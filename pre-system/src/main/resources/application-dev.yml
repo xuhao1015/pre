@@ -82,7 +82,7 @@ server:
     worker-threads: 20
 spring:
   activemq:
-    broker-url: tcp://210.16.122.100:61616
+    broker-url: tcp://103.235.174.176:61616
     user: admin
     password: 1Q2W3E4Rasdf%
     close-timeout: 0s   # 在考虑结束之前等待的时间
@@ -112,7 +112,7 @@ spring:
       maximum-pool-size: 30
       minimum-idle: 10
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://210.16.122.100:3306/pre?useUnicode=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useAffectedRows=true&allowMultiQueries=true
+    url: jdbc:mysql://103.235.174.176:3306/pre?useUnicode=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useAffectedRows=true&allowMultiQueries=true
     username: root
     password: 1Q2W3E4Rasdf%
   servlet:
@@ -137,7 +137,7 @@ spring:
     allow-bean-definition-overriding: true
   redis:
     database: 1
-    host: 210.16.122.100
+    host: 103.235.174.176
     jedis:
       pool:
         max-active: 100
