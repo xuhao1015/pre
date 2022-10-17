@@ -128,7 +128,6 @@ public class ProxyProductService {
                 String port = parseObject.get("port").toString();
                 String ip = parseObject.get("ip").toString();
                 DateTime validTime = DateUtil.parseDateTime(parseObject.getString("validTime"));
-                Integer expirationTime = proxyAddressProduct.getExpirationTime();
                 JdProxyIpPort jdProxyIpPort = new JdProxyIpPort().builder().agentAddress(producUrl).ip(ip)
                         .port(port).createTime(new Date()).isUse(0).expirationTime(validTime).build();
                 jdProxyIpPortMapper.insert(jdProxyIpPort);
