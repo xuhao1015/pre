@@ -125,10 +125,10 @@ public class ProxyProductService {
         String s = HttpUtil.get(producUrl);
         JSONObject jsonObject = JSON.parseObject(s);
         String proxyNumStr = redisTemplate.opsForValue().get("代理个数");
-        Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
+       /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;
-        }
+        }*/
         Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -30)));
         if (count1 == 0) {
             return;
