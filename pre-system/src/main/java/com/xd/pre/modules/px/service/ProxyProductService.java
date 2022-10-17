@@ -16,9 +16,11 @@ import com.xd.pre.common.sign.JdSgin;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.common.utils.px.dto.SignVoAndDto;
 import com.xd.pre.modules.px.vo.tmpvo.sysvo.ProxyAnalysisVo;
+import com.xd.pre.modules.sys.domain.JdMchOrder;
 import com.xd.pre.modules.sys.domain.JdPathConfig;
 import com.xd.pre.modules.sys.domain.JdProxyIpPort;
 import com.xd.pre.modules.sys.domain.ProxyAddressProduct;
+import com.xd.pre.modules.sys.mapper.JdMchOrderMapper;
 import com.xd.pre.modules.sys.mapper.JdPathConfigMapper;
 import com.xd.pre.modules.sys.mapper.JdProxyIpPortMapper;
 import com.xd.pre.modules.sys.mapper.ProxyAddressProductMapper;
@@ -52,6 +54,9 @@ public class ProxyProductService {
 
     @Autowired
     private IJdProxyIpPortService jdProxyIpPortService;
+
+    @Resource
+    private JdMchOrderMapper jdMchOrderMapper;
 
     public void productIpAndPort1() {
         try {
@@ -119,6 +124,14 @@ public class ProxyProductService {
         String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
         String s = HttpUtil.get(producUrl);
         JSONObject jsonObject = JSON.parseObject(s);
+        Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
+        if (count > 50) {
+            return;
+        }
+        Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -30)));
+        if (count1 == 0) {
+            return;
+        }
         Integer success = Integer.valueOf(jsonObject.get("code").toString());
         if (success == 0) {
             log.info("当前生成的ip为msg:[data:{}]", s);
