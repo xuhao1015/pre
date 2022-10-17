@@ -117,13 +117,16 @@ public class ProxyProductService {
     }
 
     public void productIpAndPort2() {
+        log.info("执行1");
         ProxyAddressProduct proxyAddressProduct = proxyAddressProductMapper.selectOne(Wrappers.<ProxyAddressProduct>lambdaQuery().eq(ProxyAddressProduct::getIsProduct, 1));
         if (proxyAddressProduct.getType() != 2) {
             return;
         }
+        log.info("执行2");
         String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
         String s = HttpUtil.get(producUrl);
         JSONObject jsonObject = JSON.parseObject(s);
+        log.info("执行3");
         String proxyNumStr = redisTemplate.opsForValue().get("代理个数");
        /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
@@ -133,6 +136,7 @@ public class ProxyProductService {
         if (count1 == 0) {
             return;
         }
+        log.info("执行4");
         Integer success = Integer.valueOf(jsonObject.get("code").toString());
         if (StrUtil.isNotBlank(redisTemplate.opsForValue().get("redisTemplate"))) {
             log.info("当前代理之前已经获取了");
