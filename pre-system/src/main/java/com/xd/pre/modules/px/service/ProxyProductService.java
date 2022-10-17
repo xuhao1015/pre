@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xd.pre.common.sign.JdSgin;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.common.utils.px.dto.SignVoAndDto;
+import com.xd.pre.modules.data.tenant.PreTenantContextHolder;
 import com.xd.pre.modules.px.vo.tmpvo.sysvo.ProxyAnalysisVo;
 import com.xd.pre.modules.sys.domain.JdMchOrder;
 import com.xd.pre.modules.sys.domain.JdPathConfig;
@@ -132,6 +133,7 @@ public class ProxyProductService {
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;
         }*/
+        PreTenantContextHolder.setCurrentTenantId(1L);
         Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -30)));
         if (count1 == 0) {
             return;
@@ -142,8 +144,10 @@ public class ProxyProductService {
             log.info("当前代理之前已经获取了");
             return;
         }
+        log.info("执行5");
         redisTemplate.opsForValue().set("熊猫代理", "锁定", 20, TimeUnit.SECONDS);
         if (success == 0) {
+            log.info("执行6");
             log.info("当前生成的ip为msg:[data:{}]", s);
             JSONArray obj = JSON.parseArray(JSON.toJSONString(jsonObject.get("obj")));
             for (Object o : obj) {
