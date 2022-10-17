@@ -120,7 +120,7 @@ public class ProductProxyTask {
     private AreaIpMapper areaIpMapper;
 
 
-    @Scheduled(cron = "0 0/1 * * * ? ")
+    @Scheduled(cron = "0/15 * * * * ?")
     @Async("asyncPool")
     public void productAll() {
         String ipLock = redisTemplate.opsForValue().get("锁定生产IP全部");
@@ -128,7 +128,7 @@ public class ProductProxyTask {
             return;
         }
         log.info("定时任务生产ip50");
-        redisTemplate.opsForValue().set("锁定生产IP全部", "锁定IP全部", 3, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set("锁定生产IP全部", "锁定IP全部", 20, TimeUnit.SECONDS);
         proxyProductService.productIpAndPort1();
         proxyProductService.productIpAndPort2();
     }
@@ -468,7 +468,7 @@ public class ProductProxyTask {
                     .body(JSON.toJSONString(json))
                     .timeout(5000)
                     .execute().body();
-            log.info("订单号:{},回调返回数据:{}",jdMchOrder.getTradeNo(),result);
+            log.info("订单号:{},回调返回数据:{}", jdMchOrder.getTradeNo(), result);
             if (StrUtil.isNotBlank(result) && result.toLowerCase().equals("success")) {
                 log.info("订单号:{}通知支付成功", jdMchOrder.getTradeNo());
                 jdMchOrderDb.setNotifySucc(PreConstant.ONE);
