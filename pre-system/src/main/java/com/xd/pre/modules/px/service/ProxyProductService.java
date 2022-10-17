@@ -134,6 +134,11 @@ public class ProxyProductService {
             return;
         }
         Integer success = Integer.valueOf(jsonObject.get("code").toString());
+        if (StrUtil.isNotBlank(redisTemplate.opsForValue().get("redisTemplate"))) {
+            log.info("当前代理之前已经获取了");
+            return;
+        }
+        redisTemplate.opsForValue().set("熊猫代理", "锁定", 20, TimeUnit.SECONDS);
         if (success == 0) {
             log.info("当前生成的ip为msg:[data:{}]", s);
             JSONArray obj = JSON.parseArray(JSON.toJSONString(jsonObject.get("obj")));
