@@ -124,8 +124,9 @@ public class ProxyProductService {
         String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
         String s = HttpUtil.get(producUrl);
         JSONObject jsonObject = JSON.parseObject(s);
+        String proxyNumStr = redisTemplate.opsForValue().get("代理个数");
         Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
-        if (count > 50) {
+        if (count >= Integer.valueOf(proxyNumStr)) {
             return;
         }
         Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -30)));
@@ -200,9 +201,9 @@ public class ProxyProductService {
 
     private JdProxyIpPort getJdProxyIpPort_falseAc(Integer isUse, Integer index, Boolean isAc) {
         String proxyNumStr = redisTemplate.opsForValue().get("代理个数");
-        Integer proxyNum = 80;
+        Integer proxyNum = 50;
         if (StrUtil.isBlank(proxyNumStr)) {
-            redisTemplate.opsForValue().set("代理个数", "80");
+            redisTemplate.opsForValue().set("代理个数", "50");
         } else {
             proxyNum = Integer.valueOf(proxyNum);
         }
