@@ -2,13 +2,13 @@ package com.xd.pre.pcScan;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
-import com.xd.pre.modules.px.appstorePc.pcScan.PcThorDto;
 import com.xd.pre.modules.px.appstorePc.pcScan.Get_confirmQRCodeScanned;
 import com.xd.pre.modules.px.appstorePc.pcScan.Get_oi_symmetry_encrypt;
+import com.xd.pre.modules.px.appstorePc.pcScan.PcThorDto;
 import com.xd.pre.modules.px.appstorePc.pcScan.ScanUtils;
 import com.xd.pre.modules.px.psscan.PcQRCodeDto;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -26,10 +26,10 @@ public class Demo {
         String key = "qvnjxuiywxlsjhxx";
         Map<String, String> ipAndPort = Connect.getIpAndPort();
         OkHttpClient client = getOkHttpClient(ipAndPort.get("ip"), Integer.valueOf(ipAndPort.get("port")));
-      //  OkHttpClient client = getOkHttpClient(null,null);
+        //  OkHttpClient client = getOkHttpClient(null,null);
         ScanUtils scanUtils = new ScanUtils();
         PcQRCodeDto pcQRCodeDto = scanUtils.getQRAndMs(client);
-       //  pcQRCodeDto=PcQRCodeDto.builder().QRCodeKey("AAEAIP03jwrbZZGVFaT0mA2pZx6swLJwxxJq8ooolecguaft").wlfstk_smdl("2sqv1h6p1832sm359bhq0g4e44dmlxrn").build();
+        //  pcQRCodeDto=PcQRCodeDto.builder().QRCodeKey("AAEAIP03jwrbZZGVFaT0mA2pZx6swLJwxxJq8ooolecguaft").wlfstk_smdl("2sqv1h6p1832sm359bhq0g4e44dmlxrn").build();
         String QRCodeKey = pcQRCodeDto.getQRCodeKey();
 
         //pin=xq-461339-tanjingyu3;wskey=AAJiiSTAAFBTbOTImBDZCrvFWJiXaf5X5SGy0a5uEx4Dg78KAzs1n46WF6DCoSFsmM4N5UFBe0dxUBlEYVuXf0PkbDypu9zMmcGZUk-A0gBviE0OSV-f6Q;
@@ -60,13 +60,11 @@ public class Demo {
     }
 
 
-
-
-
-
     public static OkHttpClient getOkHttpClient(String ip, Integer port) {
         OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
-        if(true){
+        if (true) {
+            ip = "202.110.4.167";
+            port = 11602;
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
             builder.proxy(proxy);
         }

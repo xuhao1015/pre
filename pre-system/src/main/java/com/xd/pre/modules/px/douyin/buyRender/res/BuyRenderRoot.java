@@ -17,7 +17,7 @@ public class BuyRenderRoot {
     private String leave_sub_title;
     private Coupon_result coupon_result;
     private Marquee_info marquee_info;
-    private Pay_method pay_method;
+    private Pay_method  pay_method;
     private String cross_board_info;
     private Total_price_result total_price_result;
     private String tip;
