@@ -892,6 +892,7 @@ public class DouyinService {
         LambdaQueryWrapper<JdOrderPt> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(JdOrderPt::getPtPin, uid.trim());
         wrapper.lt(JdOrderPt::getPaySuccessTime, DateUtil.beginOfDay(new Date()));
+        wrapper.isNotNull(JdOrderPt::getCardNumber);
         Integer count = jdOrderPtMapper.selectCount(wrapper);
         String s = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + uid);
         if (count > 0) {

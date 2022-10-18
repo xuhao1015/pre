@@ -183,7 +183,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     public static void main(String[] args) {
         // 登录密码
-        String encode = PreUtil.encode("xxqwer7890.");
+        String encode = PreUtil.encode("xh10150816");
         System.out.println(encode);
     }
     @Override
