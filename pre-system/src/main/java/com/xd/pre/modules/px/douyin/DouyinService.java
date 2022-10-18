@@ -166,7 +166,7 @@ public class DouyinService {
         jdOrderPtMapper.updateById(jdOrderPtDb);
         long l = (System.currentTimeMillis() - jdMchOrder.getCreateTime().getTime()) / 1000;
         jdMchOrder.setOriginalTradeId(jdOrderPtDb.getId());
-        jdMchOrder.setMatchTime(l >= 1 ? l - 1 : l);
+        jdMchOrder.setMatchTime(l);
         jdMchOrder.setOriginalTradeNo(jdOrderPtDb.getOrderId());
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         jdMchOrderMapper.updateById(jdMchOrder);
@@ -222,7 +222,7 @@ public class DouyinService {
                 String edStr = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + douyinAppCkT.getUid());
                 String ed = null;
                 if (StrUtil.isNotBlank(edStr)) {
-                    ed = JSON.parseObject(edStr, BalanceRedisDto.class).getBalance()+"";
+                    ed = JSON.parseObject(edStr, BalanceRedisDto.class).getBalance() + "";
                 }
                 if (StrUtil.isNotBlank(ed) && Integer.valueOf(ed) >= storeConfig.getSkuPrice().intValue()) {
                     if (let >= Integer.valueOf(ed) && Integer.valueOf(ed) == 200) {
@@ -315,7 +315,7 @@ public class DouyinService {
         log.info("订单号{}，放入数据数据为msg:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
         if (ObjectUtil.isNotNull(jdMchOrderDb)) {
             long l = (System.currentTimeMillis() - jdMchOrder.getCreateTime().getTime()) / 1000;
-            jdMchOrder.setMatchTime(l - 1);
+            jdMchOrder.setMatchTime(l);
             jdMchOrder.setOriginalTradeId(jdOrderPtDb.getId());
             jdMchOrder.setOriginalTradeNo(jdOrderPtDb.getOrderId());
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());

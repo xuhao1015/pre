@@ -11,6 +11,7 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.common.HybridBinarizer;
 import com.xd.pre.common.utils.px.dto.UrlEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.DigestUtils;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -427,4 +428,31 @@ public class PreUtils {
     }
 
 
+
+    public static String getSign(String orderId) {
+        String md5 = DigestUtils.md5DigestAsHex(orderId.getBytes());
+        md5 = DigestUtils.md5DigestAsHex(md5.getBytes());
+        return md5;
+    }
+
+
+    public static String getAsciiSort(Map<String, Object> map) {
+        // 移除值为空的
+        map.entrySet().removeIf(entry -> Objects.isNull(entry.getValue()) || "".equals(entry.getValue()));
+
+        List<Map.Entry<String, Object>> infoIds = new ArrayList<Map.Entry<String, Object>>(map.entrySet());
+        // 对所有传入参数按照字段名的 ASCII 码从小到大排序（字典序）
+        infoIds.sort((o1, o2) -> o1.getKey().compareToIgnoreCase(o2.getKey()));
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> infoId : infoIds) {
+            if (infoId.getKey().equals("sign")) {
+                continue;
+            }
+            sb.append(infoId.getKey());
+            sb.append("=");
+            sb.append(infoId.getValue());
+            sb.append("&");
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
 }
