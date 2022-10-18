@@ -135,7 +135,9 @@ public class ProxyProductService {
             return;
         }*/
         PreTenantContextHolder.setCurrentTenantId(1L);
-        Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -30)));
+        String 代理生产管理订单时间相差多少分钟 = redisTemplate.opsForValue().get("代理生产管理订单时间相差多少分钟");
+        Integer integer = Integer.valueOf(代理生产管理订单时间相差多少分钟);
+        Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -integer)));
         if (count1 == 0) {
             return;
         }
