@@ -53,9 +53,9 @@ public class DouYNew {
 /*        String device_id = "device_id_str=2212649920104615";
         String iid = "install_id_str=3690393549678381";
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
-        String device_id = "device_id_str=224732979927934";
-        String iid = "install_id_str=523800143470487";
-        String ck = "sid_tt=5ef01939126e658ad2f592b1415aa37a;";
+        String device_id = "device_id_str=3303360887001847";
+        String iid = "install_id_str=3514471998041480";
+        String ck = "d_ticket=5885f4e154d95f8aef6823818c188b940ce4a;odin_tt=c04cdb41264c44dd6eb1dc7639a6d747516f1fb2aeea2b7be1893ff3d9939d9c0be36c1663a4f29a0799cbd5c0776f25e23bc3f894b971beb4806805a819808fff734442d1e67035f477bb94296958db;odin_tt=cf2d83ef88adeba7a9b3de665f5c50394331f3653fc70aac403477200e6c8288269db83f33549727556d3f2413737e6c6a7e6552567e92dbae32b280d0b0c489e375bcca26477b90b6f52a0a6d12b97d;n_mh=w2qj_IYdWUDW92mBL9Ft-kpcYF6PZVf6NyMArTUSeUI;sid_guard=572b560f55fd52aa030623a610c08da2%7C1665384193%7C5184000%7CFri%2C+09-Dec-2022+06%3A43%3A13+GMT;uid_tt=e00a031ddf81a2d548aed55002c4c166;uid_tt_ss=e00a031ddf81a2d548aed55002c4c166;sid_tt=572b560f55fd52aa030623a610c08da2;sessionid=572b560f55fd52aa030623a610c08da2;sessionid_ss=572b560f55fd52aa030623a610c08da2;reg-store-region=;";
 
 
         if (device_id.contains("device_id_str=")) {
@@ -89,7 +89,7 @@ public class DouYNew {
         String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                 X_SS_STUB, url
         );
-        String signHt = HttpRequest.post("http://110.42.246.12:8191/tt1213").body(signData).execute().body();
+        String signHt = HttpRequest.post("http://1.15.184.191:8292/dy22").body(signData).execute().body();
         String x_gorgon = JSON.parseObject(signHt).getString("x-gorgon");
         String x_khronos = JSON.parseObject(signHt).getString("x-khronos");
         RequestBody requestBody = new FormBody.Builder()
@@ -206,7 +206,7 @@ public class DouYNew {
         String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                 X_SS_STUB1, url1
         );
-        String signHt1 = HttpRequest.post("http://110.42.246.12:8191/tt1213").body(signData1).execute().body();
+        String signHt1 = HttpRequest.post("http://1.15.184.191:8292/dy22").body(signData1).execute().body();
         log.info("msg:{}", signHt1);
         String x_gorgon1 = JSON.parseObject(signHt1).getString("x-gorgon");
         String x_khronos1 = JSON.parseObject(signHt1).getString("x-khronos");

@@ -30,7 +30,7 @@ public class DouYinPayByOrderId {
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB, url
             );
-            String signHt = HttpRequest.post("http://110.42.246.12:8191/tt1213").body(signData).execute().body();
+            String signHt = HttpRequest.post("http://1.15.184.191:8292/dy22").body(signData).execute().body();
             String x_gorgon = JSON.parseObject(signHt).getString("x-gorgon");
             String x_khronos = JSON.parseObject(signHt).getString("x-khronos");
             RequestBody body = RequestBody.create(mediaType, bodyData);

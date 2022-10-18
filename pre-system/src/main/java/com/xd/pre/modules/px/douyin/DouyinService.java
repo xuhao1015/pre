@@ -778,8 +778,8 @@ public class DouyinService {
     private String getSignUrl() {
         String signUrl = redisTemplate.opsForValue().get("抖音签证地址");
         if (StrUtil.isBlank(signUrl)) {
-            signUrl = "http://110.42.246.12:8191/tt1213";
-            redisTemplate.opsForValue().set("抖音签证地址", "http://110.42.246.12:8191/tt1213");
+            signUrl = "http://1.15.184.191:8292/dy22";
+            redisTemplate.opsForValue().set("抖音签证地址", "http://1.15.184.191:8292/dy22");
         }
         return signUrl;
     }

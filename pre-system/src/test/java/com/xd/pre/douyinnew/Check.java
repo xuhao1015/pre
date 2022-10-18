@@ -25,10 +25,9 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Slf4j
-public class TestResoData {
+public class Check {
     public static Db db = Db.use();
     public static Jedis jedis = RedisDS.create().getJedis();
 
@@ -39,78 +38,31 @@ public class TestResoData {
         String ck = "sid_tt=140a336dd81551eaa30bc0e9e8d336fd;";//我的账号
         */
         log.info("查找账号位置msg:{}");
-        String device_id = "";
-        String iid = "";
-        String ck = ";";
         String notUse = "56eb748c437c01e1932423dbe0a32015;936e154a11e17dd7a78293bb6d4602e6;8bddce4a0b88b7b33ad34419b8f7febb;12016212c714adb3acfc1a1c586f7c62;" +
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 ");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 3367");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-10");
+//        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 2718");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
-            String ck_device_lock = jedis.get("抖音和设备号关联:" + uid);
-            log.info("当前执行个数:{}", entity.getInt("id"));
-            ck = entity.getStr("ck");
-            if (StrUtil.isNotBlank(ck_device_lock) || notUse.contains(ck.split("sid_tt=")[1])) {
+            String device_data_str = jedis.get("抖音和设备号关联:" + uid);
+            if (StrUtil.isBlank(device_data_str)) {
+                log.info("当前ck没有锁定");
                 continue;
             }
-            Set<String> keys = jedis.keys("redis临时锁定:*");
-            if (JSON.toJSONString(keys).contains("redis临时锁定:" + uid)) {
-                continue;
-            }
-            jedis.expire("redis临时锁定:" + uid, 60 * 60 * 24);
-            for (Entity devicesBd : devicesBds) {
-                String deviceDBId = jedis.get("抖音锁定设备:" + devicesBd.getInt("id"));
-                if (StrUtil.isNotBlank(deviceDBId)) {
-                    continue;
-                }
+            DouyinDeviceIid douyinDeviceIid = JSON.parseObject(device_data_str, DouyinDeviceIid.class);
+            try {
 
-                if (JSON.toJSONString(keys).contains("redis临时锁定:" + devicesBd.getInt("id"))) {
-                    continue;
+                boolean b = mian1(douyinDeviceIid.getDeviceId(), douyinDeviceIid.getIid(), entity.getStr("ck"), douyinDeviceIid.getId(), entity.getStr("uid"));
+                if (b) {
+                    db.use().execute("update douyin_app_ck set is_enable = ? , fail_reason = ? where id = ?", -20,"{}", entity.getInt("id"));
+                    db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, douyinDeviceIid.getId());
+                    log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), douyinDeviceIid.getId());
                 }
-                if (JSON.toJSONString(keys).contains("redis临时锁定:" + uid)) {
-                    break;
-                }
-                String redistLock = jedis.get("redis临时锁定:" + devicesBd.getInt("id"));
-                if (StrUtil.isNotBlank(redistLock)) {
-                    continue;
-                }
-                redistLock = jedis.get("redis临时锁定:" + uid);
-                if (StrUtil.isNotBlank(redistLock)) {
-                    break;
-                }
-
-                jedis.set("redis临时锁定:" + uid, uid);
-                jedis.set("redis临时锁定:" + devicesBd.getInt("id"), devicesBd.getInt("id") + "");
-                jedis.expire("redis临时锁定:" + devicesBd.getInt("id"), 60 * 60 * 24);
-                log.info("当前执行的device_id:{}", devicesBd.getInt("id"));
-                device_id = devicesBd.getStr("device_id");
-                iid = devicesBd.getStr("iid");
-                try {
-                    System.err.println(device_id + "------" + iid + "--------------" + ck);
-                    ck_device_lock = jedis.get("抖音和设备号关联:" + uid);
-                    if (StrUtil.isNotBlank(ck_device_lock) || notUse.contains(ck.split("sid_tt=")[1])) {
-                        break;
-                    }
-                    boolean b = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
-                    if (b) {
-                        db.use().execute("update douyin_app_ck set is_enable = ?  where id = ?", 1, entity.getInt("id"));
-                        db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, devicesBd.getInt("id"));
-                        log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
-                    }
-                } catch (Exception e) {
-                    try {
-                        boolean b = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
-                        if (b) {
-                            log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
-                            db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", 1, entity.getInt("id"));
-                        }
-                    } catch (Exception e1) {
-                    }
-                    log.error("========================:{}", e);
-                }
+            } catch (Exception e) {
+                log.info("执行");
             }
+
         }
 
     }

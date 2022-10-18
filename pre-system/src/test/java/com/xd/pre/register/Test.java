@@ -1,13 +1,22 @@
 package com.xd.pre.register;
 
-import cn.hutool.db.nosql.redis.RedisDS;
-import redis.clients.jedis.Jedis;
+import cn.hutool.core.io.file.FileReader;
+import cn.hutool.db.Db;
 
 public class Test {
-    public static void main(String[] args) {
-        Jedis jedis = RedisDS.create().getJedis();
-        Integer a = 223232;
-        Integer b = 223232;
-        System.out.println(a.equals(b));
+    public static Db db = Db.use();
+
+    public static void main(String[] args) throws Exception {
+        FileReader fileReader = new FileReader("C:\\Users\\Administrator\\Desktop\\git\\test.txt");
+        String result = fileReader.readString();
+        String[] split = result.split("\\n");
+        for (String s : split) {
+            try {
+                int execute = db.execute(s);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        System.out.println(split);
     }
 }

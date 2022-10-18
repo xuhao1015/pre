@@ -26,7 +26,7 @@ public class Douycheck {
         String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                 X_SS_STUB1, url1
         );
-        String signHt1 = HttpRequest.post("http://110.42.246.12:8191/tt1213").body(signData1).execute().body();
+        String signHt1 = HttpRequest.post("http://1.15.184.191:8292/dy22").body(signData1).execute().body();
         String x_gorgon1 = JSON.parseObject(signHt1).getString("x-gorgon");
         String x_khronos1 = JSON.parseObject(signHt1).getString("x-khronos");
         RequestBody body = RequestBody.create(mediaType, bodyData);
