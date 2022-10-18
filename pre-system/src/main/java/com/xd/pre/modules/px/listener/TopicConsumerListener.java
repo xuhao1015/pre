@@ -550,7 +550,7 @@ public class TopicConsumerListener {
         JdMchOrder jdMchOrder = JSON.parseObject(message, JdMchOrder.class);
         try {
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-            if (DateUtil.offsetMinute(jdMchOrder.getCreateTime(), 20).getTime() < System.currentTimeMillis()) {
+            if (DateUtil.offsetMinute(jdMchOrder.getCreateTime(), 1).getTime() < System.currentTimeMillis()) {
                 log.info("订单号:{},结束匹配，超过时间", jdMchOrder.getTradeNo());
                 return;
             }

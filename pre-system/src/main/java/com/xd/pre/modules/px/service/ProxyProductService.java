@@ -213,13 +213,7 @@ public class ProxyProductService {
     }
 
     private JdProxyIpPort getJdProxyIpPort_falseAc(Integer isUse, Integer index, Boolean isAc) {
-        String proxyNumStr = redisTemplate.opsForValue().get("代理个数");
-        Integer proxyNum = 50;
-        if (StrUtil.isBlank(proxyNumStr)) {
-            redisTemplate.opsForValue().set("代理个数", "50");
-        } else {
-            proxyNum = Integer.valueOf(proxyNum);
-        }
+        Integer proxyNum = Integer.valueOf(redisTemplate.opsForValue().get("代理个数"));
         try {
             if (index >= 3) {
                 return null;
