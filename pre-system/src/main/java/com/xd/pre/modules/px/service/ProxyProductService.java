@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.sign.JdSgin;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.common.utils.px.dto.SignVoAndDto;
@@ -154,7 +155,7 @@ public class ProxyProductService {
                 JSONObject parseObject = JSON.parseObject(JSON.toJSONString(o));
                 String port = parseObject.get("port").toString();
                 String ip = parseObject.get("ip").toString();
-                DateTime validTime = DateUtil.offsetSecond(new Date(), 270);
+                DateTime validTime = DateUtil.offsetSecond(new Date(), 240);
                 if (parseObject.containsKey("validTime")) {
                     validTime = DateUtil.parseDateTime(parseObject.getString("validTime"));
                 }
@@ -221,7 +222,7 @@ public class ProxyProductService {
             index = index + 1;
             JdProxyIpPort jdProxyIpPort = null;
             if (isUse == 1) {
-                LambdaQueryWrapper<JdProxyIpPort> wrapper = Wrappers.<JdProxyIpPort>lambdaQuery();
+                LambdaQueryWrapper<JdProxyIpPort> wrapper = Wrappers.lambdaQuery();
                 wrapper.gt(JdProxyIpPort::getExpirationTime, new Date())
                         .eq(JdProxyIpPort::getIsUse, 0);
                 Integer count = jdProxyIpPortMapper.selectCount(wrapper);
@@ -237,6 +238,8 @@ public class ProxyProductService {
                 long l = (jdProxyIpPort.getExpirationTime().getTime() - System.currentTimeMillis()) / 1000;
                 log.debug("检查ip缓存池是否有用有用就放入。没有用就放入");
                 redisTemplate.opsForValue().set("IP缓存池:" + jdProxyIpPort.getId(), jdProxyIpPort.getId() + "", l, TimeUnit.SECONDS);
+                jdProxyIpPort.setIsUse(PreConstant.ONE);
+                jdProxyIpPortMapper.updateById(jdProxyIpPort);
                 return jdProxyIpPort;
             }
             if (isUse == 0) {
