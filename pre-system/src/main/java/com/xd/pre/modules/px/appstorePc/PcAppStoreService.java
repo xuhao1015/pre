@@ -574,8 +574,9 @@ public class PcAppStoreService {
         } else {
             redisTemplate.opsForValue().set("是否使用代理", "1");
         }
-        OkHttpClient client = builder.connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS)
-                .callTimeout(5, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS)
+        Integer exTime = Integer.valueOf(redisTemplate.opsForValue().get("代理使用超时时间"));
+        OkHttpClient client = builder.connectTimeout(exTime, TimeUnit.SECONDS).readTimeout(exTime, TimeUnit.SECONDS)
+                .callTimeout(exTime, TimeUnit.SECONDS).writeTimeout(exTime, TimeUnit.SECONDS)
                 .followRedirects(false).build();
         return client;
     }
