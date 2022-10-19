@@ -502,8 +502,11 @@ public class DouyinService {
             douyinDeviceIidsT.add(douyinDeviceIid);
             douyinDeviceIidsT.add(douyinDeviceIid);
         }
-        for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
-            douyinDeviceIidsT.add(douyinDeviceIid);
+        if (StrUtil.isBlank(deviceBangDing)) {
+            log.info("订单号:{},ck:udi:{},不存在绑定关系才添加", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
+            for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
+                douyinDeviceIidsT.add(douyinDeviceIid);
+            }
         }
         douyinDeviceIids = douyinDeviceIidsT;
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
