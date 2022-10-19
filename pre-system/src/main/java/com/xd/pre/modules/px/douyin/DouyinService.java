@@ -323,13 +323,20 @@ public class DouyinService {
             jdOrderPtMapper.insert(jdOrderPtDb);
         }
         log.info("订单号{}，放入数据数据为msg:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
-        if (ObjectUtil.isNotNull(jdMchOrderDb) && ObjectUtil.isNotNull(jdOrderPtDb.getId())) {
+        if (ObjectUtil.isNotNull(jdMchOrderDb)) {
+            log.info("订单号:{}开始匹配成功。完成最后的顺序", jdMchOrder.getTradeNo());
             long l = (System.currentTimeMillis() - jdMchOrder.getCreateTime().getTime()) / 1000;
             jdMchOrder.setMatchTime(l);
             jdMchOrder.setOriginalTradeId(jdOrderPtDb.getId());
             jdMchOrder.setOriginalTradeNo(jdOrderPtDb.getOrderId());
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
             jdMchOrderMapper.updateById(jdMchOrder);
+            log.info("");
+            jdMchOrder = jdMchOrderMapper.selectById(jdMchOrder.getId());
+            if (ObjectUtil.isNull(jdMchOrder.getOriginalTradeId())) {
+                log.info("+++++++++++++订单号:{}没有更新成功", jdMchOrder.getTradeNo());
+                jdMchOrderMapper.updateById(jdMchOrder);
+            }
             String lockOrderTime = redisTemplate.opsForValue().get("锁定抖音库存订单锁定分钟数");
             redisTemplate.opsForValue().set("锁定抖音库存订单:" + jdOrderPtDb.getId(), jdMchOrder.getTradeNo(), Integer.valueOf(lockOrderTime), TimeUnit.MINUTES);
             log.info("订单号{}，完成匹配:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
