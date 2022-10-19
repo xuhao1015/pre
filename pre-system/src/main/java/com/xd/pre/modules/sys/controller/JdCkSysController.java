@@ -555,8 +555,8 @@ public class JdCkSysController {
         if (username.equals("douyin")) {
             PreTenantContextHolder.setCurrentTenantId(2L);
         }
-        productProxyTask.notifySuccess(jdMchOrder);
-        return R.ok();
+        Boolean aBoolean = productProxyTask.notifySuccess(jdMchOrder);
+        return R.ok(aBoolean);
     }
 
     @GetMapping("/flowing_water")
