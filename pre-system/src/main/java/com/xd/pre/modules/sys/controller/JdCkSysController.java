@@ -530,6 +530,10 @@ public class JdCkSysController {
     public R budan(Integer id, Integer status) {
         JdMchOrder jdMchOrder = jdMchOrderMapper.selectById(id);
         jdMchOrder.setStatus(status);
+        if (status != 2) {
+            jdMchOrder.setNotifySucc(PreConstant.ZERO);
+            Boolean aBoolean = productProxyTask.notifySuccess(jdMchOrder);
+        }
         jdMchOrderMapper.updateById(jdMchOrder);
         log.info("订单号{},强行修改状态:{}", jdMchOrder.getTradeNo(), status);
         return R.ok();
