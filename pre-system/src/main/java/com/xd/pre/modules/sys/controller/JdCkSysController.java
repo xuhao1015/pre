@@ -526,12 +526,19 @@ public class JdCkSysController {
         return R.ok(divide.toString());
     }
 
+    @GetMapping("budan")
+    public R budan(Integer id, Integer status) {
+        JdMchOrder jdMchOrder = jdMchOrderMapper.selectById(id);
+        jdMchOrder.setStatus(status);
+        jdMchOrderMapper.updateById(jdMchOrder);
+        log.info("订单号{},强行修改状态:{}", jdMchOrder.getTradeNo(), status);
+        return R.ok();
+    }
 
     @GetMapping("kami")
     public R kami(@RequestParam("id") Integer id) {
         JdMchOrder jdMchOrder = jdMchOrderMapper.selectById(id);
         weiXinPayUrl.getCartNumAndMy(jdMchOrder);
-        productProxyTask.notifySuccess(jdMchOrder);
         return R.ok();
     }
 
@@ -543,12 +550,12 @@ public class JdCkSysController {
         PreSecurityUser securityUser = jwtUtil.getUserFromToken(request);
         String username = securityUser.getUsername();
         log.info("订单号：{},当前用户名：{}", id, username);
-        JdMchOrder jdOrderPt = jdMchOrderMapper.selectById(id);
-        weiXinPayUrl.getCartNumAndMy(jdOrderPt);
+        JdMchOrder jdMchOrder = jdMchOrderMapper.selectById(id);
+//        weiXinPayUrl.getCartNumAndMy(jdMchOrder);
         if (username.equals("douyin")) {
             PreTenantContextHolder.setCurrentTenantId(2L);
         }
-        productProxyTask.notifySuccess(jdOrderPt);
+        productProxyTask.notifySuccess(jdMchOrder);
         return R.ok();
     }
 
