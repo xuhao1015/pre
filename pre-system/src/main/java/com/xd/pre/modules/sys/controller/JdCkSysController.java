@@ -711,12 +711,12 @@ public class JdCkSysController {
         }
         if (ObjectUtil.isNotNull(jdMchOrder) && StrUtil.isNotBlank(jdMchOrder.getOriginalTradeNo())) {
             log.info("查询订单匹配状态");
-            wrapper.eq(JdMchOrder::getOriginalTradeNo, jdMchOrder.getOriginalTradeNo());
+            wrapper.like(JdMchOrder::getOriginalTradeNo, jdMchOrder.getOriginalTradeNo());
         }
         if (ObjectUtil.isNotNull(jdMchOrder) && ObjectUtil.isNotNull(jdMchOrder.getStatus())) {
             wrapper.eq(JdMchOrder::getStatus, jdMchOrder.getStatus());
         }
-        wrapper.orderByDesc(JdMchOrder::getCreateTime);
+        wrapper.orderByDesc(JdMchOrder::getId);
         Page<JdMchOrder> page1 = jdMchOrderMapper.selectPage(page, wrapper);
         List<JdMchOrderAndCard> jdMchOrderAndCards = new ArrayList<>();
         List<JdMchOrder> records = page.getRecords();
