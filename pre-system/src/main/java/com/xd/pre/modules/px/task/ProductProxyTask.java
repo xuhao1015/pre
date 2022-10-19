@@ -467,12 +467,18 @@ public class ProductProxyTask {
                     .notify_time(DateUtil.formatDateTime(new Date()))
                     .status(jdMchOrderDb.getStatus() + "").build();
             cn.hutool.json.JSON json = new JSONObject(notifyVo);
+            String no_time = redisTemplate.opsForValue().get("通知成功次数:" + jdMchOrder.getTradeNo());
+            if (StrUtil.isNotBlank(no_time) && Integer.valueOf(no_time) >= 4) {
+                log.info("订单号已经通知3次成功没有必要再通知");
+                return true;
+            }
             String result = HttpRequest.post(jdMchOrderDb.getNotifyUrl())
                     .body(JSON.toJSONString(json))
                     .timeout(5000)
                     .execute().body();
             log.info("订单号:{},回调返回数据:{}", jdMchOrder.getTradeNo(), result);
             if (StrUtil.isNotBlank(result) && result.toLowerCase().equals("success")) {
+                redisTemplate.opsForValue().increment("通知成功次数:" + jdMchOrder.getTradeNo());
                 log.info("订单号:{}通知支付成功", jdMchOrder.getTradeNo());
                 jdMchOrderDb.setNotifySucc(PreConstant.ONE);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
