@@ -331,7 +331,7 @@ public class DouyinService {
             jdMchOrder.setOriginalTradeNo(jdOrderPtDb.getOrderId());
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
             jdMchOrderMapper.updateById(jdMchOrder);
-            log.info("");
+            log.info("订单号第一个成功修改");
             jdMchOrder = jdMchOrderMapper.selectById(jdMchOrder.getId());
             if (ObjectUtil.isNull(jdMchOrder.getOriginalTradeId())) {
                 log.info("+++++++++++++订单号:{}没有更新成功", jdMchOrder.getTradeNo());
