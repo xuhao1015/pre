@@ -1,6 +1,7 @@
 package com.xd.pre.common.utils.px;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.qrcode.BufferedImageLuminanceSource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -11,7 +12,6 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.common.HybridBinarizer;
 import com.xd.pre.common.utils.px.dto.UrlEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.DigestUtils;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -428,10 +428,8 @@ public class PreUtils {
     }
 
 
-
     public static String getSign(String orderId) {
-        String md5 = DigestUtils.md5DigestAsHex(orderId.getBytes());
-        md5 = DigestUtils.md5DigestAsHex(md5.getBytes());
+        String md5 = SecureUtil.md5(orderId);
         return md5;
     }
 
