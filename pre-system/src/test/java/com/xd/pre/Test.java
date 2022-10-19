@@ -35,7 +35,18 @@ public class Test {
     }
 
     private static void 创建订单() {
-        String a = "{\"amount\":\"100.00\",\"body\":\"goods\",\"client_ip\":\"68.178.160.76\",\"mch_id\":\"1\",\"notify_url\":\"http://68.178.160.76/api/notify/notify/channel/DouyinPay\",\"out_trade_no\":\"2210191801121498\",\"pass_code\":\"8\",\"sign\":\"ebadce0d8b13cb33c6d5ec5f20735300\",\"subject\":\"goods\",\"timestamp\":\"2022-10-19 18:01:12\"}";
+        String a = "{\n" +
+                "\t\"amount\": \"200.00\",\n" +
+                "\t\"out_trade_no\": \"753\",\n" +
+                "\t\"subject\": \"支付1000元\",\n" +
+                "\t\"sign\": \"%s\",\n" +
+                "\t\"client_ip\": \"192.168.2.1\",\n" +
+                "\t\"mch_id\": \"1\",\n" +
+                "\t\"body\": \"支付1000元\",\n" +
+                "\t\"notify_url\": \"http://103.235.174.176/pre/jd/callbackTemp\",\n" +
+                "\t\"pass_code\": \"8\",\n" +
+                "\t\"timestamp\": \"2014-07-24 03:07:50\"\n" +
+                "}";
         JSONObject parseObject = JSON.parseObject(a);
         String asciiSort = PreUtils.getAsciiSort(parseObject);
         String s = asciiSort + "&sign=" + "64f1a1ccc1da0745c52719a9d896d869";

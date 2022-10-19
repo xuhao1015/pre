@@ -83,37 +83,43 @@ public class DouyinService {
 
 
     public R match(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog) {
-        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        storeConfig.setMark(jdMchOrder.getTenantId() + "");
-        TimeInterval timer = DateUtil.timer();
-        log.info("订单号{}，用户ip:{},开始抖音匹配订单", jdMchOrder.getTradeNo(), JSON.toJSONString(jdLog));
-        OkHttpClient client = pcAppStoreService.buildClient();
-        log.info("订单号:{},判断是否存在已经存在的库存，重复利用", jdMchOrder.getTradeNo());
-        //  redisTemplate.opsForValue().set("锁定抖音库存订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 5, TimeUnit.MINUTES);
-        LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
-        stockWrapper.isNull(JdOrderPt::getPaySuccessTime).gt(JdOrderPt::getWxPayExpireTime, new Date());
-        Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
-        if (CollUtil.isNotEmpty(stockNums)) {
-            List<String> sockIds = stockNums.stream().map(it -> it.split(":")[1]).collect(Collectors.toList());
-            stockWrapper.notIn(JdOrderPt::getId, sockIds);
+        try {
+            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+            storeConfig.setMark(jdMchOrder.getTenantId() + "");
+            TimeInterval timer = DateUtil.timer();
+            log.info("订单号{}，用户ip:{},开始抖音匹配订单", jdMchOrder.getTradeNo(), JSON.toJSONString(jdLog));
+            OkHttpClient client = pcAppStoreService.buildClient();
+            log.info("订单号:{},判断是否存在已经存在的库存，重复利用", jdMchOrder.getTradeNo());
+            //  redisTemplate.opsForValue().set("锁定抖音库存订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 5, TimeUnit.MINUTES);
+            LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
+            stockWrapper.isNull(JdOrderPt::getPaySuccessTime).gt(JdOrderPt::getWxPayExpireTime, new Date());
+            Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
+            if (CollUtil.isNotEmpty(stockNums)) {
+                List<String> sockIds = stockNums.stream().map(it -> it.split(":")[1]).collect(Collectors.toList());
+                stockWrapper.notIn(JdOrderPt::getId, sockIds);
+            }
+            stockWrapper.eq(JdOrderPt::getSkuPrice, storeConfig.getSkuPrice());
+            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+            List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
+            String payReUrl = "";
+            if (CollUtil.isNotEmpty(jdOrderPtStocks)) {
+                log.info("订单号:{}.使用库存", jdMchOrder.getTradeNo());
+                sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 10);
+                sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 10);
+                return douyinUseStock(jdMchOrder, storeConfig, jdLog, timer, client, jdOrderPtStocks, payReUrl);
+            } else {
+                log.info("订单号:{}.异步生成一下订单", jdMchOrder.getTradeNo());
+                sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 5);
+                sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 15);
+                log.info("订单号:{},新下单", jdMchOrder.getTradeNo());
+                return douyinProductNewOrder(jdMchOrder, storeConfig, jdLog, timer, client, payReUrl);
+            }
+        } catch (Exception e) {
+            log.error("订单号：{}，匹配订单报错:{}", jdMchOrder.getTradeNo(), e.getMessage());
         }
-        stockWrapper.eq(JdOrderPt::getSkuPrice, storeConfig.getSkuPrice());
-        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
-        String payReUrl = "";
-        if (CollUtil.isNotEmpty(jdOrderPtStocks)) {
-            log.info("订单号:{}.使用库存", jdMchOrder.getTradeNo());
-            sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 10);
-            sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 10);
-            return douyinUseStock(jdMchOrder, storeConfig, jdLog, timer, client, jdOrderPtStocks, payReUrl);
-        } else {
-            log.info("订单号:{}.异步生成一下订单", jdMchOrder.getTradeNo());
-            sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 5);
-            sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 15);
-            log.info("订单号:{},新下单", jdMchOrder.getTradeNo());
-            return douyinProductNewOrder(jdMchOrder, storeConfig, jdLog, timer, client, payReUrl);
-        }
+        return null;
+
     }
 
     // 发送消息，destination是发送到的队列，message是待发送的消息
@@ -311,9 +317,13 @@ public class DouyinService {
                 .mark(JSON.toJSONString(payDto))
                 .build();
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        jdOrderPtMapper.insert(jdOrderPtDb);
+        if (ObjectUtil.isNull(jdOrderPtDb.getId())) {
+            log.info("+++++++++++++订单号:{},放入数据库失败:{}", jdMchOrder.getTradeNo(), jdOrderPtDb.getOrderId());
+            log.info("+++++++++++++订单号:{}", jdMchOrder.getTradeNo());
+            jdOrderPtMapper.insert(jdOrderPtDb);
+        }
         log.info("订单号{}，放入数据数据为msg:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
-        if (ObjectUtil.isNotNull(jdMchOrderDb)) {
+        if (ObjectUtil.isNotNull(jdMchOrderDb) && ObjectUtil.isNotNull(jdOrderPtDb.getId())) {
             long l = (System.currentTimeMillis() - jdMchOrder.getCreateTime().getTime()) / 1000;
             jdMchOrder.setMatchTime(l);
             jdMchOrder.setOriginalTradeId(jdOrderPtDb.getId());
@@ -325,9 +335,9 @@ public class DouyinService {
             log.info("订单号{}，完成匹配:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
             return R.ok(jdOrderPtDb);
         } else {
+            redisTemplate.delete("匹配锁定成功:" + jdMchOrder.getTradeNo());
             return R.ok(jdOrderPtDb);
         }
-
     }
 
     public List<DouyinDeviceIid> getDouyinDeviceIids(JdMchOrder jdMchOrder) {
