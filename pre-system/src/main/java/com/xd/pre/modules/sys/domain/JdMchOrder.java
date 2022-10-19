@@ -85,12 +85,15 @@ public class JdMchOrder {
      */
     private String skuId;
 
+
+    private Date clickPay;
+    private Long tenantId;
+
     @TableField(exist = false)
     private String startCreateTime;
 
     @TableField(exist = false)
     private String endCreateTime;
 
-    private Long tenantId;
 
 }
