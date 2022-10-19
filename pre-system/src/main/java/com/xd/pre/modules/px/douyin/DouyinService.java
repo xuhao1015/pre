@@ -382,7 +382,6 @@ public class DouyinService {
                 douyinDeviceIUseids.add(douyinDeviceIid);
             }
             if (CollUtil.isNotEmpty(douyinDeviceIids) && douyinDeviceIids.size() > 2) {
-                log.info("订单号：{}，当前设备信息{}", jdMchOrder.getTradeNo(), JSON.toJSONString(douyinDeviceIids));
                 return douyinDeviceIUseids;
             }
 
