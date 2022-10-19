@@ -438,6 +438,9 @@ public class ProductProxyTask {
                         notifySuccess(jdMchOrder);
                     }
                 }
+                if (jdMchOrder.getStatus() == 2) {
+                    notifySuccess(jdMchOrder);
+                }
             } catch (Exception e) {
                 log.info("出现未知情况msg:{}", e.getStackTrace());
             }
