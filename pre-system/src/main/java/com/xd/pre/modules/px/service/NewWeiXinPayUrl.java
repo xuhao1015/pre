@@ -173,9 +173,6 @@ public class NewWeiXinPayUrl {
             if (jdAppStoreConfig.getGroupNum() == PreConstant.NINE) {
                 return douYinHuaDanService.match(jdMchOrder, jdAppStoreConfig, jdLogs.get(0));
             }
-            if (jdAppStoreConfig.getGroupNum() == PreConstant.NINE) {
-                return douYinHuaDanService.match(jdMchOrder, jdAppStoreConfig, jdLogs.get(0));
-            }
             if (jdAppStoreConfig.getGroupNum() == PreConstant.TEN) {
                 return yongHuiService.match(jdMchOrder, jdAppStoreConfig, jdLogs.get(0));
             }

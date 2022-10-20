@@ -81,8 +81,11 @@ public class DouyinService {
     @Autowired
     private JmsMessagingTemplate jmsMessagingTemplate;
 
-
     public R match(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog) {
+        Boolean checkIp = checkIp(jdMchOrder, storeConfig, jdLog);
+        if (!checkIp) {
+            return null;
+        }
         try {
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
             storeConfig.setMark(jdMchOrder.getTenantId() + "");
@@ -120,6 +123,25 @@ public class DouyinService {
         }
         return null;
 
+    }
+
+    private Boolean checkIp(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog) {
+        log.info("订单号:{}查询是否是ip黑名单", jdMchOrder.getTradeNo());
+        Set<String> ipblack = redisTemplate.keys("IP黑名单:*");
+        if (CollUtil.isNotEmpty(ipblack)) {
+            List<String> ipBlackList = ipblack.stream().map(it -> it.replace("IP黑名单:", "")).collect(Collectors.toList());
+            if (ipBlackList.contains(jdLog.getIp())) {
+                log.info("订单号{}再ip黑名单之内:,不匹配", jdMchOrder.getTradeNo());
+                jdMchOrder.setClickPay(new Date(0L));
+                Boolean isLockMath = redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder),
+                        storeConfig.getExpireTime(), TimeUnit.MINUTES);
+                if (isLockMath) {
+                    jdMchOrderMapper.updateById(jdMchOrder);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     // 发送消息，destination是发送到的队列，message是待发送的消息
