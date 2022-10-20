@@ -30,9 +30,7 @@ public class LocalDateTimeSerializerConfig {
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilder() {
         return builder -> {
-            TimeZone tz = TimeZone.getTimeZone("UTC");//获取时区
             DateFormat df = new SimpleDateFormat(pattern);//设置格式化模板
-            df.setTimeZone(tz);
             builder.failOnEmptyBeans(false)
                     .failOnUnknownProperties(false)
                     .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
