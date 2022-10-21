@@ -971,7 +971,35 @@ public class DouyinService {
 //        redisTemplate.opsForValue().setIfAbsent("回调触发器:{}");
     }
 
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
+    @Async("asyncPool")
+    public void black() {
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("拉黑名单任务", "1", 5, TimeUnit.MINUTES);
+        if (!ifAbsent) {
+            return;
+        }
+        log.info("执行拉黑名单");
+        DateTime beginOfDay = DateUtil.beginOfDay(new Date());
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        List<Map<String, String>> list = jdMchOrderMapper.selectBlackData(beginOfDay);
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        for (Map<String, String> map : list) {
+            if (StrUtil.isBlank(map.get("ip"))) {
+                continue;
+            }
+            Integer count = jdMchOrderMapper.selectBlackDataByIp(beginOfDay, map.get("ip"));
+            String ipuse = redisTemplate.opsForValue().get("IP白名单:" + map.get("ip"));
+            if (count == 0 && StrUtil.isBlank(ipuse)) {
+                redisTemplate.opsForValue().set("IP黑名单:" + map.get("ip"), map.get("count"));
+            } else {
+                redisTemplate.delete("IP黑名单:" + map.get("ip"));
+            }
+        }
+    }
+
+    @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
     public void synProductMaxPrirce() {
         for (int i = 0; i < 4; i++) {
