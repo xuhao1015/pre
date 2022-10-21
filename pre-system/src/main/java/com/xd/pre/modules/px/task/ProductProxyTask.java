@@ -120,7 +120,7 @@ public class ProductProxyTask {
     private AreaIpMapper areaIpMapper;
 
 
-    @Scheduled(cron = "0/15 * * * * ?")
+    @Scheduled(cron = "0/9 * * * * ?")
     @Async("asyncPool")
     public void productAll() {
         String ipLock = redisTemplate.opsForValue().get("锁定生产IP全部");
@@ -128,7 +128,7 @@ public class ProductProxyTask {
             return;
         }
         log.info("定时任务生产ip50");
-        redisTemplate.opsForValue().set("锁定生产IP全部", "锁定IP全部", 20, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set("锁定生产IP全部", "锁定IP全部", 10, TimeUnit.SECONDS);
         proxyProductService.productIpAndPort1();
         proxyProductService.productIpAndPort2();
     }

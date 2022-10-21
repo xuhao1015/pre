@@ -148,7 +148,11 @@ public class ProxyProductService {
             return;
         }
         log.info("执行5");
-        redisTemplate.opsForValue().set("熊猫代理", "锁定", 20, TimeUnit.SECONDS);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("熊猫代理", "锁定", 12, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            log.info("执行5");
+            return;
+        }
         if (success == 0) {
             log.info("执行6");
             log.info("当前生成的ip为msg:[data:{}]", s);
@@ -157,7 +161,8 @@ public class ProxyProductService {
                 JSONObject parseObject = JSON.parseObject(JSON.toJSONString(o));
                 String port = parseObject.get("port").toString();
                 String ip = parseObject.get("ip").toString();
-                DateTime validTime = DateUtil.offsetSecond(new Date(), 240);
+                String ip过期时间 = redisTemplate.opsForValue().get("IP过期时间");
+                DateTime validTime = DateUtil.offsetSecond(new Date(), Integer.valueOf(ip过期时间));
                 if (parseObject.containsKey("validTime")) {
                     validTime = DateUtil.parseDateTime(parseObject.getString("validTime"));
                 }
