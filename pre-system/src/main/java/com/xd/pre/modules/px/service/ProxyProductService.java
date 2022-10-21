@@ -146,7 +146,7 @@ public class ProxyProductService {
         String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
         String s = HttpUtil.get(producUrl);
         JSONObject jsonObject = JSON.parseObject(s);
-        log.info("执行ip结果为msg:{}",JSON.toJSONString(jsonObject));
+        log.info("执行ip结果为msg:{}", JSON.toJSONString(jsonObject));
         Integer success = Integer.valueOf(jsonObject.get("code").toString());
         if (success == 0) {
             log.info("执行7");
@@ -299,5 +299,48 @@ public class ProxyProductService {
         log.info("ip：msg:[data:{}]", hostAddress);
         JdPathConfig jdPathConfig = jdPathConfigMapper.selectOne(Wrappers.<JdPathConfig>lambdaQuery().eq(JdPathConfig::getIp, hostAddress));
         return jdPathConfig;
+    }
+
+    public void productIpAndPort3() {
+        ProxyAddressProduct proxyAddressProduct = proxyAddressProductMapper.selectOne(Wrappers.<ProxyAddressProduct>lambdaQuery().eq(ProxyAddressProduct::getIsProduct, 1));
+        if (proxyAddressProduct.getType() != 3) {
+            return;
+        }
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        String 代理生产管理订单时间相差多少分钟 = redisTemplate.opsForValue().get("代理生产管理订单时间相差多少分钟");
+        Integer integer = Integer.valueOf(代理生产管理订单时间相差多少分钟);
+        Integer count1 = jdMchOrderMapper.selectCount(Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, DateUtil.offsetMinute(new Date(), -integer)));
+        if (count1 == 0) {
+            return;
+        }
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("熊猫代理", "锁定", 12, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            log.info("执行6");
+            return;
+        }
+        log.info("开始生产代理");
+        String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
+        String s = HttpUtil.get(producUrl);
+        log.info("生产代理成功msg:{}", s);
+        if (StrUtil.isBlank(s)) {
+            return;
+        }
+        JSONObject parseObject = JSON.parseObject(s);
+        if (parseObject.getInteger("code").equals(200)) {
+            log.info("生产代理成功");
+            String data = parseObject.getString("data");
+            List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);
+            if (CollUtil.isNotEmpty(jsonObjects)) {
+                for (JSONObject jsonObject : jsonObjects) {
+                    String ip = jsonObject.getString("ip");
+                    Integer port = jsonObject.getInteger("port");
+                    DateTime expire_time = DateUtil.parseDateTime(jsonObject.getString("expire_time"));
+                    JdProxyIpPort jdProxyIpPort = new JdProxyIpPort().builder().agentAddress(producUrl).ip(ip)
+                            .port(port + "").createTime(new Date()).isUse(0).expirationTime(expire_time).build();
+                    jdProxyIpPortMapper.insert(jdProxyIpPort);
+                }
+            }
+        }
+
     }
 }

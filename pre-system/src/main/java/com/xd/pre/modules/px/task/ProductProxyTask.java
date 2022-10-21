@@ -130,7 +130,17 @@ public class ProductProxyTask {
         log.info("定时任务生产ip50");
         redisTemplate.opsForValue().set("锁定生产IP全部", "锁定IP全部", 5, TimeUnit.SECONDS);
         proxyProductService.productIpAndPort1();
-        proxyProductService.productIpAndPort2();
+        try {
+            proxyProductService.productIpAndPort2();
+        } catch (Exception e) {
+
+        }
+        try {
+            proxyProductService.productIpAndPort3();
+        } catch (Exception e) {
+
+        }
+
     }
 
 
