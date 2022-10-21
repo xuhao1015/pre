@@ -325,6 +325,12 @@ public class ProxyProductService {
         if (StrUtil.isBlank(s)) {
             return;
         }
+        Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery()
+                .gt(JdProxyIpPort::getExpirationTime, DateUtil.offsetMinute(new Date(), 1)));
+        if (count >= 100) {
+            log.info("超过100个ip。不用生产");
+            return;
+        }
         JSONObject parseObject = JSON.parseObject(s);
         if (parseObject.getInteger("code").equals(200)) {
             log.info("生产代理成功");
