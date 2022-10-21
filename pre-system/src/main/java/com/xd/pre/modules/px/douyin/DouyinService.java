@@ -161,7 +161,7 @@ public class DouyinService {
         JdOrderPt jdOrderPtDb = jdOrderPtStocks.get(PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 1)[0]);
         PayDto payDto = JSON.parseObject(jdOrderPtDb.getMark(), PayDto.class);
         log.info("订单号:{},有库存,匹配的订单内置订单号是:{},", jdMchOrder.getTradeNo(), jdOrderPtDb.getOrderId());
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             log.info("订单号：{}第{}，次循环", jdMchOrder.getTradeNo(), i);
             payReUrl = payByOrderId(client, payDto, jdLog, jdMchOrder);
             if (StrUtil.isNotBlank(payReUrl)) {
@@ -526,6 +526,9 @@ public class DouyinService {
             log.info("订单号{}，封装url数据为msg:{}", jdMchOrder.getTradeNo(), payReUrl);
             return payReUrl;
         } catch (Exception e) {
+            if (StrUtil.isNotBlank(e.getMessage()) && e.getMessage().contains("Failed")) {
+                log.info("订单号{}", jdMchOrder.getTradeNo());
+            }
             log.error("订单号{}，请求报错msg:{}", jdMchOrder.getTradeNo(), e.getMessage());
         }
         return null;
@@ -896,6 +899,7 @@ public class DouyinService {
                 response.close();
             } catch (Exception e) {
                 client = pcAppStoreService.buildClient();
+//                redisTemplate.delete("")
                 log.info("订单号{},订单号查询订单详情错误错误-----,切换ip查询", jdMchOrder.getTradeNo());
             }
 //            String body = HttpRequest.get(url).header("cookie", jdOrderPt.getCurrentCk()).execute().body();
