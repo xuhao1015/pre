@@ -126,20 +126,24 @@ public class DouyinService {
     }
 
     private Boolean checkIp(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog) {
-        log.info("订单号:{}查询是否是ip黑名单", jdMchOrder.getTradeNo());
-        Set<String> ipblack = redisTemplate.keys("IP黑名单:*");
-        if (CollUtil.isNotEmpty(ipblack)) {
-            List<String> ipBlackList = ipblack.stream().map(it -> it.replace("IP黑名单:", "")).collect(Collectors.toList());
-            if (ipBlackList.contains(jdLog.getIp())) {
-                log.info("订单号{}再ip黑名单之内:,不匹配", jdMchOrder.getTradeNo());
-                jdMchOrder.setClickPay(new Date(0L));
-                Boolean isLockMath = redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder),
-                        storeConfig.getExpireTime(), TimeUnit.MINUTES);
-                if (isLockMath) {
-                    jdMchOrderMapper.updateById(jdMchOrder);
+        try {
+            log.info("订单号:{}查询是否是ip黑名单", jdMchOrder.getTradeNo());
+            Set<String> ipblack = redisTemplate.keys("IP黑名单:*");
+            if (CollUtil.isNotEmpty(ipblack)) {
+                List<String> ipBlackList = ipblack.stream().map(it -> it.replace("IP黑名单:", "")).collect(Collectors.toList());
+                if (ipBlackList.contains(jdLog.getIp())) {
+                    log.info("订单号{}再ip黑名单之内:,不匹配", jdMchOrder.getTradeNo());
+                    jdMchOrder.setClickPay(new Date(0L));
+                    Boolean isLockMath = redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder),
+                            storeConfig.getExpireTime(), TimeUnit.MINUTES);
+                    if (isLockMath) {
+                        jdMchOrderMapper.updateById(jdMchOrder);
+                    }
+                    return false;
                 }
-                return false;
             }
+        } catch (Exception e) {
+
         }
         return true;
     }
