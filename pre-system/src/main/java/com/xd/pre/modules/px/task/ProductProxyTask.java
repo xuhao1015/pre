@@ -442,6 +442,11 @@ public class ProductProxyTask {
                 log.info("订单号:{}回调订单定时任务", jdMchOrder.getTradeNo());
                 redisTemplate.opsForValue().set("查询订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 10, TimeUnit.SECONDS);
                 if (jdMchOrder.getStatus() != 2) {
+                    try {
+
+                    }catch (Exception e){
+                        log.info("订单号：{}，查询报错:{}",jdMchOrder.getTradeNo(),e.getMessage());
+                    }
                     weiXinPayUrl.getCartNumAndMy(jdMchOrder);
                     JdMchOrder jdMchOrderIn = jdMchOrderMapper.selectById(jdMchOrder.getId());
                     if (jdMchOrderIn.getStatus() == 2) {
