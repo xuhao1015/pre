@@ -849,7 +849,7 @@ public class DouyinService {
             log.info("订单号:{},在40秒之内。不用查询", jdMchOrder.getTradeNo());
             return;
         }
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("当前查询订单:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPt), 1, TimeUnit.MINUTES);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("当前查询订单:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder), 25, TimeUnit.SECONDS);
         if (!ifAbsent) {
             log.info("当前订单,{},已经被锁定。请骚后查询", jdMchOrder.getTradeNo());
             return;
@@ -863,7 +863,6 @@ public class DouyinService {
         }
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         log.info("订单号{}，开始查询订单", jdMchOrder.getTradeNo());
-        DouyinDeviceIid douyinDeviceIid = JSON.parseObject(jdOrderPt.getMark(), DouyinDeviceIid.class);
         String findOrderTime = redisTemplate.opsForValue().get("查询订单次数");
         for (int i = 0; i < Integer.valueOf(findOrderTime); i++) {
             jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
@@ -874,15 +873,18 @@ public class DouyinService {
                     return;
                 }
             }
+            String ptPin = jdOrderPt.getPtPin();
             log.info("订单号{}，查询订单循环次数:{}", jdMchOrder.getTradeNo(), i);
-            if (i >= 10) {
-                Set<String> keys = redisTemplate.keys("抖音锁定设备:*");
-                List<String> ids = keys.stream().map(it -> it.replace("抖音锁定设备:", "")).collect(Collectors.toList());
-                douyinDeviceIid = douyinDeviceIidMapper.selectById(Integer.valueOf(ids.get(PreUtils.randomCommon(0, ids.size() - 1, 1)[0])));
-            }
             String url = String.format("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?" +
-                            "aid=%s&order_id=%s",
+                            "aid=%s",
                     PreUtils.randomCommon(100, 1000000, 1)[0] + "", jdOrderPt.getOrderId());
+            String s = redisTemplate.opsForValue().get("抖音和设备号关联:" + ptPin);
+            if (StrUtil.isNotBlank(s)) {
+                DouyinDeviceIid douyinDeviceIid = JSON.parseObject(s, DouyinDeviceIid.class);
+                url = String.format("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?" +
+                                "aid=%s&order_id=%s&device_id=%s&iid=%s&channel=dy_tiny_juyouliang_dy_and24&app_name=news_article",
+                        PreUtils.randomCommon(100, 1000000, 1)[0] + "", jdOrderPt.getOrderId(), douyinDeviceIid.getDeviceId(), douyinDeviceIid.getIid());
+            }
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Cookie", jdOrderPt.getCurrentCk())

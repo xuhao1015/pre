@@ -71,7 +71,6 @@ public class ProxyProductService {
                 return;
             }
             String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
-
             String s = HttpUtil.get(producUrl);
             log.info("当前生成的ip为msg:[data:{}]", s);
             JSONObject jsonObject = JSON.parseObject(s);
@@ -218,7 +217,7 @@ public class ProxyProductService {
     private JdProxyIpPort getJdProxyIpPort_falseAc(Integer isUse, Integer index, Boolean isAc) {
         Integer proxyNum = Integer.valueOf(redisTemplate.opsForValue().get("代理个数"));
         try {
-            if (index >= 3) {
+            if (index >= 7) {
                 return null;
             }
             index = index + 1;
@@ -228,11 +227,6 @@ public class ProxyProductService {
                 wrapper.gt(JdProxyIpPort::getExpirationTime, new Date())
                         .eq(JdProxyIpPort::getIsUse, 0);
                 Integer count = jdProxyIpPortMapper.selectCount(wrapper);
-                if (count <= proxyNum) {
-                    this.productIpAndPort2();
-                    this.productIpAndPort1();
-                    return getOneIp(isUse, index, isAc);
-                }
                 int i = PreUtils.randomCommon(1, count - 1, 1)[0];
                 Page<JdProxyIpPort> page = new Page<>(i, 1);
                 page = jdProxyIpPortMapper.selectPage(page, wrapper);
