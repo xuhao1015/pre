@@ -125,10 +125,6 @@ public class ProxyProductService {
             return;
         }
         log.info("执行2");
-        String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
-        String s = HttpUtil.get(producUrl);
-        JSONObject jsonObject = JSON.parseObject(s);
-        log.info("执行3");
        /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;
@@ -141,13 +137,17 @@ public class ProxyProductService {
             return;
         }
         log.info("执行4");
-        Integer success = Integer.valueOf(jsonObject.get("code").toString());
         log.info("执行5");
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("熊猫代理", "锁定", 12, TimeUnit.SECONDS);
         if (!ifAbsent) {
             log.info("执行6");
             return;
         }
+        String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
+        String s = HttpUtil.get(producUrl);
+        JSONObject jsonObject = JSON.parseObject(s);
+        log.info("执行ip结果为msg:{}",JSON.toJSONString(jsonObject));
+        Integer success = Integer.valueOf(jsonObject.get("code").toString());
         if (success == 0) {
             log.info("执行7");
             log.info("当前生成的ip为msg:[data:{}]", s);
