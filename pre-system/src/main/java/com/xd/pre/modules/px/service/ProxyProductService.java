@@ -129,7 +129,6 @@ public class ProxyProductService {
         String s = HttpUtil.get(producUrl);
         JSONObject jsonObject = JSON.parseObject(s);
         log.info("执行3");
-        String proxyNumStr = redisTemplate.opsForValue().get("代理个数");
        /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;
@@ -143,10 +142,6 @@ public class ProxyProductService {
         }
         log.info("执行4");
         Integer success = Integer.valueOf(jsonObject.get("code").toString());
-        if (StrUtil.isNotBlank(redisTemplate.opsForValue().get("redisTemplate"))) {
-            log.info("当前代理之前已经获取了");
-            return;
-        }
         log.info("执行5");
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("熊猫代理", "锁定", 12, TimeUnit.SECONDS);
         if (!ifAbsent) {
