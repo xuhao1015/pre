@@ -145,11 +145,11 @@ public class ProxyProductService {
         log.info("执行5");
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("熊猫代理", "锁定", 12, TimeUnit.SECONDS);
         if (!ifAbsent) {
-            log.info("执行5");
+            log.info("执行6");
             return;
         }
         if (success == 0) {
-            log.info("执行6");
+            log.info("执行7");
             log.info("当前生成的ip为msg:[data:{}]", s);
             JSONArray obj = JSON.parseArray(JSON.toJSONString(jsonObject.get("obj")));
             for (Object o : obj) {
