@@ -341,6 +341,7 @@ public class ProxyProductService {
                     String ip = jsonObject.getString("ip");
                     Integer port = jsonObject.getInteger("port");
                     DateTime expire_time = DateUtil.parseDateTime(jsonObject.getString("expire_time"));
+                    expire_time = DateUtil.offsetMinute(expire_time, -3);
                     JdProxyIpPort jdProxyIpPort = new JdProxyIpPort().builder().agentAddress(producUrl).ip(ip)
                             .port(port + "").createTime(new Date()).isUse(0).expirationTime(expire_time).build();
                     jdProxyIpPortMapper.insert(jdProxyIpPort);
