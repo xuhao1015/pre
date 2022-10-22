@@ -297,13 +297,13 @@ public class TopicConsumerListener {
     }
 
     //queue模式的消费者
-    @JmsListener(destination = "product_douyin_stock_queue", containerFactory = "queueListener", concurrency = "40")
+    @JmsListener(destination = "product_douyin_stock_queue", containerFactory = "queueListener", concurrency = "20")
     public void product_douyin_stock_queue(String message) {
         log.info("生产库存appstore");
         JdAppStoreConfig jdAppStoreConfig = JSON.parseObject(message, JdAppStoreConfig.class);
+        PreTenantContextHolder.setCurrentTenantId(Long.valueOf(jdAppStoreConfig.getMark()));
         log.info("查询商户订单的数据设置当前的线程数据");
         jdAppStoreConfig = jdAppStoreConfigMapper.selectById(jdAppStoreConfig.getId());
-        PreTenantContextHolder.setCurrentTenantId(Long.valueOf(jdAppStoreConfig.getMark()));
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.EIGHT) {
             log.info("生产appstore");
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
@@ -547,7 +547,7 @@ public class TopicConsumerListener {
 
 
     //订单匹配消费
-    @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "20")
+//    @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "20")
     public void readActiveQueueQueue(String message) {
         JdMchOrder jdMchOrder = JSON.parseObject(message, JdMchOrder.class);
         try {
