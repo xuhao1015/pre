@@ -322,6 +322,7 @@ public class TopicConsumerListener {
             Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("抖音生产订单刚刚放入最大小号数:" + jdAppStoreConfig.getId(), "1", 抖音生产订单最快每天放入MQ速度, TimeUnit.SECONDS);
             if (!ifAbsent) {
                 log.info("刚刚放入。不需要再放");
+                return;
             }
             Page<JdMchOrder> jdMchOrderPage = jdMchOrderMapper.selectPage(new Page<>(1, 1), Wrappers.<JdMchOrder>lambdaQuery()
                     .eq(JdMchOrder::getPassCode, jdAppStoreConfig.getGroupNum()).eq(JdMchOrder::getSkuId, jdAppStoreConfig.getSkuId())
