@@ -302,6 +302,7 @@ public class TopicConsumerListener {
         log.info("生产库存appstore");
         JdAppStoreConfig jdAppStoreConfig = JSON.parseObject(message, JdAppStoreConfig.class);
         log.info("查询商户订单的数据设置当前的线程数据");
+        jdAppStoreConfig = jdAppStoreConfigMapper.selectById(jdAppStoreConfig.getId());
         PreTenantContextHolder.setCurrentTenantId(Long.valueOf(jdAppStoreConfig.getMark()));
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.EIGHT) {
             log.info("生产appstore");
