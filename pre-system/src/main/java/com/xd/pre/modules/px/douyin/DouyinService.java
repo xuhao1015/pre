@@ -872,8 +872,9 @@ public class DouyinService {
             jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
             if (StrUtil.isNotBlank(jdOrderPt.getOrgAppCk())) {
                 DateTime dateTime = DateUtil.parseDateTime(jdOrderPt.getOrgAppCk());
-                if (DateUtil.offsetMinute(dateTime, -12).getTime() > jdMchOrder.getCreateTime().getTime()) {
-                    log.info("订单号：{}+10分钟都大于创建时间》》》》》》》》已经查询过了。没必要继续查询", jdMchOrder.getTradeNo());
+                String 成功查询订单数据不用查单 = redisTemplate.opsForValue().get("成功查询订单数据不用查单");
+                if (DateUtil.offsetMinute(dateTime, -Integer.valueOf(成功查询订单数据不用查单)).getTime() > jdMchOrder.getCreateTime().getTime()) {
+                    log.info("订单号：{}+{},分钟都大于创建时间》》》》》》》》已经查询过了。没必要继续查询", 成功查询订单数据不用查单, jdMchOrder.getTradeNo());
                     return;
                 }
             }
