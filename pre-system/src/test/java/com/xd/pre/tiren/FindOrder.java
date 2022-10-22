@@ -21,7 +21,7 @@ public class FindOrder {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
-        String outOrder = "P1583901845534998528";
+        String outOrder = "P1583910011001831424";
         Entity entity = db.use().queryOne(String.format("select * from jd_mch_order where out_trade_no = '%s'", outOrder));
         String original_trade_no = entity.getStr("original_trade_no");
         Entity entity1 = db.use().queryOne(String.format("select * from jd_order_pt where order_id = %s", original_trade_no));

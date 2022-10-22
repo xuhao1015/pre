@@ -868,6 +868,7 @@ public class DouyinService {
         log.info("订单号{}，开始查询订单", jdMchOrder.getTradeNo());
         String findOrderTime = redisTemplate.opsForValue().get("查询订单次数");
         for (int i = 0; i < Integer.valueOf(findOrderTime); i++) {
+            client = pcAppStoreService.buildClient();
             jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
             if (StrUtil.isNotBlank(jdOrderPt.getOrgAppCk())) {
                 DateTime dateTime = DateUtil.parseDateTime(jdOrderPt.getOrgAppCk());
@@ -916,7 +917,6 @@ public class DouyinService {
                 body = response.body().string();
                 response.close();
             } catch (Exception e) {
-                client = pcAppStoreService.buildClient();
 //                redisTemplate.delete("")
                 log.info("订单号{},订单号查询订单详情错误错误-----,切换ip查询", jdMchOrder.getTradeNo());
             }
