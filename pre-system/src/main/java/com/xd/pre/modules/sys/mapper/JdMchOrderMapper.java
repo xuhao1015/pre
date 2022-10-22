@@ -45,10 +45,9 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
             " LEFT JOIN jd_log lo ON lo.order_id = mo.trade_no  " +
             "WHERE " +
             " mo.create_time > #{beginOfDay} " +
-            " and mo.`status` !=2 " +
+            " and mo.`status` !=2 and mo.match_time<=10 " +
             " GROUP BY lo.ip,mo.tenant_id " +
-            " HAVING   count(1)>5 " +
-            " order by count(1); ")
+            " HAVING   count(1)>5")
     List<Map<String, Object>> selectBlackData(@Param("beginOfDay") DateTime beginOfDay);
 
     @Select("SELECT " +
@@ -59,5 +58,5 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
             "WHERE " +
             " mo.create_time > #{beginOfDay} " +
             " and mo.status =2 and lo.ip = #{ip}")
-    Integer selectBlackDataByIp(@Param("beginOfDay")DateTime beginOfDay, @Param("ip") String ip);
+    Integer selectBlackDataByIp(@Param("beginOfDay") DateTime beginOfDay, @Param("ip") String ip);
 }
