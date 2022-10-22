@@ -788,7 +788,6 @@ public class WphService {
             log.info("执行getCheckmobileV1返回的数据msg:{}", resStr);
             if (StrUtil.isNotBlank(resStr) && resStr.contains("80001")) {
                 log.error("账号账号存在风险msg:{}", captchaXY.getPhone());
-                //TODO 拉黑手机号
                 return null;
             }
             response.close();
@@ -1385,7 +1384,6 @@ public class WphService {
                 log.info("当前卡密已经获取到了。不需要重新获取msg:{}", jdOrderPt.getCardNumber());
                 return;
             }
-            //TODO 设置取回时间设置
             long between = DateUtil.between(jdOrderPt.getPaySuccessTime(), new Date(), DateUnit.MINUTE);
             if (between >= 120) {
                 return;

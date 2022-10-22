@@ -363,12 +363,10 @@ public class TopicConsumerListener {
 
         }
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.TEN) {
-            //TODO
             log.info("生产永辉TODO");
             return;
         }
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.NINE) {
-            //TODO
             log.info("生产永辉TODo");
             return;
         }
@@ -554,6 +552,7 @@ public class TopicConsumerListener {
 
     //订单匹配消费
     @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "20")
+    //TODO 上面让匹配
     public void readActiveQueueQueue(String message) {
         JdMchOrder jdMchOrder = JSON.parseObject(message, JdMchOrder.class);
         try {

@@ -174,7 +174,6 @@ public class DouYinHuaDanService {
             douyinRechargePhoneLambdaQueryWrapper.notIn(DouyinRechargePhone::getId, ids);
         }
         log.info("订单号:{},当前订单锁定的账号", jdMchOrder.getTradeNo());
-        //TODO 锁定正在使用的账号
         Integer rechargeCount = douyinRechargePhoneMapper.selectCount(douyinRechargePhoneLambdaQueryWrapper);
         if (rechargeCount < 0) {
             log.error("当前没有要充值的手机号码。请添加话单");

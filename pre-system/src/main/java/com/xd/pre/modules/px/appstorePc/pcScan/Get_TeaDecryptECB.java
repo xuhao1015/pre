@@ -47,7 +47,6 @@ public class Get_TeaDecryptECB {
         }
 
         int[] ints = Fuzhu.bin2hex_(v4Str + v5Str);
-        // TODO
         // log.info("get_TeaDecryptECB:返回值{}", JSON.toJSONString(Arrays.stream(ints).boxed().collect(Collectors.toList())));
         return ints;
     }

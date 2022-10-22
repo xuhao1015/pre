@@ -120,17 +120,14 @@ public class PcAppStoreService {
         log.info("开始获取订单的h5页面msg:{}", orderId);
         String payUrl301_1 = getPayUrl301_1(orderCk, orderId, headerMap, client);
         if (StrUtil.isBlank(payUrl301_1)) {
-            //TODO 重复执行
         }
         pcOrderDto.setPayUrl301_1(payUrl301_1);
         String payUrl301_2 = getPayUrl301_2(orderCk.getThor(), payUrl301_1, headerMap, client);
         if (StrUtil.isBlank(payUrl301_2)) {
-            //TODO 重复执行
         }
         pcOrderDto.setPayUrl301_2(payUrl301_2);
         String payUrl301_3 = getPayUrl301_2(orderCk.getThor(), payUrl301_2, headerMap, client);
         if (StrUtil.isBlank(payUrl301_3)) {
-            //TODO 重复执行
         }
         pcOrderDto.setPayUrl301_3(payUrl301_3);
         String reqInfo = PreUtils.parseUrl(payUrl301_3).getParams().get("reqInfo");
@@ -143,12 +140,10 @@ public class PcAppStoreService {
         pcOrderDto.setFingerprint(fingerprint);
         PcOrderDto pcOrderDtoT = getPaySign(orderCk.getThor(), pcOrderDto, headerMap, client);
         if (ObjectUtil.isNull(pcOrderDtoT)) {
-            //TODO 重复执行
         }
         pcOrderDto = pcOrderDtoT;
         pcOrderDtoT = weixinConfirm(orderCk.getThor(), pcOrderDto, headerMap, client);
         if (ObjectUtil.isNull(pcOrderDtoT)) {
-            //TODO 重复执行
             return null;
         }
         pcOrderDto = pcOrderDtoT;
@@ -161,7 +156,6 @@ public class PcAppStoreService {
         log.info("执行最后一步获取二维码的signCode");
         pcOrderDtoT = qrCodeSign(orderCk.getThor(), pcOrderDto, headerMap, client);
         if (ObjectUtil.isNull(pcOrderDtoT)) {
-            //TODO 重复执行
         }
         pcOrderDto = pcOrderDtoT;
         for (int i = 0; i < 5; i++) {

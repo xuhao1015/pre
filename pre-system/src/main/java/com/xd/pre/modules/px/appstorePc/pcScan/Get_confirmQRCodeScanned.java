@@ -25,7 +25,6 @@ public class Get_confirmQRCodeScanned {
                 Area = Area + "0";
             }
             String DwAppClientVer = "9.1.0";
-            //TODO 这地方要随机获取wifi方法.版本 2  network ＝ 多项选择 (取随机数 (1, 4), “wifi”, “4G”, “3G”, “2G”)
             String network = "4G";
             Integer DwAppID = 100;
             String Build = "83789";

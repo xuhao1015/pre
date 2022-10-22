@@ -196,7 +196,6 @@
 //        String body = execute.body().string();
 //        log.info("微信支付链接msg:{}", body);
 ////        System.out.println(body);
-//      /*  //TODO 获取一个代理
 //        HttpResponse referer = HttpRequest.get(String.format(jdPayOrderPostAddress.getUrl(), payId, PreUtils.getRandomString(90)))
 //                .header("Cookie", ckByTokey)
 //                .header("origin", jdPayOrderPostAddress.getOrigin())
@@ -209,7 +208,6 @@
 //    }
 //
 //    public Boolean step3Check(JdPayOrderPostAddress jdPayOrderPostAddress, String payId, OkHttpClient client) throws Exception {
-//        //TODO 获取一个代理
 //        RequestBody requestBody = new FormBody.Builder()
 //                .add("appId", jdPayOrderPostAddress.getAppId())
 //                .add("payId", payId)
@@ -240,7 +238,6 @@
 //
 //
 //    public String step2Jdappmpay(JdPayOrderPostAddress jdPayOrderPostAddress, OkHttpClient client) throws Exception {
-//        //TODO 获取一个代理
 //        Request request = new Request.Builder().get().url(jdPayOrderPostAddress.getUrl())
 //                .header("user-agent", jdPayOrderPostAddress.getUserAgent()).build();
 //        Response execute = client.newCall(request).execute();
@@ -270,7 +267,6 @@
 //            Response execute = client.newCall(request).execute();
 //            String body = execute.body().string();
 //
-//            //TODO 获取一个代理
 ///*            HttpResponse referer = HttpRequest.get(jdPayOrderPostAddress.getUrl())
 //                    .cookie(ckByTokey)
 //                    .header("referer", jdPayOrderPostAddress.getReferer())

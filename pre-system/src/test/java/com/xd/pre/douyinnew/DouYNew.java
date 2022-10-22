@@ -109,7 +109,6 @@ public class DouYNew {
         log.info("预下单数据msg:{}", resBody);
         response.close();
         if (false) {
-            //TODO 不让下单
             return;
         }
         BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);

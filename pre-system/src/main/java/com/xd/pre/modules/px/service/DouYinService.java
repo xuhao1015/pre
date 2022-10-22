@@ -280,7 +280,6 @@ public class DouYinService {
             ipNotLocks = all.stream().filter(it -> !allLock.contains(it)).collect(Collectors.toList());
         }
         if (CollUtil.isEmpty(ipNotLocks) || ipNotLocks.size() < 20) {
-            //        TODO 查询直登账号，并且待支付和已经支付的不超过5单。这个账号
 //         返回对应的订单号。然后支付
             //        //下单
             log.info("获取独享ip");

@@ -481,7 +481,6 @@
 //            String totalPayAmount = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(resStr).getString("data"))
 //                    .getString("preview")).getString("totalPayAmount");
 //            BigDecimal totalPayAmountBig = new BigDecimal(totalPayAmount);
-//            //TODO 和数据对比商品价格
 //            return totalPayAmountBig;
 //        } catch (Exception e) {
 //            log.info("预编译报错msg:{}", e);
