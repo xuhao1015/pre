@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xd.pre.common.utils.px.PreUtils;
 
-public class Test {
+public class PostOrderSign {
     public static void main(String[] args) {
         创建订单();
 //        查询订单();
@@ -37,7 +37,7 @@ public class Test {
     private static void 创建订单() {
         String a = "{\n" +
                 "\t\"amount\": \"200.00\",\n" +
-                "\t\"out_trade_no\": \"756\",\n" +
+                "\t\"out_trade_no\": \"103\",\n" +
                 "\t\"subject\": \"支付1000元\",\n" +
                 "\t\"sign\": \"%s\",\n" +
                 "\t\"client_ip\": \"192.168.2.1\",\n" +
