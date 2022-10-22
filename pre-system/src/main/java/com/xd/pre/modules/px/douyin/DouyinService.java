@@ -888,9 +888,26 @@ public class DouyinService {
                                 "aid=%s&order_id=%s&device_id=%s&iid=%s&channel=dy_tiny_juyouliang_dy_and24&app_name=news_article",
                         PreUtils.randomCommon(100, 1000000, 1)[0] + "", jdOrderPt.getOrderId(), douyinDeviceIid.getDeviceId(), douyinDeviceIid.getIid());
             }
+            String x_gorgon = "8404d4860000775655c5b8f6315f8a608a802f3a78e4891a08cc";
+            String x_khronos = "1665697911";
+            try {
+                String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}", url);
+                String signUrl = getSignUrl();
+                log.info("订单号{}查询订单，签证地址msg:{}", jdMchOrder.getTradeNo(), signUrl);
+                String signHt1 = HttpRequest.post(signUrl).body(signData1).timeout(2000).execute().body();
+                x_gorgon = JSON.parseObject(signHt1).getString("x-gorgon");
+                x_khronos = JSON.parseObject(signHt1).getString("x-khronos");
+                log.info("订单号:{},xk和xg数据为:{},{}", x_khronos, x_gorgon);
+            } catch (Exception e) {
+                log.info("查询订单xg和xk报错:{}", jdMchOrder.getTradeNo());
+            }
             Request request = new Request.Builder()
                     .url(url)
+                    .addHeader("User-Agent", "okhttp/3.10.0.1")
+                    .addHeader("cache-control", "no-cache")
                     .addHeader("Cookie", jdOrderPt.getCurrentCk())
+                    .addHeader("X-Khronos", x_khronos)
+                    .addHeader("X-Gorgon", x_gorgon)
                     .build();
             String body = null;
             try {
