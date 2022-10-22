@@ -301,9 +301,10 @@ public class TopicConsumerListener {
     public void product_douyin_stock_queue(String message) {
         log.info("生产库存appstore");
         JdAppStoreConfig jdAppStoreConfig = JSON.parseObject(message, JdAppStoreConfig.class);
-        PreTenantContextHolder.setCurrentTenantId(Long.valueOf(jdAppStoreConfig.getMark()));
+        PreTenantContextHolder.setCurrentTenantId(1L);
         log.info("查询商户订单的数据设置当前的线程数据");
         jdAppStoreConfig = jdAppStoreConfigMapper.selectById(jdAppStoreConfig.getId());
+        jdAppStoreConfig.setMark("1");
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.EIGHT) {
             log.info("生产appstore");
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
@@ -346,7 +347,12 @@ public class TopicConsumerListener {
                 JdLog jdLog = JdLog.builder().ip("210.16.122.101").orderId(orderId).build();
                 TimeInterval timer = DateUtil.timer();
                 OkHttpClient client = pcAppStoreService.buildClient();
-                R r = douyinService.douyinProductNewOrder(jdMchOrder, jdAppStoreConfig, jdLog, timer, client, "");
+                R r = null;
+                try {
+                    r = douyinService.douyinProductNewOrder(jdMchOrder, jdAppStoreConfig, jdLog, timer, client, "");
+                } catch (Exception e) {
+
+                }
                 if (ObjectUtil.isNotNull(r) && r.getCode() == HttpStatus.HTTP_OK && r.getData() instanceof JdOrderPt) {
                     log.info("订单号:{},当前订单生产完成。生产数据为msg:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(r.getData()));
                 }
