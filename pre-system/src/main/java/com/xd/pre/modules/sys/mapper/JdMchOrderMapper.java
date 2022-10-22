@@ -47,7 +47,7 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
             " mo.create_time > #{beginOfDay} " +
             " and mo.`status` !=2 " +
             " GROUP BY lo.ip,mo.tenant_id " +
-            " HAVING   count(1)>10 " +
+            " HAVING   count(1)>5 " +
             " order by count(1); ")
     List<Map<String, String>> selectBlackData(@Param("beginOfDay") DateTime beginOfDay);
 
