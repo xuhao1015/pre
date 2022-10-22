@@ -992,18 +992,19 @@ public class DouyinService {
         log.info("执行拉黑名单");
         DateTime beginOfDay = DateUtil.beginOfDay(new Date());
         PreTenantContextHolder.setCurrentTenantId(1L);
-        List<Map<String, String>> list = jdMchOrderMapper.selectBlackData(beginOfDay);
+        List<Map<String, Object>> list = jdMchOrderMapper.selectBlackData(beginOfDay);
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        for (Map<String, String> map : list) {
-            if (StrUtil.isBlank(map.get("ip"))) {
+        for (Map<String, Object> map : list) {
+            if (ObjectUtil.isNull(map.get("ip"))) {
                 continue;
             }
-            Integer count = jdMchOrderMapper.selectBlackDataByIp(beginOfDay, map.get("ip"));
+            Integer count = jdMchOrderMapper.selectBlackDataByIp(beginOfDay, map.get("ip").toString());
             String ipuse = redisTemplate.opsForValue().get("IP白名单:" + map.get("ip"));
             if (count == 0 && StrUtil.isBlank(ipuse)) {
-                redisTemplate.opsForValue().set("IP黑名单:" + map.get("ip"), map.get("count"));
+                String count1 = map.get("count").toString();
+                redisTemplate.opsForValue().set("IP黑名单:" + map.get("ip"), count1);
             } else {
                 redisTemplate.delete("IP黑名单:" + map.get("ip"));
             }

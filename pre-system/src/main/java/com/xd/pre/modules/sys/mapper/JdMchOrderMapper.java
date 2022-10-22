@@ -49,7 +49,7 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
             " GROUP BY lo.ip,mo.tenant_id " +
             " HAVING   count(1)>5 " +
             " order by count(1); ")
-    List<Map<String, String>> selectBlackData(@Param("beginOfDay") DateTime beginOfDay);
+    List<Map<String, Object>> selectBlackData(@Param("beginOfDay") DateTime beginOfDay);
 
     @Select("SELECT " +
             "count(1) " +
