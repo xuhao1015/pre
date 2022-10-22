@@ -417,6 +417,28 @@ public class ProductProxyTask {
         }
     }
 
+    @Scheduled(cron = "0/20 * * * * ?")
+    @Async("asyncPool")
+    public void callBackNotice() {
+        Integer callBack = -300;
+        String callBackStr = redisTemplate.opsForValue().get("回调分钟数");
+        if (StrUtil.isBlank(callBackStr)) {
+            redisTemplate.opsForValue().set("回调分钟数", "-300");
+        } else {
+            callBack = Integer.valueOf(callBackStr);
+        }
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        DateTime dateTime = DateUtil.offsetSecond(new Date(), callBack);
+        List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery()
+                .ge(JdMchOrder::getCreateTime, dateTime).isNotNull(JdMchOrder::getOriginalTradeNo)
+                .eq(JdMchOrder::getPassCode, PreConstant.EIGHT).eq(JdMchOrder::getStatus, PreConstant.TWO));
+        for (JdMchOrder jdMchOrder : jdMchOrders) {
+            if (jdMchOrder.getStatus() == 2) {
+                notifySuccess(jdMchOrder);
+            }
+        }
+
+    }
 
     @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
@@ -435,9 +457,6 @@ public class ProductProxyTask {
         for (JdMchOrder jdMchOrder : jdMchOrders) {
             try {
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-                if (jdMchOrder.getStatus() == 2) {
-                    notifySuccess(jdMchOrder);
-                }
                 String data = redisTemplate.opsForValue().get("查询订单:" + jdMchOrder.getTradeNo());
                 if (StrUtil.isNotBlank(data)) {
                     return;
