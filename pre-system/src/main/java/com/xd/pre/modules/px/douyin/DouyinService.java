@@ -143,7 +143,7 @@ public class DouyinService {
                 }
             }
         } catch (Exception e) {
-
+            log.info("订单号:{}黑名单出现错误:{}", jdMchOrder.getTradeNo(), e.getMessage());
         }
         return true;
     }
