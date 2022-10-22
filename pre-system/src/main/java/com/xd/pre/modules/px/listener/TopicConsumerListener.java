@@ -553,7 +553,7 @@ public class TopicConsumerListener {
 
 
     //订单匹配消费
-//    @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "20")
+    @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "20")
     public void readActiveQueueQueue(String message) {
         JdMchOrder jdMchOrder = JSON.parseObject(message, JdMchOrder.class);
         try {
