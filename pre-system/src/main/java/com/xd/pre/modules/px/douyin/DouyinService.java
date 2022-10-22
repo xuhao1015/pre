@@ -894,7 +894,7 @@ public class DouyinService {
                 String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}", url);
                 String signUrl = getSignUrl();
                 log.info("订单号{}查询订单，签证地址msg:{}", jdMchOrder.getTradeNo(), signUrl);
-                String signHt1 = HttpRequest.post(signUrl).body(signData1).timeout(2000).execute().body();
+                String signHt1 = HttpRequest.post(signUrl).body(signData1).timeout(3000).execute().body();
                 x_gorgon = JSON.parseObject(signHt1).getString("x-gorgon");
                 x_khronos = JSON.parseObject(signHt1).getString("x-khronos");
                 log.info("订单号:{},xk和xg数据为:{},{}", x_khronos, x_gorgon);
