@@ -435,12 +435,12 @@ public class ProductProxyTask {
         for (JdMchOrder jdMchOrder : jdMchOrders) {
             try {
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                if (jdMchOrder.getStatus() == 2) {
+                    notifySuccess(jdMchOrder);
+                }
                 String data = redisTemplate.opsForValue().get("查询订单:" + jdMchOrder.getTradeNo());
                 if (StrUtil.isNotBlank(data)) {
                     return;
-                }
-                if (jdMchOrder.getStatus() == 2) {
-                    notifySuccess(jdMchOrder);
                 }
                 log.info("订单号:{}回调订单定时任务", jdMchOrder.getTradeNo());
                 redisTemplate.opsForValue().set("查询订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 10, TimeUnit.SECONDS);
