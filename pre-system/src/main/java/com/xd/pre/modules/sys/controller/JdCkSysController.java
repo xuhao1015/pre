@@ -187,7 +187,6 @@ public class JdCkSysController {
     public R uploadPhone(@RequestParam("file") MultipartFile file) throws Exception {
         Long currentTenantId = PreTenantContextHolder.getCurrentTenantId();
         log.info("上传当前租户msg:{}", currentTenantId);
-        byte[] bytes = file.getBytes();
         String originalFilename = file.getOriginalFilename();
         ExcelReader reader = ExcelUtil.getReader(file.getInputStream());
         List<ReadDto> readDtos = reader.readAll(ReadDto.class);
@@ -274,11 +273,14 @@ public class JdCkSysController {
                     DouyinAppCk douyinAppCkDb = douyinAppCkMapper.selectOne(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getUid, uid));
                     if (ObjectUtil.isNotNull(douyinAppCkDb)) {
                         log.info("已经存在msg:{}", JSON.toJSONString(douyinAppCkDb));
-                        douyinAppCkMapper.deleteById(douyinAppCkDb.getId());
+                        if (douyinAppCkDb.getIsEnable() == PreConstant.FUYI_1) {
+                            douyinAppCkMapper.deleteById(douyinAppCkDb.getId());
+                            build.setFailReason("替换");
+                            douyinAppCkMapper.insert(build);
+                        }
+                    }else {
                         douyinAppCkMapper.insert(build);
-                    } else {
                     }
-                    douyinAppCkMapper.insert(build);
                 }
             } catch (Exception e) {
                 log.error("当前ck报错msg:{},ck:{}", e.getMessage(), douYinAppCk);
