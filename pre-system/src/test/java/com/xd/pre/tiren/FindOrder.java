@@ -24,6 +24,7 @@ public class FindOrder {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
+        noticy("P1583147207349174272");
         for (int i = 0; i < 1000000; i++) {
             Thread.sleep(60 * 1000);
             List<Entity> query = null;
@@ -36,7 +37,7 @@ public class FindOrder {
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " and mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 5 MINUTE )  " +
+                        " and mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 7 MINUTE )  " +
                         " and mo.click_pay is not null  " +
                         " and mo.click_pay !='1970-01-01 08:00:00' " +
                         " AND op.html IS NULL " +

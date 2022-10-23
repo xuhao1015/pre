@@ -511,12 +511,12 @@ public class ProductProxyTask {
                     .execute().body();
             log.info("订单号:{},回调返回数据:{}", jdMchOrder.getTradeNo(), result);
             if (StrUtil.isNotBlank(result) && result.toLowerCase().equals("success")) {
-                redisTemplate.opsForValue().increment("通知成功次数:" + jdMchOrder.getTradeNo());
                 log.info("订单号:{}通知支付成功", jdMchOrder.getTradeNo());
                 jdMchOrderDb.setNotifySucc(PreConstant.ONE);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                 log.info("订单号，{}通知结果后返回的数据:{},租户:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrderDb), jdMchOrder.getTenantId());
                 jdMchOrderMapper.updateByIdNotSuccess(jdMchOrder.getId(), PreConstant.ONE);
+                redisTemplate.opsForValue().increment("通知成功次数:" + jdMchOrder.getTradeNo());
                 return true;
             }
         } catch (Exception e) {
