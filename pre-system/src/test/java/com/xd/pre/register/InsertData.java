@@ -1,4 +1,4 @@
-package com.xd.pre.testPay;
+package com.xd.pre.register;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.file.FileReader;

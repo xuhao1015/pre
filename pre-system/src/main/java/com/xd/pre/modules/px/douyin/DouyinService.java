@@ -160,7 +160,6 @@ public class DouyinService {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         JdOrderPt jdOrderPtDb = jdOrderPtStocks.get(PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 1)[0]);
         PayDto payDto = JSON.parseObject(jdOrderPtDb.getMark(), PayDto.class);
-        log.info("订单号:{},有库存,匹配的订单内置订单号是:{},", jdMchOrder.getTradeNo(), jdOrderPtDb.getOrderId());
         for (int i = 0; i < 2; i++) {
             log.info("订单号：{}第{}，次循环", jdMchOrder.getTradeNo(), i);
             payReUrl = payByOrderId(client, payDto, jdLog, jdMchOrder);
@@ -182,6 +181,7 @@ public class DouyinService {
             log.error("订单号{}，有人已经使用库存,请查看数据库msg:{}", jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo());
             return null;
         }
+        log.info("订单号:{},外部订单号是:{},有库存,匹配的订单内置订单号是:{},", jdMchOrder.getTradeNo(), jdMchOrder.getOutTradeNo(), jdOrderPtDb.getOrderId());
         Boolean isLockMath = redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder),
                 storeConfig.getExpireTime(), TimeUnit.MINUTES);
         if (!isLockMath) {
