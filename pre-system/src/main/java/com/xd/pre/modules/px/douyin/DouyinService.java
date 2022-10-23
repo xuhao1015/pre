@@ -181,13 +181,13 @@ public class DouyinService {
             log.error("订单号{}，有人已经使用库存,请查看数据库msg:{}", jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo());
             return null;
         }
-        log.info("订单号:{},外部订单号是:{},有库存,匹配的订单内置订单号是:{},", jdMchOrder.getTradeNo(), jdMchOrder.getOutTradeNo(), jdOrderPtDb.getOrderId());
         Boolean isLockMath = redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder),
                 storeConfig.getExpireTime(), TimeUnit.MINUTES);
         if (!isLockMath) {
             log.error("订单号{}，库存当前已经匹配了,请查看数据库msg:{}", jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo());
             return null;
         }
+        log.info("订单号:{},外部订单号是:{},有库存,匹配的订单内置订单号是:{},", jdMchOrder.getTradeNo(), jdMchOrder.getOutTradeNo(), jdOrderPtDb.getOrderId());
         log.info("订单号:{},当前库存存在支付连接", jdMchOrder.getTradeNo());
         //  .hrefUrl(payReUrl).weixinUrl(payReUrl).wxPayUrl(payReUrl)
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
