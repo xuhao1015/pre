@@ -53,9 +53,9 @@ public class DouYNew {
 /*        String device_id = "device_id_str=2212649920104615";
         String iid = "install_id_str=3690393549678381";
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
-        String device_id = "device_id_str=1192303690515518";
-        String iid = "install_id_str=4059830016815256";
-        String ck = "sid_tt=8a2aa37fcc50308e017e165c317d0dcc;";
+        String device_id = "device_id_str=1456188607970952";
+        String iid = "install_id_str=136774654374727";
+        String ck = "sid_tt=c72f5b4572167e01c9d3fe89bba0175b;";
 
 
         if (device_id.contains("device_id_str=")) {

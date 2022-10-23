@@ -943,24 +943,8 @@ public class DouyinService {
                 JSONObject voucher_info = voucher_info_list.get(PreConstant.ZERO);
                 String code = voucher_info.getString("code");
                 if (StrUtil.isNotBlank(code)) {
-                    PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-                    log.info("订单号{}，当前获取的卡密成功msg:{}", jdMchOrder.getTradeNo(), code);
-                    jdOrderPt.setCardNumber(code);
-                    jdOrderPt.setCarMy(code);
-                    jdOrderPt.setSuccess(PreConstant.ONE);
-                    jdOrderPt.setPaySuccessTime(new Date());
-                    jdOrderPtMapper.updateById(jdOrderPt);
-                    jdMchOrder.setStatus(PreConstant.TWO);
-                    PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-                    jdMchOrderMapper.updateById(jdMchOrder);
-                    jdOrderPtMapper.updateById(jdOrderPt);
-                    jdOrderPtMapper.updateById(jdOrderPt);
+                    updateSuccess(jdMchOrder, jdOrderPt, code);
                     log.info("订单号：{}，开始计算成功金额,pin:{}", jdMchOrder.getTradeNo());
-//                    Integer maxPrice = douyinMaxPrice();
-//                    DateTime endOfDay = DateUtil.endOfDay(new Date());
-//                    DateTime beginOfDay = DateUtil.beginOfDay(new Date());
-//                    Integer sku_price_total = jdOrderPtMapper.selectDouYinByStartTimeAndEndAndUid(jdOrderPt.getPtPin(), beginOfDay, endOfDay);
-//                    log.info("订单号:{},当前账号:{},剩余额度:{}", jdMchOrder.getTradeNo(), jdOrderPt.getPtPin(), maxPrice - sku_price_total);
                     return;
                 }
             }
@@ -1028,6 +1012,84 @@ public class DouyinService {
                 redisTemplate.delete("IP黑名单:" + map.get("ip"));
             }
         }
+    }
+
+    @Scheduled(cron = "0/20 * * * * ?")
+    @Async("asyncPool")
+    public void budan() {
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        Integer time = Integer.valueOf(redisTemplate.opsForValue().get("补单时间"));
+        List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectBuDan(time);
+        if (CollUtil.isEmpty(jdMchOrders)) {
+            return;
+        }
+        log.info("开始补单msg:{}");
+        for (JdMchOrder jdMchOrder : jdMchOrders) {
+            try {
+                Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("补单执行:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder), 40, TimeUnit.SECONDS);
+                if (!ifAbsent) {
+                    continue;
+                }
+                JdOrderPt jdOrderPt = jdOrderPtMapper.selectById(jdMchOrder.getOriginalTradeId());
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?aid=45465&order_id=" + jdOrderPt.getOrderId().trim())
+                        .get()
+                        .addHeader("Cookie", jdOrderPt.getCurrentCk())
+                        .addHeader("X-Khronos", "1665697911")
+                        .addHeader("X-Gorgon", "8404d4860000775655c5b8f6315f8a608a802f3a78e4891a08cc")
+                        .addHeader("User-Agent", "okhttp/3.10.0.1")
+                        .addHeader("cache-control", "no-cache")
+                        .build();
+                Response response = client.newCall(request).execute();
+                String body = response.body().string();
+                System.out.println(body);
+                if (StrUtil.isBlank(body)) {
+                    log.info("对不起，没有查询成");
+                    return;
+                }
+                log.info("订单号:{},查询成功数据:{}", jdMchOrder.getTradeNo(), body);
+                jdOrderPt.setHtml(body);
+                jdOrderPt.setOrgAppCk(DateUtil.formatDateTime(new Date()));
+                jdOrderPtMapper.updateById(jdOrderPt);
+                String html = JSON.parseObject(body).getString("order_detail_info");
+                String voucher_info_listStr = JSON.parseObject(html).getString("voucher_info_list");
+                List<JSONObject> voucher_info_list = JSON.parseArray(voucher_info_listStr, JSONObject.class);
+                if (CollUtil.isEmpty(voucher_info_list)) {
+                    log.info("订单号:{},补单没有支付补单成功,没有支付", jdMchOrder.getTradeNo());
+                    return;
+                }
+                JSONObject voucher_info = voucher_info_list.get(PreConstant.ZERO);
+                String code = voucher_info.getString("code");
+                if (StrUtil.isBlank(code)) {
+                    log.info("没有支付");
+                    return;
+                }
+                log.info("订单号:{}支付成功msg:", jdMchOrder.getTradeNo());
+                if (StrUtil.isNotBlank(code)) {
+                    updateSuccess(jdMchOrder, jdOrderPt, code);
+                    return;
+                }
+            } catch (Exception e) {
+                log.info("订单补单查询失败:{},{}", jdMchOrder.getTradeNo(), e.getMessage());
+            }
+
+        }
+    }
+
+    private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code) {
+        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+        log.info("订单号{}，当前获取的卡密成功msg:{}", jdMchOrder.getTradeNo(), code);
+        jdOrderPt.setCardNumber(code);
+        jdOrderPt.setCarMy(code);
+        jdOrderPt.setSuccess(PreConstant.ONE);
+        jdOrderPt.setPaySuccessTime(new Date());
+        jdOrderPtMapper.updateById(jdOrderPt);
+        jdMchOrder.setStatus(PreConstant.TWO);
+        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+        jdMchOrderMapper.updateById(jdMchOrder);
+        jdOrderPtMapper.updateById(jdOrderPt);
+        jdOrderPtMapper.updateById(jdOrderPt);
     }
 
     @Scheduled(cron = "0/20 * * * * ?")
