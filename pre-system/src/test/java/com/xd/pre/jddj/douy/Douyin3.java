@@ -1,20 +1,29 @@
 package com.xd.pre.jddj.douy;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.xd.pre.common.utils.px.PreUtils;
+import com.xd.pre.douyinnew.TestResoData;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.pcScan.Demo;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import redis.clients.jedis.Jedis;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class Douyin3 {
@@ -25,6 +34,34 @@ public class Douyin3 {
         stringObjectHashMap.put("ip", split[0]);
         stringObjectHashMap.put("port", split[1].replace("\r\n", ""));
         return stringObjectHashMap;
+    }
+
+    public static OkHttpClient getIpAndPort20() {
+        Jedis jedis = TestResoData.jedis;
+        Set<String> keys = jedis.keys("ip缓存临时:*");
+        if (CollUtil.isNotEmpty(keys) && keys.size() > 15) {
+            List<String> collect = keys.stream().collect(Collectors.toList());
+            int i = PreUtils.randomCommon(0, keys.size() - 1, 1)[0];
+            String s1 = collect.get(i);
+            String data = jedis.get(s1);
+            LinshiIpAndData linshiIpAndData = JSON.parseObject(data, LinshiIpAndData.class);
+            OkHttpClient okHttpClient = Demo.getOkHttpClient(linshiIpAndData.getIp(), linshiIpAndData.getPort());
+            return okHttpClient;
+        }
+        String s = HttpUtil.get("http://webapi.http.zhimacangku.com/getip?num=20&type=2&pro=&city=0&yys=0&port=1&time=1&ts=1&ys=0&cs=0&lb=1&sb=0&pb=4&mr=1&regions=");
+        String data = JSON.parseObject(s).getString("data");
+        List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);
+        for (JSONObject jsonObject : jsonObjects) {
+            String expire_time = jsonObject.getString("expire_time");
+            String ip = jsonObject.getString("ip");
+            Integer port = jsonObject.getInteger("port");
+            LinshiIpAndData build = LinshiIpAndData.builder().ip(ip).port(port).build();
+            jedis.set("ip缓存临时:" + ip, JSON.toJSONString(build));
+            DateTime dateTime = DateUtil.parseDateTime(expire_time);
+            long l = (dateTime.getTime() - System.currentTimeMillis()) / 1000;
+            jedis.expire("ip缓存临时:" + ip, Integer.valueOf(l + ""));
+        }
+        return getIpAndPort20();
     }
 
     public static void main(String[] args) throws Exception {

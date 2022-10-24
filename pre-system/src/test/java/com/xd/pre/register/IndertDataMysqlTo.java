@@ -3,7 +3,7 @@ package com.xd.pre.register;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.db.Db;
 
-public class Test {
+public class IndertDataMysqlTo {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {

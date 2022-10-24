@@ -60,8 +60,8 @@ public interface JdOrderPtMapper extends BaseMapper<JdOrderPt> {
             "'1739136614382624', " +
             "'1739136822194211', " +
             "'1745277214000191') " +
-            "and (pay_success_time is not null or  wx_pay_expire_time >NOW()  ) " +
-            "and create_time BETWEEN #{beginOfDay} AND #{endOfDay} " +
+            "and (pay_success_time is not null or  wx_pay_expire_time >NOW()   ) " +
+            "and wx_pay_expire_time BETWEEN #{beginOfDay} AND #{endOfDay} " +
             "GROUP BY pt_pin ")
     List<Map<String, Object>> selectDouYinByStartTimeAndEndAndUidGroup(@Param("beginOfDay") DateTime beginOfDay, @Param("endOfDay") DateTime endOfDay);
 
