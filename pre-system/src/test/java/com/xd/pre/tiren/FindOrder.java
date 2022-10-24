@@ -24,24 +24,25 @@ public class FindOrder {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
-        noticy("P1583192068764925952");
+        noticy("P1584604450078785536");
         for (int i = 0; i < 1000000; i++) {
             Thread.sleep(60 * 1000);
             List<Entity> query = null;
             try {
-                query = db.use().query(" " +
-                        "SELECT " +
-                        " mo.trade_no,mo.out_trade_no,mo.original_trade_no  " +
+                query = db.use().query("SELECT " +
+                        " mo.trade_no, " +
+                        " mo.out_trade_no, " +
+                        " mo.original_trade_no  " +
                         "FROM " +
                         " jd_mch_order mo " +
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " and mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 7 MINUTE )  " +
-                        " and mo.click_pay is not null  " +
-                        " and mo.click_pay !='1970-01-01 08:00:00' " +
-                        " AND op.html IS NULL " +
-                        " and mo.`status`!=2 ");
+                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 7 MINUTE )  " +
+                        " AND mo.click_pay IS NOT NULL  " +
+                        " AND mo.click_pay != '1970-01-01 08:00:00'  " +
+                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 3  " +
+                        " AND mo.`status` != 2;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
             }

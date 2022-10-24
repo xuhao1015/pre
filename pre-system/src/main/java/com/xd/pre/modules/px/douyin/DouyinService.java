@@ -987,8 +987,31 @@ public class DouyinService {
 
     @Scheduled(cron = "0/30 * * * * ?")
     @Async("asyncPool")
+    public void blackBai() {
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 2, TimeUnit.MINUTES);
+        if (!ifAbsent) {
+            return;
+        }
+        Set<String> keys = redisTemplate.keys("IP黑名单:*");
+        if (CollUtil.isEmpty(keys)) {
+            return;
+        }
+        log.info("开始重置黑名单");
+        List<String> collect = keys.stream().map(it -> it.replace("IP黑名单:", "")).collect(Collectors.toList());
+        for (String ip : collect) {
+            DateTime beginOfDay = DateUtil.beginOfDay(new Date());
+            Integer count = jdMchOrderMapper.selectBlackDataByIp(beginOfDay, ip);
+            if (count > 0) {
+                redisTemplate.delete("IP黑名单:" + ip);
+            }
+        }
+
+    }
+
+    @Scheduled(cron = "0/30 * * * * ?")
+    @Async("asyncPool")
     public void black() {
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("拉黑名单任务", "1", 5, TimeUnit.MINUTES);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("拉黑名单任务", "1", 3, TimeUnit.MINUTES);
         if (!ifAbsent) {
             return;
         }
