@@ -1106,9 +1106,9 @@ public class DouyinService {
             log.info("抖音定时任务同步订单金额");
             if (CollUtil.isNotEmpty(douyinAppCks)) {
                 for (DouyinAppCk douyinAppCk : douyinAppCks) {
-                    if(douyinAppCk.getUid().equals("699722047953838")){
+                   /* if(douyinAppCk.getUid().equals("699722047953838")){
                         System.out.println("sss");
-                    }
+                    }*/
                     Integer sku_price_total = PreConstant.ZERO;
                     String pt_pin = douyinAppCk.getUid();
                     if (CollUtil.isNotEmpty(mapList)) {
