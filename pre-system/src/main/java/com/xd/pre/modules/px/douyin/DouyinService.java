@@ -848,7 +848,8 @@ public class DouyinService {
             log.info("订单号:{}没有访问数据。不需要查询", jdMchOrder.getTradeNo());
             return;
         }
-        if (DateUtil.offsetSecond(jdMchOrder.getCreateTime(), 40).getTime() > new Date().getTime()) {
+        Integer sufClickPay = Integer.valueOf(redisTemplate.opsForValue().get("查单点击时间相隔时间"));
+        if (ObjectUtil.isNotNull(jdMchOrder.getClickPay()) && DateUtil.offsetSecond(jdMchOrder.getClickPay(), sufClickPay).getTime() > new Date().getTime()) {
             log.info("订单号:{},在40秒之内。不用查询", jdMchOrder.getTradeNo());
             return;
         }

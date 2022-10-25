@@ -24,7 +24,7 @@ public class FindOrder {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
-        noticy("P1584604450078785536");
+        noticy("P1584650282199089152");
         for (int i = 0; i < 1000000; i++) {
             Thread.sleep(60 * 1000);
             List<Entity> query = null;
@@ -38,10 +38,10 @@ public class FindOrder {
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 7 MINUTE )  " +
+                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 15 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
-                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 3  " +
+                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 7  " +
                         " AND mo.`status` != 2;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
@@ -63,6 +63,10 @@ public class FindOrder {
 
     private static void noticy(String outOrder) throws SQLException, IOException {
         Entity entity = db.use().queryOne(String.format("select * from jd_mch_order where out_trade_no = '%s'", outOrder));
+        if (entity.getInt("status") == 2) {
+            log.info("当前订单已经成功");
+            return;
+        }
         String original_trade_no = entity.getStr("original_trade_no");
         Entity entity1 = db.use().queryOne(String.format("select * from jd_order_pt where order_id = %s", original_trade_no));
         String current_ck = entity1.getStr("current_ck");
