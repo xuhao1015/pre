@@ -849,7 +849,7 @@ public class DouyinService {
             return;
         }
         Integer sufClickPay = Integer.valueOf(redisTemplate.opsForValue().get("查单点击时间相隔时间"));
-        if (ObjectUtil.isNotNull(jdMchOrder.getClickPay()) && DateUtil.offsetSecond(jdMchOrder.getClickPay(), sufClickPay).getTime() > new Date().getTime()) {
+        if (ObjectUtil.isNull(jdMchOrder.getClickPay()) || DateUtil.offsetSecond(jdMchOrder.getClickPay(), sufClickPay).getTime() > new Date().getTime()) {
             log.info("订单号:{},在40秒之内。不用查询", jdMchOrder.getTradeNo());
             return;
         }
