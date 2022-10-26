@@ -269,7 +269,7 @@ public class JdCkSysController {
                 String recommend_info = JSON.parseObject(productStr).getString("recommend_info");
                 if (StrUtil.isNotBlank(recommend_info) && recommend_info.contains("uid") && recommend_info.contains("gid")) {
                     String uid = JSON.parseObject(recommend_info, JSONObject.class).getString("uid");
-                    DouyinAppCk build = DouyinAppCk.builder().uid(uid).ck(douYinAppCk).isEnable(PreConstant.ONE).fileName(originalFilename).createTime(new Date()).build();
+                    DouyinAppCk build = DouyinAppCk.builder().uid(uid).ck(douYinAppCk).isEnable(PreConstant.ZERO).fileName(originalFilename).createTime(new Date()).build();
                     DouyinAppCk douyinAppCkDb = douyinAppCkMapper.selectOne(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getUid, uid));
                     if (ObjectUtil.isNotNull(douyinAppCkDb)) {
                         log.info("已经存在msg:{}", JSON.toJSONString(douyinAppCkDb));
