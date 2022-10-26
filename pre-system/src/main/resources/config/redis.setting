@@ -11,11 +11,11 @@ host = 103.235.174.176
 # 端口，默认6379
 port = 6379
 # 超时，默认2000
-timeout = 2000
+timeout = 20000
 # 连接超时，默认timeout
-connectionTimeout = 2000
+connectionTimeout = 20000
 # 读取超时，默认timeout
-soTimeout = 2000
+soTimeout = 20000
 # 密码，默认无
 password = 1Q2W3E4Rasdf%
 # 数据库序号，默认0

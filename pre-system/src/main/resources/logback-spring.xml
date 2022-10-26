@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
-    <springProperty scope="context" name="logname" source="spring.application.name" />
-    <property name="LOG_HOME" value="../logs" />
-    <property name="LOG_NAME" value="shop-server" />
-    <property name="LOG_NAME" value="shop-server" />
+    <springProperty scope="context" name="logname" source="spring.application.name"/>
+    <property name="LOG_HOME" value="../logs"/>
+    <property name="LOG_NAME" value="shop-server"/>
+    <property name="LOG_NAME" value="shop-server"/>
     <!-- 控制台输出 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -13,7 +13,7 @@
         </encoder>
     </appender>
     <!-- 按照每天生成日志文件 -->
-    <appender name="FILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_HOME}/log-${LOG_NAME}-%d{yyyy-MM-dd}.log</FileNamePattern>
@@ -32,7 +32,9 @@
 
     <appender name="LOGSTASH"
               class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>110.40.178.29:5044</destination>
+        <!--   <destination>110.40.178.29:5044</destination>-->
+       <!-- <destination>103.235.174.176:5044</destination>-->
+        <destination>150.242.219.59:5044</destination>
         <!-- encoder必须配置,有多种可选 -->
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"serverName":"${logname}"}</customFields>
@@ -41,9 +43,9 @@
 
     <!-- 日志输出级别 -->
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="LOGSTASH" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="FILE"/>
     </root>
     <!--
     <logger name="org.hibernate.engine.QueryParameters" level="DEBUG"/>
