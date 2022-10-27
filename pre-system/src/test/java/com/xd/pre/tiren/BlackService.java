@@ -26,7 +26,7 @@ public class BlackService {
                     " and mo.`status` =2 and lo.ip = ?", ip);
             Integer count = entity.getInt("count");
             if (count > 0) {
-                log.info("ip检查");
+                log.info("ip检查++++++++++++++++++++++++++++");
                 jedis.set("IP白名单:" + ip, count + "");
                 jedis.del("IP黑名单:" + ip);
             }
