@@ -6,14 +6,14 @@ import java.net.URLEncoder;
 public class PayRiskInfoAndPayInfoUtils {
 
     private static String buildPayRiskInfo(PayDto dto) {
-        String str = String.format("[{\"key\":\"pay_risk_info\",\"value\":\"{\\\"biometric_params\\\":\\\"1\\\",\\\"is_jailbreak\\\":\\\"2\\\",\\\"openudid\\\":\\\"\\\",\\\"order_page_style\\\":0,\\\"checkout_id\\\":3,\\\"ecom_payapi\\\":true,\\\"ip\\\":\\\"%s\\\"}\",\"type\":\"text\",\"enabled\":false,\"description\":\"\"}]",
+        String str = String.format("{\"biometric_params\":\"1\",\"is_jailbreak\":\"2\",\"openudid\":\"\",\"order_page_style\":0,\"checkout_id\":3,\"ecom_payapi\":true,\"ip\":\"%s\"}",
                 dto.getUserIp()
         );
         return "pay_risk_info=" + URLEncoder.encode(str);
     }
 
     public static String buidPayUrl(PayDto dto) {
-        String str = String.format("https://ec.snssdk.com/order/createpay?aid=1128&device_platform=android&device_type=SM-G955N&request_tag_from=h5&app_name=aweme&version_name=17.3.0&app_type=normal&channel=dy_tiny_juyouliang_dy_and24&version_code=170300&os=android&os_version=5.1.1&device_id=%s&iid=%s",
+        String str = String.format("https://ec.snssdk.com/order/createpay?aid=1128&device_platform=android&request_tag_from=h5&os_api=22&manifest_version_code=170301&app_name=aweme&version_name=17.3.0&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&version_code=170300&os=android&os_version=5.1.1&device_id=%s&iid=%s",
                 dto.getDevice_id(), dto.getIid()
         );
         return str;
@@ -31,7 +31,6 @@ public class PayRiskInfoAndPayInfoUtils {
     }
 
     public static String buildPayForm(PayDto dto) {
-        //app_name=aweme&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid=3743163984904813&order_id=4983651837194409539&os=android&device_id=2538093503847412&aid=1128&pay_type=1
         String str = String.format("app_name=aweme&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid=%s&os=android&device_id=%s&aid=1128&pay_type=%s&order_id=%s",
                 dto.getDevice_id(),
                 dto.getIid(),
