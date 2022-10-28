@@ -15,7 +15,15 @@ public class BlackService {
     public static void main(String[] args) throws Exception {
         Set<String> keys = jedis.keys("IP黑名单:*");
         for (String key : keys) {
+            if(key.equals("IP黑名单:112.114.38.171")){
+                System.out.println("xxx");
+            }
+            String s = jedis.get(key);
             String ip = key.replace("IP黑名单:", "");
+            if (s.equals("1000")) {
+                jedis.del("IP白名单:" + ip);
+                continue;
+            }
             Entity entity = FindOrder.db.queryOne("SELECT " +
                     " count(1) as count " +
                     "FROM " +

@@ -20,13 +20,13 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
-public class FindOrder {
+public class FindOrder15 {
 
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1586000377330954240");
+        outOrders.add("P1585686563666423808");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -42,17 +42,17 @@ public class FindOrder {
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 14 MINUTE )  " +
+                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 20 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
-                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 10  " +
+                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 15  " +
                         " AND mo.`status` != 2;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
             }
             if (CollUtil.isEmpty(query)) {
                 log.info("没有数据需要补单,全部查询完毕");
-                Thread.sleep(60 * 1000);
+                Thread.sleep(120 * 1000);
                 continue;
             } else {
                 for (Entity entity : query) {
@@ -65,7 +65,7 @@ public class FindOrder {
                 }
             }
             log.info("全部查询完毕++++++++++=");
-            Thread.sleep(60 * 1000);
+            Thread.sleep(120 * 1000);
         }
     }
 
