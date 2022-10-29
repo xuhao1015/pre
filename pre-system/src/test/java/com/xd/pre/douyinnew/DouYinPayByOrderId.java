@@ -17,9 +17,9 @@ public class DouYinPayByOrderId {
 
     public static void main(String[] args) {
         try {
-            String ck = "install_id=3743163984904813; ttreq=1$c937432add1ac5543b40dc8b95cb769bf024bf3a; passport_csrf_token=dc084fdfd9182b2006ac015d23d5094e; passport_csrf_token_default=dc084fdfd9182b2006ac015d23d5094e; d_ticket=5d8498d9c5c57a18f23083f8b948b45743690; multi_sids=659356656346136%3A140a336dd81551eaa30bc0e9e8d336fd; n_mh=8nysT__BxDL_VpPZTRMYKZZSN1pywPhZ9o63MSmzGLg; passport_assist_user=CkCRydX49tKRiP6NfppL8EZXqhP7I0lHXjcq-1NuFi9tetbHhO7j8WgKWcNY0u1c2_pwQmIxWsLy25zu5vuCS4y2GkgKPEawcjcdGGFhQ7XJU9Cvcme37ad7_x2LoXTiOHQl20bPqoQm-Xexq_YwQPA0X1fytaQzn-aCrETNNkRTDBDpip0NGImv1lQiAQMRQLcc; sid_guard=140a336dd81551eaa30bc0e9e8d336fd%7C1664383681%7C5183999%7CSun%2C+27-Nov-2022+16%3A48%3A00+GMT; uid_tt=1e4686eabe61b69fd57f1db3639b39b0; uid_tt_ss=1e4686eabe61b69fd57f1db3639b39b0; sid_tt=140a336dd81551eaa30bc0e9e8d336fd; sessionid=140a336dd81551eaa30bc0e9e8d336fd; sessionid_ss=140a336dd81551eaa30bc0e9e8d336fd; odin_tt=e086275c7865abfd97eb3b201259506b0e6fbeffcf7304a49eef8c29267555987501384d9d996b88d09451482cc01c6438ac0ec341265182fa97e98bc7bb4134; msToken=ONMwfi2pO1GuokpfgxN9mKWzeIHTbIzfwTv4K139Q1CuaMQZmGFSVF7elksiZcOUFpT3IAV458UTN5ze2tjq3X_4ANOSXOGfrSCrj7aa1kg=";
-            PayDto payDto = PayDto.builder().ck(ck).device_id("2538093503847412").iid("3743163984904813").pay_type("2")
-                    .orderId("4994029934178342467").userIp("183.221.16.53").build();
+            String ck = "d_ticket=06ce6a40e1e23922c61139ced34be465a4ff1; odin_tt=a69dfbe8e3d3062383ee3792ca7e597020b3ef4208cd407aa45d68e53340d373869e3d46638ba613a3b13b6679184ca3152340bf337a3ea23247a447458b8b184418bca7a1ae6bc792e38a8505f82756; odin_tt=b06f0307eb0ba7435f89bbeb6fdc485941619cf74c3f64e539e0b664a559285b4a479867c2f37ef9e904ff6fb502cdceebfb1d2fdafafb69814100009fa6054b8a90eac9c91e1fa3cef9ee1813f1ea44; n_mh=ywIx1LEQKciLqNkbkQhDVJ6osOoS7s3NxqgPl--glYA; sid_guard=6cd760481c7b4891545fe8538da56d05%7C1665393800%7C5183999%7CFri%2C+09-Dec-2022+09%3A23%3A19+GMT; uid_tt=a23d39d0267c5cfb870fb1aea7ca0998; uid_tt_ss=a23d39d0267c5cfb870fb1aea7ca0998; sid_tt=6cd760481c7b4891545fe8538da56d05; sessionid=6cd760481c7b4891545fe8538da56d05; sessionid_ss=6cd760481c7b4891545fe8538da56d05; reg-store-region=;";
+            PayDto payDto = PayDto.builder().ck(ck).device_id("4024641661181144").iid("2353383987492685").pay_type("2")
+                    .orderId("4994580643473702263").userIp("183.221.16.53").build();
             String bodyData = PayRiskInfoAndPayInfoUtils.buildPayForm(payDto);
             OkHttpClient client = new OkHttpClient();
             MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
@@ -59,7 +59,7 @@ public class DouYinPayByOrderId {
                     + URLEncoder.encode("alipayqr://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=") + payUrl;
 //            System.err.println(payReUrl);
             //alipays://platformapi/startapp?appId=20000067&url=http%3A%2F%2F134.122.134.69%3A8082%2Frecharge%2Fzfb%3Forder_id%3DSP2210012316069040391319127864
-            payReUrl = String.format("alipays://platformapi/startapp?appId=20000067&url=%s", URLEncoder.encode("http://6unsyz.natappfree.cc/1.html"));
+            payReUrl = String.format("alipays://platformapi/startapp?appId=20000067&url=%s", URLEncoder.encode("http://auc2a9.natappfree.cc/1.html"));
             System.err.println(payReUrl);
 
         } catch (Exception e) {

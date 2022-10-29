@@ -32,8 +32,7 @@
 
     <appender name="LOGSTASH"
               class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <!--   <destination>110.40.178.29:5044</destination>-->
-       <!-- <destination>103.235.174.176:5044</destination>-->
+       <!-- <destination>103.235.174.139:5044</destination>-->
         <destination>150.242.219.59:5044</destination>
         <!-- encoder必须配置,有多种可选 -->
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">

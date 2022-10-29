@@ -404,7 +404,7 @@ public class ProductProxyTask {
                 .callTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS)
                 .followRedirects(false).build();
         Request request = new Request.Builder()
-                .url("http://103.235.174.176")
+                .url("http://103.235.174.139")
                 .get()
                 .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Mobile Safari/537.36")
                 .build();
