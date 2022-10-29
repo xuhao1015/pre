@@ -278,7 +278,7 @@ public class JdCkSysController {
                             build.setFailReason("替换");
                             douyinAppCkMapper.insert(build);
                         }
-                    }else {
+                    } else {
                         douyinAppCkMapper.insert(build);
                     }
                 }
@@ -783,7 +783,10 @@ public class JdCkSysController {
                     }
                 }
             }
-            List<JdLog> jdLogs = mapJdlogs.get(record.getTradeNo());
+            List<JdLog> jdLogs = null;
+            if (CollUtil.isNotEmpty(mapJdlogs)) {
+                jdLogs = mapJdlogs.get(record.getTradeNo());
+            }
             if (CollUtil.isNotEmpty(jdLogs)) {
                 JdLog jdLog = jdLogs.get(0);
                 jdMchOrderAndCard.setUserAgent(jdLog.getUserAgent());
