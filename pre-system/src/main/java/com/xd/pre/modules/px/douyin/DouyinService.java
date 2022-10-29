@@ -1049,6 +1049,10 @@ public class DouyinService {
         PreTenantContextHolder.setCurrentTenantId(1L);
         Integer time = Integer.valueOf(redisTemplate.opsForValue().get("补单时间"));
         List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectBuDan(time);
+        List<JdMchOrder> jdMchOrders1 = jdMchOrderMapper.selectbudanData15();
+        List<JdMchOrder> jdMchOrders2 = jdMchOrderMapper.selectbudanData10();
+        jdMchOrders.addAll(jdMchOrders1);
+        jdMchOrders.addAll(jdMchOrders2);
         if (CollUtil.isEmpty(jdMchOrders)) {
             return;
         }
@@ -1119,6 +1123,13 @@ public class DouyinService {
         jdMchOrderMapper.updateById(jdMchOrder);
         jdOrderPtMapper.updateById(jdOrderPt);
         jdOrderPtMapper.updateById(jdOrderPt);
+    }
+
+    @Scheduled(cron = "0/20 * * * * ?")
+    @Async("asyncPool")
+    public void selectOrderDeail() {
+
+
     }
 
     @Scheduled(cron = "0/20 * * * * ?")

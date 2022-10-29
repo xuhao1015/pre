@@ -73,4 +73,38 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
             " AND op.html IS NULL " +
             " and mo.`status`!=2;")
     List<JdMchOrder> selectBuDan(@Param("time") Integer time);
+
+    @Select("SELECT " +
+            " mo.trade_no, " +
+            " mo.out_trade_no, " +
+            " mo.original_trade_no  " +
+            "FROM " +
+            " jd_mch_order mo " +
+            " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
+            "WHERE " +
+            " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
+            " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 20 MINUTE )  " +
+            " AND mo.click_pay IS NOT NULL  " +
+            " AND mo.click_pay != '1970-01-01 08:00:00'  " +
+            " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 15  " +
+            " AND mo.`status` != 2;")
+    List<JdMchOrder> selectbudanData15();
+
+    @Select("SELECT " +
+            " mo.trade_no, " +
+            " mo.out_trade_no, " +
+            " mo.original_trade_no  " +
+            "FROM " +
+            " jd_mch_order mo " +
+            " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
+            "WHERE " +
+            " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
+            " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 14 MINUTE )  " +
+            " AND mo.click_pay IS NOT NULL  " +
+            " AND mo.click_pay != '1970-01-01 08:00:00'  " +
+            " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 10  " +
+            " AND mo.`status` != 2")
+    List<JdMchOrder> selectbudanData10();
+
+
 }
