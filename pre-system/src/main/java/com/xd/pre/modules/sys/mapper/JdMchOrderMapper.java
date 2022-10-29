@@ -75,9 +75,7 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
     List<JdMchOrder> selectBuDan(@Param("time") Integer time);
 
     @Select("SELECT " +
-            " mo.trade_no, " +
-            " mo.out_trade_no, " +
-            " mo.original_trade_no  " +
+            " mo.*" +
             "FROM " +
             " jd_mch_order mo " +
             " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
@@ -91,9 +89,7 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
     List<JdMchOrder> selectbudanData15();
 
     @Select("SELECT " +
-            " mo.trade_no, " +
-            " mo.out_trade_no, " +
-            " mo.original_trade_no  " +
+            " mo.*" +
             "FROM " +
             " jd_mch_order mo " +
             " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
