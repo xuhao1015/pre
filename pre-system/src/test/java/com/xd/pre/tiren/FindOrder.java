@@ -26,7 +26,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1584984961485795328");
+        outOrders.add("P1586975111396859904");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -45,7 +45,7 @@ public class FindOrder {
                         " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 14 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
-                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 10  " +
+                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 7  " +
                         " AND mo.`status` != 2;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
