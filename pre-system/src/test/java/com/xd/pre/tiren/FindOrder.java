@@ -8,6 +8,7 @@ import cn.hutool.db.Entity;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xd.pre.common.constant.PreConstant;
+import com.xd.pre.douyinnew.TestResoData;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,8 +26,9 @@ public class FindOrder {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
+        TestResoData.jedis.set("通知成功次数:"+"202211011759554069","100");
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1586975111396859904");
+        outOrders.add("P1587383928299331584");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }

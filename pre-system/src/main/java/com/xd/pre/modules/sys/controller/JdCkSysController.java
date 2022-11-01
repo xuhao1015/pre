@@ -536,6 +536,9 @@ public class JdCkSysController {
             jdMchOrder.setNotifySucc(PreConstant.ZERO);
             Boolean aBoolean = productProxyTask.notifySuccess(jdMchOrder);
         }
+        if (status == PreConstant.THREE) {
+            log.info("订单号退款补单:{}", jdMchOrder.getTradeNo());
+        }
         jdMchOrderMapper.updateById(jdMchOrder);
         log.info("订单号{},强行修改状态:{}", jdMchOrder.getTradeNo(), status);
         return R.ok();

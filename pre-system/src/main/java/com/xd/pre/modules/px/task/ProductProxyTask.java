@@ -492,6 +492,10 @@ public class ProductProxyTask {
                 log.info("订单号:{},未成功，不用通知", jdMchOrder.getTradeNo());
                 return false;
             }
+            if (jdMchOrderDb.getStatus() == PreConstant.THREE) {
+                log.info("订单号已经退款，不需要回调:{}", jdMchOrderDb.getTradeNo());
+                return false;
+            }
             NotifyVo notifyVo = NotifyVo.builder()
                     .mch_id(jdMchOrderDb.getMchId())
                     .trade_no(jdMchOrderDb.getTradeNo())

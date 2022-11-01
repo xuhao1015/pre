@@ -44,8 +44,8 @@ public class TestResoData {
         String notUse = "56eb748c437c01e1932423dbe0a32015;936e154a11e17dd7a78293bb6d4602e6;8bddce4a0b88b7b33ad34419b8f7febb;12016212c714adb3acfc1a1c586f7c62;" +
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 and file_name='doouyingappck26.txt' and id>2362 ");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 6391");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 and id>2055");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 6799");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             String ck_device_lock = jedis.get("抖音和设备号关联:" + uid);
@@ -130,8 +130,8 @@ public class TestResoData {
                 .new_source_type("product_detail").build();*/
 /*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
                 .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
-        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561752220930340544").sku_id("1739136822194211").author_id("4051040200033531")
-                .ecom_scene_id("").origin_id("4051040200033531_3561752220930340544").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
+        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3578244605646345985").sku_id("1747189749393459").author_id("4051040200033531")
+                .ecom_scene_id("1082").origin_id("99514375927_3578244605646345985").origin_type("3002070010").shop_id("GceCTPIk").new_source_type("product_detail").build();
         System.err.println(JSON.toJSONString(buyRenderParamDto));
 /*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
                 .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
