@@ -538,6 +538,11 @@ public class JdCkSysController {
         }
         if (status == PreConstant.THREE) {
             log.info("订单号退款补单:{}", jdMchOrder.getTradeNo());
+            List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
+            if (CollUtil.isNotEmpty(jdLogs)) {
+                String ip = jdLogs.get(0).getIp();
+                redisTemplate.opsForValue().set("IP黑名单:" + ip, "1000");
+            }
         }
         jdMchOrderMapper.updateById(jdMchOrder);
         log.info("订单号{},强行修改状态:{}", jdMchOrder.getTradeNo(), status);

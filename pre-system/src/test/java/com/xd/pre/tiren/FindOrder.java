@@ -26,9 +26,8 @@ public class FindOrder {
     public static Db db = Db.use();
 
     public static void main(String[] args) throws Exception {
-        TestResoData.jedis.set("通知成功次数:"+"202211011759554069","100");
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1587383928299331584");
+        outOrders.add("P1587388969559138304");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
