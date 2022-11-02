@@ -810,7 +810,7 @@ public class JdCkSysController {
                 jdMchOrderAndCard.setUserAgent(jdLog.getUserAgent());
                 jdMchOrderAndCard.setUserIp(jdLog.getIp());
             }
-            if (douyinSignDataMap.containsKey(jdMchOrderAndCard.getTradeNo())) {
+            if (CollUtil.isNotEmpty(douyinSignDataMap) && douyinSignDataMap.containsKey(jdMchOrderAndCard.getTradeNo())) {
                 DouyinSignData douyinSignData = douyinSignDataMap.get(jdMchOrderAndCard.getTradeNo()).get(PreConstant.ZERO);
                 jdMchOrderAndCard.setClickPre(douyinSignData.getCreateTime());
             }
