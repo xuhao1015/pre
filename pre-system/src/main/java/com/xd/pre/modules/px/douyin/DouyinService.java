@@ -858,6 +858,10 @@ public class DouyinService {
             log.info("当前订单,{},已经被锁定。请骚后查询", jdMchOrder.getTradeNo());
             return;
         }
+        if (jdMchOrder.getStatus() == PreConstant.THREE) {
+            log.info("订单号:{}已经退款。不回调", jdMchOrder.getTradeNo());
+            return;
+        }
         OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
         OkHttpClient client = builder.build();
 //        Response response = client.newCall(request).execute();
