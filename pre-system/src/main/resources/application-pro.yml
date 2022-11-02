@@ -63,6 +63,7 @@ pre:
       - jd_address
       - wph_account
       - douyin_device_iid
+      - douyin_sign_data
     tenantIdColumn: tenant_id
   url:
     address: http://localhost:9528

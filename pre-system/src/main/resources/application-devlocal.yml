@@ -62,6 +62,7 @@ pre:
       - jd_ck_copy1
       - jd_ck_copy2
       - jd_ck_copy3
+      - douyin_sign_data
     tenantIdColumn: tenant_id
   url:
     address: http://localhost:9528

@@ -112,6 +112,9 @@ public class JdCkSysController {
     @Resource
     private DouyinHexiaoPhoneMapper douyinHexiaoPhoneMapper;
 
+    @Resource
+    private DouyinSignDataMapper douyinSignDataMapper;
+
     @GetMapping("douyinYonghuiAble")
     public R douyinYonghuiAble(Integer id, Integer isEnable) {
         DouyinHexiaoPhone douyinHexiaoPhone = douyinHexiaoPhoneMapper.selectById(id);
@@ -743,6 +746,8 @@ public class JdCkSysController {
         List<JdMchOrder> records = page.getRecords();
         Map<Integer, JdOrderPt> mapOrderPos = null;
         Map<String, List<JdLog>> mapJdlogs = null;
+        Map<String, List<DouyinSignData>> douyinSignDataMap = null;
+
         Map<String, JdCk> mapCks = null;
         if (CollUtil.isNotEmpty(records)) {
             List<Integer> orderPtIds = records.stream().map(it -> it.getOriginalTradeId()).distinct().collect(Collectors.toList());
@@ -759,8 +764,13 @@ public class JdCkSysController {
             }
             List<String> trades = records.stream().map(it -> it.getTradeNo()).collect(Collectors.toList());
             List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().in(JdLog::getOrderId, trades));
+            List<DouyinSignData> douyinSignDatas = douyinSignDataMapper.selectList(Wrappers.<DouyinSignData>lambdaQuery().in(DouyinSignData::getOrderId, trades));
+
             if (CollUtil.isNotEmpty(jdLogs)) {
                 mapJdlogs = jdLogs.stream().collect(Collectors.groupingBy(JdLog::getOrderId));
+            }
+            if (CollUtil.isNotEmpty(douyinSignDatas)) {
+                douyinSignDataMap = douyinSignDatas.stream().collect(Collectors.groupingBy(DouyinSignData::getOrderId));
             }
         }
         for (JdMchOrder record : records) {
@@ -799,6 +809,10 @@ public class JdCkSysController {
                 JdLog jdLog = jdLogs.get(0);
                 jdMchOrderAndCard.setUserAgent(jdLog.getUserAgent());
                 jdMchOrderAndCard.setUserIp(jdLog.getIp());
+            }
+            if (douyinSignDataMap.containsKey(jdMchOrderAndCard.getTradeNo())) {
+                DouyinSignData douyinSignData = douyinSignDataMap.get(jdMchOrderAndCard.getTradeNo()).get(PreConstant.ZERO);
+                jdMchOrderAndCard.setClickPre(douyinSignData.getCreateTime());
             }
             jdMchOrderAndCards.add(jdMchOrderAndCard);
         }

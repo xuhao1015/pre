@@ -3,6 +3,8 @@ package com.xd.pre.modules.px.vo.tmpvo.appstorevo;
 import com.xd.pre.modules.sys.domain.JdMchOrder;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class JdMchOrderAndCard extends JdMchOrder {
     private String createTimeStr;
@@ -20,4 +22,5 @@ public class JdMchOrderAndCard extends JdMchOrder {
     private String userIp;
     private String orgAppCk;
     private String ptPin;
+    private Date clickPre;
 }
