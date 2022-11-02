@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
-public class FindOrder {
+public class FindOrderDai {
 
     public static Db db = Db.use();
 
@@ -42,10 +42,10 @@ public class FindOrder {
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 14 MINUTE )  " +
+                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 25 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
-                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 7  " +
+                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 20  and op.html like '%待发卷%' " +
                         " AND mo.`status` != 2;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
