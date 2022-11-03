@@ -57,6 +57,7 @@ public class JdOrderPt {
     private Integer retryTime;
     private String orgAppCk;
 
+
     private String wphCardPhone;
     private String mark;
     private Integer tenantId;

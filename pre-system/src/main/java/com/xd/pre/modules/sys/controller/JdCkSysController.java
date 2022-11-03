@@ -2,6 +2,7 @@ package com.xd.pre.modules.sys.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -18,6 +19,7 @@ import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.R;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.modules.data.tenant.PreTenantContextHolder;
+import com.xd.pre.modules.px.douyin.dto.IsCheckShipDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadYonghuiDto;
 import com.xd.pre.modules.px.service.CkService;
@@ -114,6 +116,42 @@ public class JdCkSysController {
 
     @Resource
     private DouyinSignDataMapper douyinSignDataMapper;
+
+    @GetMapping("/isCheckShipIgnore")
+    public R isCheckShipIgnore(Integer originalTradeId) {
+        JdOrderPt jdOrderPt = jdOrderPtMapper.selectById(originalTradeId);
+        if (ObjectUtil.isNull(jdOrderPt)) {
+            return R.error("数据不存在");
+        }
+        jdOrderPt.setRetryTime(PreConstant.ONE);
+        jdOrderPtMapper.updateById(jdOrderPt);
+        return R.ok();
+    }
+
+    @GetMapping("isCheckShip")
+    public R isCheckShip() {
+        DateTime dateTime = DateUtil.beginOfDay(new Date());
+        List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT).eq(JdAppStoreConfig::getIsProduct, PreConstant.ONE));
+        if (CollUtil.isEmpty(jdAppStoreConfigs)) {
+            return R.ok();
+        }
+        List<String> skus = jdAppStoreConfigs.stream().map(it -> it.getSkuId()).collect(Collectors.toList());
+        List<JdOrderPt> orderData = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery()
+                .gt(JdOrderPt::getCreateTime, dateTime).in(JdOrderPt::getSkuId, skus).like(JdOrderPt::getHtml, "待发券")
+                .eq(JdOrderPt::getRetryTime, PreConstant.ZERO));
+        if (CollUtil.isEmpty(orderData)) {
+            return R.ok();
+        }
+        List<String> orderShangchengs = orderData.stream().map(it -> it.getOrderId()).collect(Collectors.toList());
+        List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery().in(JdMchOrder::getOriginalTradeNo, orderShangchengs));
+        if (CollUtil.isEmpty(jdMchOrders)) {
+            return R.ok();
+        }
+        JdMchOrder jdMchOrder1 = jdMchOrders.stream().sorted(Comparator.comparing(JdMchOrder::getCreateTime)).collect(Collectors.toList()).get(0);
+        JdMchOrder jdMchOrder2 = jdMchOrders.stream().sorted(Comparator.comparing(JdMchOrder::getCreateTime).reversed()).collect(Collectors.toList()).get(0);
+        IsCheckShipDto build = IsCheckShipDto.builder().count(jdMchOrders.size()).startTime(jdMchOrder1.getClickPay()).endTime(jdMchOrder2.getCreateTime()).jdMchOrders(jdMchOrders).build();
+        return R.ok(build);
+    }
 
     @GetMapping("douyinYonghuiAble")
     public R douyinYonghuiAble(Integer id, Integer isEnable) {
