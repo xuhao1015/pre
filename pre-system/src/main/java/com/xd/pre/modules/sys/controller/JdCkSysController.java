@@ -133,19 +133,22 @@ public class JdCkSysController {
         DateTime dateTime = DateUtil.beginOfDay(new Date());
         List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT).eq(JdAppStoreConfig::getIsProduct, PreConstant.ONE));
         if (CollUtil.isEmpty(jdAppStoreConfigs)) {
-            return R.ok();
+            IsCheckShipDto build = IsCheckShipDto.builder().count(PreConstant.ZERO).jdMchOrders(new ArrayList<>()).build();
+            return R.ok(build);
         }
         List<String> skus = jdAppStoreConfigs.stream().map(it -> it.getSkuId()).collect(Collectors.toList());
         List<JdOrderPt> orderData = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery()
                 .gt(JdOrderPt::getCreateTime, dateTime).in(JdOrderPt::getSkuId, skus).like(JdOrderPt::getHtml, "待发券")
                 .eq(JdOrderPt::getRetryTime, PreConstant.ZERO));
         if (CollUtil.isEmpty(orderData)) {
-            return R.ok();
+            IsCheckShipDto build = IsCheckShipDto.builder().count(PreConstant.ZERO).jdMchOrders(new ArrayList<>()).build();
+            return R.ok(build);
         }
         List<String> orderShangchengs = orderData.stream().map(it -> it.getOrderId()).collect(Collectors.toList());
         List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery().in(JdMchOrder::getOriginalTradeNo, orderShangchengs));
         if (CollUtil.isEmpty(jdMchOrders)) {
-            return R.ok();
+            IsCheckShipDto build = IsCheckShipDto.builder().count(PreConstant.ZERO).jdMchOrders(new ArrayList<>()).build();
+            return R.ok(build);
         }
         JdMchOrder jdMchOrder1 = jdMchOrders.stream().sorted(Comparator.comparing(JdMchOrder::getCreateTime)).collect(Collectors.toList()).get(0);
         JdMchOrder jdMchOrder2 = jdMchOrders.stream().sorted(Comparator.comparing(JdMchOrder::getCreateTime).reversed()).collect(Collectors.toList()).get(0);
