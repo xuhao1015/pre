@@ -10,26 +10,26 @@ import com.xd.pre.common.utils.px.PreUtils;
 
 public class PostOrderSign {
     public static void main(String[] args) {
-        创建订单();
-//        查询订单();
+//        创建订单();
+        查询订单();
 
     }
 
     private static void 查询订单() {
         String a = "{\t\n" +
                 "\t\"mch_id\":\"1\",\n" +
-                "\t\"out_trade_no\":\"750\",\n" +
+                "\t\"out_trade_no\":\"P1588023458656309248\",\n" +
                 "\t\"sign\":\"04e68dccc9b4e011b0ccd2ab23733542\"\n" +
                 "}";
         JSONObject parseObject = JSON.parseObject(a);
         String asciiSort = PreUtils.getAsciiSort(parseObject);
-        String s = asciiSort + "&sign=" + "04e68dccc9b4e011b0ccd2ab23733542";
+        String s = asciiSort + "&sign=" + "64f1a1ccc1da0745c52719a9d896d869";
         String encode = Base64.encode(s);
         String sign = PreUtils.getSign(encode);
         cn.hutool.json.JSONObject hutoolsJson = new cn.hutool.json.JSONObject(a);
         hutoolsJson.put("sign", sign);
         System.out.println(JSON.toJSONString(hutoolsJson));
-        HttpResponse execute = HttpRequest.post("http://103.235.174.139/api/px/payFindStatusByOderId").body(hutoolsJson).execute();
+        HttpResponse execute = HttpRequest.post("http://150.242.219.46/api/px/payFindStatusByOderId").body(hutoolsJson).execute();
         String body = execute.body();
         System.out.println(body);
     }

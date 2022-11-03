@@ -510,7 +510,6 @@ public class ProductProxyTask {
             cn.hutool.json.JSON json = new JSONObject(notifyVo);
             String no_time = redisTemplate.opsForValue().get("通知成功次数:" + jdMchOrder.getTradeNo());
             if (StrUtil.isNotBlank(no_time) && Integer.valueOf(no_time) >= 5 && jdMchOrderDb.getNotifySucc() == PreConstant.ONE) {
-                log.info("订单号:{},已经通知3次成功没有必要再通知", jdMchOrder.getTradeNo());
                 return true;
             }
             String result = HttpRequest.post(jdMchOrderDb.getNotifyUrl())
