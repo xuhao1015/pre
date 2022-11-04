@@ -95,15 +95,15 @@ public class DouyinService {
             log.info("订单号:{},判断是否存在已经存在的库存，重复利用", jdMchOrder.getTradeNo());
             //  redisTemplate.opsForValue().set("锁定抖音库存订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 5, TimeUnit.MINUTES);
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
-            stockWrapper.isNull(JdOrderPt::getPaySuccessTime).gt(JdOrderPt::getWxPayExpireTime, new Date());
+            stockWrapper.gt(JdOrderPt::getWxPayExpireTime, new Date());
+            stockWrapper.eq(JdOrderPt::getSkuPrice, storeConfig.getSkuPrice());
+            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
             Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
             if (CollUtil.isNotEmpty(stockNums)) {
                 List<String> sockIds = stockNums.stream().map(it -> it.split(":")[1]).collect(Collectors.toList());
                 stockWrapper.notIn(JdOrderPt::getId, sockIds);
             }
-            stockWrapper.eq(JdOrderPt::getSkuPrice, storeConfig.getSkuPrice());
-            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+            stockWrapper.isNull(JdOrderPt::getPaySuccessTime);
             List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
             String payReUrl = "";
             if (CollUtil.isNotEmpty(jdOrderPtStocks)) {
@@ -1139,42 +1139,41 @@ public class DouyinService {
     @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
     public void synProductMaxPrirce() {
-        for (int i = 0; i < 4; i++) {
-            PreTenantContextHolder.setCurrentTenantId(i % 2 == 0 ? 1L : 2L);
-            Integer maxPrice = douyinMaxPrice();
-            DateTime endOfDay = DateUtil.endOfDay(new Date());
-            DateTime beginOfDay = DateUtil.beginOfDay(new Date());
-            List<Map<String, Object>> mapList = jdOrderPtMapper.selectDouYinByStartTimeAndEndAndUidGroup(beginOfDay, endOfDay);
-            List<DouyinAppCk> douyinAppCks = douyinAppCkMapper.selectList(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getIsEnable, PreConstant.ONE));
-            List<String> skuyesterdays = jdOrderPtMapper.selectOrderSuccessYesterday(beginOfDay);
-            log.info("抖音定时任务同步订单金额");
-            if (CollUtil.isNotEmpty(douyinAppCks)) {
-                for (DouyinAppCk douyinAppCk : douyinAppCks) {
-                   /* if(douyinAppCk.getUid().equals("699722047953838")){
-                        System.out.println("sss");
-                    }*/
-                    Integer sku_price_total = PreConstant.ZERO;
-                    String pt_pin = douyinAppCk.getUid();
-                    if (CollUtil.isNotEmpty(mapList)) {
-                        Map<String, Map<String, Object>> pt_pins = mapList.stream().collect(Collectors.toMap(it -> it.get("pt_pin").toString(), it -> it));
-                        Map<String, Object> stringObjectMap = pt_pins.get(pt_pin);
-                        if (CollUtil.isNotEmpty(stringObjectMap)) {
-                            sku_price_total = new BigDecimal(stringObjectMap.get("sku_price_total").toString()).intValue();
-                        }
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("同步订单金额", "2", 30, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            return;
+        }
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        Integer maxPrice = douyinMaxPrice();
+        DateTime endOfDay = DateUtil.endOfDay(new Date());
+        DateTime beginOfDay = DateUtil.beginOfDay(new Date());
+        List<Map<String, Object>> mapList = jdOrderPtMapper.selectDouYinByStartTimeAndEndAndUidGroup(beginOfDay, endOfDay);
+        List<DouyinAppCk> douyinAppCks = douyinAppCkMapper.selectList(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getIsEnable, PreConstant.ONE));
+        List<String> skuyesterdays = jdOrderPtMapper.selectOrderSuccessYesterday(beginOfDay);
+        log.info("抖音定时任务同步订单金额");
+        if (CollUtil.isNotEmpty(douyinAppCks)) {
+            for (DouyinAppCk douyinAppCk : douyinAppCks) {
+                Integer sku_price_total = PreConstant.ZERO;
+                String pt_pin = douyinAppCk.getUid();
+                if (CollUtil.isNotEmpty(mapList)) {
+                    Map<String, Map<String, Object>> pt_pins = mapList.stream().collect(Collectors.toMap(it -> it.get("pt_pin").toString(), it -> it));
+                    Map<String, Object> stringObjectMap = pt_pins.get(pt_pin);
+                    if (CollUtil.isNotEmpty(stringObjectMap)) {
+                        sku_price_total = new BigDecimal(stringObjectMap.get("sku_price_total").toString()).intValue();
                     }
+                }
 //                String pt_pin = data.get("pt_pin").toString();
 //                Integer sku_price_total = new BigDecimal(data.get("sku_price_total").toString()).intValue();
-                    if (CollUtil.isNotEmpty(skuyesterdays) && skuyesterdays.contains(pt_pin)) {
-                        BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((maxPrice - sku_price_total)).build();
+                if (CollUtil.isNotEmpty(skuyesterdays) && skuyesterdays.contains(pt_pin)) {
+                    BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((maxPrice - sku_price_total)).build();
+                    redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
+                } else {
+                    if (sku_price_total == 100) {
+                        BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((100 - sku_price_total)).build();
                         redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
                     } else {
-                        if (sku_price_total == 100) {
-                            BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((100 - sku_price_total)).build();
-                            redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
-                        } else {
-                            BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((200 - sku_price_total)).build();
-                            redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
-                        }
+                        BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((200 - sku_price_total)).build();
+                        redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
                     }
                 }
             }
