@@ -927,7 +927,7 @@ public class DouyinService {
                 log.info("订单号{},订单号查询订单详情错误错误-----,切换ip查询", jdMchOrder.getTradeNo());
             }
 //            String body = HttpRequest.get(url).header("cookie", jdOrderPt.getCurrentCk()).execute().body();
-            log.info("订单号{}，查询订单数据订单结果msg:{}", jdMchOrder.getTradeNo(), body);
+            log.info("订单号{}，查询订单数据订单结果msg:有值", jdMchOrder.getTradeNo());
             if (StrUtil.isBlank(body)) {
                 log.info("订单号{}，查询订单结果为空。。。。。。。XXXXXXXXXXXXXXX", jdMchOrder.getTradeNo(), body);
                 continue;
@@ -1116,7 +1116,7 @@ public class DouyinService {
 
     private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        log.info("订单号{}，当前获取的卡密成功msg:{}", jdMchOrder.getTradeNo(), code);
+        log.info("订单号{}，当前获取的卡密成功", jdMchOrder.getTradeNo());
         jdOrderPt.setCardNumber(code);
         jdOrderPt.setCarMy(code);
         jdOrderPt.setSuccess(PreConstant.ONE);

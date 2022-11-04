@@ -1430,8 +1430,6 @@ public class WphService {
             Request request = header.build();
             Response response = client.newCall(request).execute();
             String result2 = response.body().string();
-
-
             log.info("当前获取SmsCaptchaByOrderIdmsg:{}", result2);
             WphParamCaptchaTokenAndUUID wphParamCaptchaTokenAndUUID = JSON.parseObject(JSON.parseObject(result2).getString("data"), WphParamCaptchaTokenAndUUID.class);
             log.info("判断是否出现了图片如果出现了");
