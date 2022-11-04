@@ -548,10 +548,10 @@ public class DouyinService {
             douyinDeviceIidsT.add(douyinDeviceIid);
         }
         if (StrUtil.isBlank(deviceBangDing)) {
-            log.info("订单号:{},ck:udi:{},不存在绑定关系才添加", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
-            for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
-                douyinDeviceIidsT.add(douyinDeviceIid);
-            }
+            log.info("订单号:{},ck:udi:{},关闭账号未待使用", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
+            douyinAppCk.setIsEnable(PreConstant.ZERO);
+            douyinAppCkMapper.updateById(douyinAppCk);
+            return null;
         }
         douyinDeviceIids = douyinDeviceIidsT;
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
