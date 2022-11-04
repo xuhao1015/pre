@@ -39,7 +39,7 @@ public class Douyin3 {
     public static OkHttpClient getIpAndPort20() {
         Jedis jedis = TestResoData.jedis;
         Set<String> keys = jedis.keys("ip缓存临时:*");
-        if (CollUtil.isNotEmpty(keys) && keys.size() > 15) {
+        if (CollUtil.isNotEmpty(keys) && keys.size() > 40) {
             List<String> collect = keys.stream().collect(Collectors.toList());
             int i = PreUtils.randomCommon(0, keys.size() - 1, 1)[0];
             String s1 = collect.get(i);

@@ -45,7 +45,7 @@ public class TestResoData {
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
         List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 and file_name = 'doouyingappck26.txt'");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 7188");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 7619");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             String ck_device_lock = jedis.get("抖音和设备号关联:" + uid);
@@ -115,8 +115,8 @@ public class TestResoData {
     }
 
     private static boolean mian1(String device_id, String iid, String ck, Integer deiviesId, String uid) throws IOException, SQLException {
-        Integer payType = 2;
-        String payIp = "183.11.13.172";
+        Integer payType = 1;
+        String payIp = PreUtils.getRandomIp();
 
 
         if (device_id.contains("device_id_str=")) {

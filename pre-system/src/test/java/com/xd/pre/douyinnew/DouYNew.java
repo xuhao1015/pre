@@ -8,6 +8,7 @@ import com.xd.pre.jddj.douy.Douyin3;
 import com.xd.pre.modules.px.douyin.buyRender.BuyRenderParamDto;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.submit.SubmitUtils;
+import com.xd.pre.pcScan.Demo;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
@@ -32,7 +33,7 @@ public class DouYNew {
         String ck = "sid_tt=a72737227f6a2f24471827aa74924cc4;";*/
 
         Integer payType = 2;
-        String payIp = "183.11.12.172";
+        String payIp = "189.222.12.272";
 /*
         String device_id = "device_id_str=729717026068446";
         String iid = "install_id_str=770090229574599";
@@ -52,9 +53,9 @@ public class DouYNew {
 /*        String device_id = "device_id_str=2212649920104615";
         String iid = "install_id_str=3690393549678381";
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
-        String device_id = "device_id_str=3760765969107406";
-        String iid = "install_id_str=1596927086446023";
-        String ck = "sid_tt=080f39d877137f39405ae5aa3afff41f;";
+        String device_id = "device_id_str=1051572450366199";
+        String iid = "install_id_str=3549662869459118";
+        String ck = "sid_tt=12a84f1c732abdaed3cab80626a1a30a;";
 
 
         if (device_id.contains("device_id_str=")) {
@@ -68,8 +69,8 @@ public class DouYNew {
                 .new_source_type("product_detail").build();*/
 /*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
                 .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
-        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561752220930340544").sku_id("1739136822194211").author_id("4051040200033531")
-                .ecom_scene_id("").origin_id("4051040200033531_3561752220930340544").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
+        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3578244605646345985").sku_id("1747189749393459").author_id("4051040200033531")
+                .ecom_scene_id("1082").origin_id("99514375927_3578244605646345985").origin_type("3002070010").shop_id("GceCTPIk").new_source_type("product_detail").build();
         System.err.println(JSON.toJSONString(buyRenderParamDto));
 /*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
                 .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
@@ -79,8 +80,9 @@ public class DouYNew {
 //        System.err.println(JSON.toJSONString(buyRenderParamDto));
         String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
         Map<String, String> ipAndPort = Douyin3.getIpAndPort();
-        OkHttpClient client = null;/*Demo.getOkHttpClient(ipAndPort.get("ip"), Integer.valueOf(ipAndPort.get("port")));*/
-        client = new OkHttpClient().newBuilder().build();
+        OkHttpClient client = null;
+       client =  Demo.getOkHttpClient(ipAndPort.get("ip"), Integer.valueOf(ipAndPort.get("port")));
+//        client = new OkHttpClient().newBuilder().build();
 
 //        String body = "{\"address\":null,\"platform_coupon_id\":null,\"kol_coupon_id\":null,\"auto_select_best_coupons\":true,\"customize_pay_type\":\"{\\\"checkout_id\\\":1,\\\"bio_type\\\":\\\"1\\\"}\",\"first_enter\":true,\"source_type\":\"1\",\"shape\":0,\"marketing_channel\":\"\",\"forbid_redpack\":false,\"support_redpack\":true,\"use_marketing_combo\":false,\"entrance_params\":\"{\\\"order_status\\\":3,\\\"previous_page\\\":\\\"order_list_page\\\",\\\"carrier_source\\\":\\\"order_detail\\\",\\\"ecom_scene_id\\\":\\\"1041\\\",\\\"room_id\\\":\\\"\\\",\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"4051040200033531\\\",\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"is_replay\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\"}\",\"shop_requests\":[{\"shop_id\":\"GceCTPIk\",\"product_requests\":[{\"product_id\":\"3556357046087622442\",\"sku_id\":\"1736502463777799\",\"sku_num\":1,\"author_id\":\"4051040200033531\",\"ecom_scene_id\":\"1041\",\"origin_id\":\"4051040200033531_3556357046087622442\",\"origin_type\":\"3002070010\",\"new_source_type\":\"product_detail\",\"select_privilege_properties\":[]}]}]}";
         String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=SM-G973N&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + device_id + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
@@ -188,7 +190,7 @@ public class DouYNew {
                 buyRenderParamDto.getProduct_id(),
                 buyRenderParamDto.getProduct_id(),
                 payType,
-                "13568504163",
+                PreUtils.getTel(),
                 device_id,
                 iid,
                 buyRenderRoot.getPay_method().getDecision_id(),

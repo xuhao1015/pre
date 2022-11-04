@@ -230,8 +230,8 @@ public class DouyinService {
         Integer count = douyinAppCkMapper.selectCount(wrapper);
         int pageIndex = PreUtils.randomCommon(0, count, 1)[0];
         List<Integer> accounts = new ArrayList<>();
-        if (count > 5) {
-            int[] ints = PreUtils.randomCommon(0, count, 4);
+        if (count > 50) {
+            int[] ints = PreUtils.randomCommon(0, count, 30);
             for (int anInt : ints) {
                 accounts.add(anInt);
             }
