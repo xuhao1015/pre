@@ -21,6 +21,7 @@ public class IgnoreAccount {
         query.addAll(query3);
         query.addAll(query4);
         if (CollUtil.isEmpty(query)) {
+            log.info("当前账号全部正常+++++++++++++++++");
             return;
         }
         try {

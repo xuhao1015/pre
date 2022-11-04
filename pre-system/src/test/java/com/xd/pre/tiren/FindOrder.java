@@ -26,7 +26,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1588132926937255936");
+        outOrders.add("P1588502149689761792");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -95,6 +95,9 @@ public class FindOrder {
             log.info("对不起，没有查询成");
             return;
         }
+        if (body.contains("用户未登录")) {
+            return;
+        }
         String html = JSON.parseObject(body).getString("order_detail_info");
         String voucher_info_listStr = JSON.parseObject(html).getString("voucher_info_list");
         List<JSONObject> voucher_info_list = JSON.parseArray(voucher_info_listStr, JSONObject.class);
@@ -109,7 +112,6 @@ public class FindOrder {
             log.info("没有支付");
             return;
         }
-        log.info("支付成功:{}", original_trade_no);
         db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 code, code, DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), html, original_trade_no);
