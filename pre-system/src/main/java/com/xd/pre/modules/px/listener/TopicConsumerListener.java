@@ -301,18 +301,18 @@ public class TopicConsumerListener {
     public void product_douyin_stock_queue(String message) {
         log.info("生产库存appstore");
         JdAppStoreConfig jdAppStoreConfig = JSON.parseObject(message, JdAppStoreConfig.class);
+        log.info("生产appstore");
+        Integer 抖音生产订单最快每天放入MQ速度 = Integer.valueOf(redisTemplate.opsForValue().get("抖音生产订单最快每天放入MQ速度"));
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("抖音生产订单刚刚放入最大小号数:" + jdAppStoreConfig.getId(), "1", 抖音生产订单最快每天放入MQ速度, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            log.info("刚刚放入。不需要再放");
+            return;
+        }
         PreTenantContextHolder.setCurrentTenantId(1L);
         log.info("查询商户订单的数据设置当前的线程数据");
         jdAppStoreConfig = jdAppStoreConfigMapper.selectById(jdAppStoreConfig.getId());
         jdAppStoreConfig.setMark("1");
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.EIGHT) {
-            log.info("生产appstore");
-            Integer 抖音生产订单最快每天放入MQ速度 = Integer.valueOf(redisTemplate.opsForValue().get("抖音生产订单最快每天放入MQ速度"));
-            Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("抖音生产订单刚刚放入最大小号数:" + jdAppStoreConfig.getId(), "1", 抖音生产订单最快每天放入MQ速度, TimeUnit.SECONDS);
-            if (!ifAbsent) {
-                log.info("刚刚放入。不需要再放");
-                return;
-            }
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
             stockWrapper.eq(JdOrderPt::getSkuPrice, jdAppStoreConfig.getSkuPrice());
             Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
