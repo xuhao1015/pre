@@ -297,7 +297,7 @@ public class TopicConsumerListener {
     }
 
     //queue模式的消费者
-    @JmsListener(destination = "product_douyin_stock_queue", containerFactory = "queueListener", concurrency = "20")
+    @JmsListener(destination = "product_douyin_stock_queue", containerFactory = "queueListener", concurrency = "30")
     public void product_douyin_stock_queue(String message) {
         log.info("生产库存appstore");
         JdAppStoreConfig jdAppStoreConfig = JSON.parseObject(message, JdAppStoreConfig.class);
@@ -307,6 +307,12 @@ public class TopicConsumerListener {
         jdAppStoreConfig.setMark("1");
         if (Integer.valueOf(jdAppStoreConfig.getGroupNum()) == PreConstant.EIGHT) {
             log.info("生产appstore");
+            Integer 抖音生产订单最快每天放入MQ速度 = Integer.valueOf(redisTemplate.opsForValue().get("抖音生产订单最快每天放入MQ速度"));
+            Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("抖音生产订单刚刚放入最大小号数:" + jdAppStoreConfig.getId(), "1", 抖音生产订单最快每天放入MQ速度, TimeUnit.SECONDS);
+            if (!ifAbsent) {
+                log.info("刚刚放入。不需要再放");
+                return;
+            }
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
             stockWrapper.eq(JdOrderPt::getSkuPrice, jdAppStoreConfig.getSkuPrice());
             Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
@@ -318,12 +324,6 @@ public class TopicConsumerListener {
             List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
             if (jdOrderPtStocks.size() >= jdAppStoreConfig.getProductStockNum()) {
                 log.info("超过库存。不用生产");
-                return;
-            }
-            Integer 抖音生产订单最快每天放入MQ速度 = Integer.valueOf(redisTemplate.opsForValue().get("抖音生产订单最快每天放入MQ速度"));
-            Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("抖音生产订单刚刚放入最大小号数:" + jdAppStoreConfig.getId(), "1", 抖音生产订单最快每天放入MQ速度, TimeUnit.SECONDS);
-            if (!ifAbsent) {
-                log.info("刚刚放入。不需要再放");
                 return;
             }
             Page<JdMchOrder> jdMchOrderPage = jdMchOrderMapper.selectPage(new Page<>(1, 1), Wrappers.<JdMchOrder>lambdaQuery()
@@ -551,7 +551,7 @@ public class TopicConsumerListener {
 
 
     //订单匹配消费
-    @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "20")
+    @JmsListener(destination = "${spring.activemq.queue-name}", containerFactory = "queueListener", concurrency = "30")
     //TODO 上面让匹配
     public void readActiveQueueQueue(String message) {
         JdMchOrder jdMchOrder = JSON.parseObject(message, JdMchOrder.class);
