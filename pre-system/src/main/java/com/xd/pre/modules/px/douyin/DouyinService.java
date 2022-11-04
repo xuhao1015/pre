@@ -1085,7 +1085,7 @@ public class DouyinService {
                     log.info("对不起，没有查询成");
                     return;
                 }
-                log.info("订单号:{},查询成功数据:{}", jdMchOrder.getTradeNo(), body);
+                log.info("订单号:{},查询成功数据:有数据", jdMchOrder.getTradeNo());
                 jdOrderPt.setHtml(body);
                 jdOrderPt.setOrgAppCk(DateUtil.formatDateTime(new Date()));
                 jdOrderPtMapper.updateById(jdOrderPt);
