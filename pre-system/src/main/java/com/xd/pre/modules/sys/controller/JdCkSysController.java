@@ -296,6 +296,7 @@ public class JdCkSysController {
         String trim = new String(bytes).trim();
         String[] split = trim.split("\n");
         OkHttpClient client = new OkHttpClient();
+        ArrayList<String> feihao = new ArrayList<>();
         for (int i = 0; i < split.length; i++) {
             String douYinAppCk = split[i].trim();
             try {
@@ -322,15 +323,22 @@ public class JdCkSysController {
                             build.setFailReason("替换");
                             douyinAppCkMapper.insert(build);
                         }
+                        if(!douyinAppCkDb.getFileName().equals("douyinck_11_05.txt") && DateUtil.parseDateTime("2022-10-22 00:00:00").getTime()<douyinAppCkDb.getCreateTime().getTime()){
+                            feihao.add("重复号:"+douYinAppCk);
+                        }
                     } else {
                         douyinAppCkMapper.insert(build);
                     }
+                }else {
+                    feihao.add("废号:"+douYinAppCk);
+                    log.info("费号:{}",douYinAppCk);
                 }
             } catch (Exception e) {
                 log.error("当前ck报错msg:{},ck:{}", e.getMessage(), douYinAppCk);
             }
         }
-        return R.ok();
+
+        return R.ok(JSON.toJSONString(feihao));
     }
 
     @GetMapping("douyinPage")
