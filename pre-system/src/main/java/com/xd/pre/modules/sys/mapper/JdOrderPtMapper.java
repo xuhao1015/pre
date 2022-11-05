@@ -56,17 +56,18 @@ public interface JdOrderPtMapper extends BaseMapper<JdOrderPt> {
             "and create_time BETWEEN #{beginOfDay} AND #{endOfDay}")
     Integer selectDouYinByStartTimeAndEndAndUid(@Param("ptPin") String ptPin, @Param("beginOfDay") DateTime beginOfDay, @Param("endOfDay") DateTime endOfDay);
 
-    @Select("select sum(sku_price ) as sku_price_total,pt_pin from jd_order_pt where sku_id in ('1736502463777799', " +
-            "'1739136614382624', " +
-            "'1739136822194211', " +
-            "'1745277214000191') " +
-            "and (pay_success_time is not null or  wx_pay_expire_time >NOW()   ) " +
-            "and wx_pay_expire_time BETWEEN #{beginOfDay} AND #{endOfDay} " +
-            "GROUP BY pt_pin ")
-    List<Map<String, Object>> selectDouYinByStartTimeAndEndAndUidGroup(@Param("beginOfDay") DateTime beginOfDay, @Param("endOfDay") DateTime endOfDay);
-
     @Select("select pt_pin  from jd_order_pt where pay_success_time < #{beginOfDay} " +
             "and sku_id  in   ('1736502463777799', '1739136614382624', '1739136822194211','1745277214000191')" +
             "GROUP BY pt_pin ")
     List<String> selectOrderSuccessYesterday(@Param("beginOfDay") DateTime beginOfDay);
+
+    @Select("select sum(sku_price ) as sku_price_total,pt_pin from jd_order_pt where " +
+            " wx_pay_expire_time BETWEEN #{beginOfDay} AND #{endOfDay} " +
+            "and sku_id in ('1736502463777799', " +
+            "'1739136614382624', " +
+            "'1739136822194211', " +
+            "'1745277214000191') " +
+            "and (pay_success_time is not null or  wx_pay_expire_time >NOW()   ) " +
+            "GROUP BY pt_pin ")
+    List<Map<String, Object>> selectDouYinByStartTimeAndEndAndUidGroup(@Param("beginOfDay") DateTime beginOfDay, @Param("endOfDay") DateTime endOfDay);
 }
