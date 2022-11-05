@@ -38,5 +38,6 @@ public class DouyinAppCk {
     private Date updateTime;
     private String failReason;
     private Integer maxAmount;
+    private Integer isOld;
     private Integer tenantId;
 }
