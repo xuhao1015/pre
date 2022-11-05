@@ -993,7 +993,7 @@ public class DouyinService {
     @Scheduled(cron = "0/30 * * * * ?")
     @Async("asyncPool")
     public void blackBai() {
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 2, TimeUnit.MINUTES);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 1, TimeUnit.MINUTES);
         if (!ifAbsent) {
             return;
         }

@@ -26,7 +26,7 @@ public class FindOrderDai {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1588565148953731072");
+        outOrders.add("wns75638032855918966169");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
