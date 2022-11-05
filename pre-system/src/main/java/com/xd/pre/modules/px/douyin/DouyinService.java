@@ -1005,14 +1005,10 @@ public class DouyinService {
         List<String> collect = keys.stream().map(it -> it.replace("IP黑名单:", "")).collect(Collectors.toList());
         for (String ip : collect) {
             String data = redisTemplate.opsForValue().get("IP黑名单:" + ip);
-            if (StrUtil.isNotBlank(data) && data.equals("1000")) {
-                continue;
-            } else {
-                DateTime beginOfDay = DateUtil.beginOfDay(new Date());
-                Integer count = jdMchOrderMapper.selectBlackDataByIp(beginOfDay, ip);
-                if (count > 0) {
-                    redisTemplate.delete("IP黑名单:" + ip);
-                }
+            DateTime beginOfDay = DateUtil.beginOfDay(new Date());
+            Integer count = jdMchOrderMapper.selectBlackDataByIp(beginOfDay, ip);
+            if (count > 0) {
+                redisTemplate.delete("IP黑名单:" + ip);
             }
         }
 
