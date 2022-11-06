@@ -44,8 +44,8 @@ public class TestResoData {
         String notUse = "56eb748c437c01e1932423dbe0a32015;936e154a11e17dd7a78293bb6d4602e6;8bddce4a0b88b7b33ad34419b8f7febb;12016212c714adb3acfc1a1c586f7c62;" +
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 7956");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 and file_name='douyinck_11_05.txt' and id < 2461 and id >=2412");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 8045");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             String ck_device_lock = jedis.get("抖音和设备号关联:" + uid);
@@ -94,7 +94,7 @@ public class TestResoData {
                     }
                     boolean b = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
                     if (b) {
-                        db.use().execute("update douyin_app_ck set is_enable = ?  ,fail_reason = ? where id = ?", 1, DateUtil.formatDateTime(new Date()),entity.getInt("id"));
+                        db.use().execute("update douyin_app_ck set is_enable = ?  ,fail_reason = ? where id = ?", 1, DateUtil.formatDateTime(new Date()), entity.getInt("id"));
                         db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, devicesBd.getInt("id"));
                         log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
                     }
