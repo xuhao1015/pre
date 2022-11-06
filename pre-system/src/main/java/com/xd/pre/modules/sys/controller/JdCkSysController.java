@@ -131,6 +131,8 @@ public class JdCkSysController {
     @GetMapping("isCheckShip")
     public R isCheckShip() {
         DateTime dateTime = DateUtil.beginOfDay(new Date());
+        log.debug("倒退半小时，要出现0点问题");
+        dateTime = DateUtil.offsetMinute(dateTime, -30);
         List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT).eq(JdAppStoreConfig::getIsProduct, PreConstant.ONE));
         if (CollUtil.isEmpty(jdAppStoreConfigs)) {
             IsCheckShipDto build = IsCheckShipDto.builder().count(PreConstant.ZERO).jdMchOrders(new ArrayList<>()).build();
@@ -323,15 +325,15 @@ public class JdCkSysController {
                             build.setFailReason("替换");
                             douyinAppCkMapper.insert(build);
                         }
-                        if(!douyinAppCkDb.getFileName().equals("douyinck_11_05.txt") && DateUtil.parseDateTime("2022-10-22 00:00:00").getTime()<douyinAppCkDb.getCreateTime().getTime()){
-                            feihao.add("重复号:"+douYinAppCk);
+                        if (!douyinAppCkDb.getFileName().equals("douyinck_11_05.txt") && DateUtil.parseDateTime("2022-10-22 00:00:00").getTime() < douyinAppCkDb.getCreateTime().getTime()) {
+                            feihao.add("重复号:" + douYinAppCk);
                         }
                     } else {
                         douyinAppCkMapper.insert(build);
                     }
-                }else {
-                    feihao.add("废号:"+douYinAppCk);
-                    log.info("费号:{}",douYinAppCk);
+                } else {
+                    feihao.add("废号:" + douYinAppCk);
+                    log.info("费号:{}", douYinAppCk);
                 }
             } catch (Exception e) {
                 log.error("当前ck报错msg:{},ck:{}", e.getMessage(), douYinAppCk);
