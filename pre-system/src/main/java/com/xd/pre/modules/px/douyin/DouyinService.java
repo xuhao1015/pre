@@ -81,6 +81,9 @@ public class DouyinService {
     @Autowired
     private JmsMessagingTemplate jmsMessagingTemplate;
 
+    @Resource
+    private JdLogMapper jdLogMapper;
+
     public R match(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog) {
         Boolean checkIp = checkIp(jdMchOrder, storeConfig, jdLog);
         if (!checkIp) {
@@ -1123,6 +1126,17 @@ public class DouyinService {
         jdMchOrderMapper.updateById(jdMchOrder);
         jdOrderPtMapper.updateById(jdOrderPt);
         jdOrderPtMapper.updateById(jdOrderPt);
+        try {
+            List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
+            if (CollUtil.isNotEmpty(jdLogs)) {
+                log.info("订单号:{}删除redis黑名单:{}", jdMchOrder.getTradeNo(), jdLogs.get(PreConstant.ZERO).getIp());
+                redisTemplate.delete("IP黑名单:" + jdLogs.get(PreConstant.ZERO).getIp());
+                log.info("删除黑名单成功:{}", jdMchOrder.getTradeNo());
+            }
+        } catch (Exception e) {
+            log.error("删除黑名单报错:{}", jdMchOrder.getTradeNo());
+        }
+
     }
 
     @Scheduled(cron = "0/20 * * * * ?")
