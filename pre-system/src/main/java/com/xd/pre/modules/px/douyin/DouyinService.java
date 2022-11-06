@@ -761,21 +761,6 @@ public class DouyinService {
         return null;
     }
 
-    private void deleteLockCk(DouyinAppCk douyinAppCk, DouyinDeviceIid douyinDeviceIid) {
-        Set<String> keys = redisTemplate.keys("抖音和设备号关联:*");
-        if (CollUtil.isNotEmpty(keys)) {
-            for (String key : keys) {
-                String s = redisTemplate.opsForValue().get(key);
-                if (StrUtil.isNotBlank(s)) {
-                    DouyinDeviceIid douyinDeviceIidLock = JSON.parseObject(s, DouyinDeviceIid.class);
-                    if (douyinDeviceIidLock.getId().equals(douyinDeviceIid.getId()) && !key.contains(douyinAppCk.getUid())) {
-                        log.info("删除错误的管理关系:{},应该是:{},{}", key, douyinAppCk.getUid(), douyinDeviceIid.getDeviceId());
-                        redisTemplate.delete(key);
-                    }
-                }
-            }
-        }
-    }
 
     public BuyRenderRoot getAndBuildBuyRender(OkHttpClient client, DouyinAppCk douyinAppCk, BuyRenderParamDto buyRenderParamDto,
                                               DouyinDeviceIid douyinDeviceIid, JdMchOrder jdMchOrder) {
@@ -996,7 +981,7 @@ public class DouyinService {
     @Scheduled(cron = "0/30 * * * * ?")
     @Async("asyncPool")
     public void blackBai() {
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 1, TimeUnit.MINUTES);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 2, TimeUnit.MINUTES);
         if (!ifAbsent) {
             return;
         }
@@ -1053,9 +1038,7 @@ public class DouyinService {
         Integer time = Integer.valueOf(redisTemplate.opsForValue().get("补单时间"));
         List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectBuDan(time);
         List<JdMchOrder> jdMchOrders1 = jdMchOrderMapper.selectbudanData10();
-        List<JdMchOrder> jdMchOrders2 = jdMchOrderMapper.selectbudanData15();
         jdMchOrders.addAll(jdMchOrders1);
-        jdMchOrders.addAll(jdMchOrders2);
         if (CollUtil.isEmpty(jdMchOrders)) {
             return;
         }
