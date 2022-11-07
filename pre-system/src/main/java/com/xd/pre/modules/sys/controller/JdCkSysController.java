@@ -598,6 +598,18 @@ public class JdCkSysController {
                 redisTemplate.opsForValue().set("IP黑名单:" + ip, "1000");
             }
         }
+        if (status == PreConstant.FIVE) {
+            log.info("订单号加白补单:{}", jdMchOrder.getTradeNo());
+            List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
+            if (CollUtil.isNotEmpty(jdLogs)) {
+                String ip = jdLogs.get(0).getIp();
+                redisTemplate.opsForValue().set("IP白名单:" + ip, "1000");
+                redisTemplate.delete("IP黑名单:" + ip);
+            }
+        }
+        if (status == PreConstant.FOUR || status == PreConstant.FIVE) {
+            return R.ok();
+        }
         jdMchOrderMapper.updateById(jdMchOrder);
         log.info("订单号{},强行修改状态:{}", jdMchOrder.getTradeNo(), status);
         return R.ok();
