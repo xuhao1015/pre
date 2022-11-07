@@ -588,10 +588,10 @@ public class JdCkSysController {
         jdMchOrder.setStatus(status);
         if (status != 2) {
             jdMchOrder.setNotifySucc(PreConstant.ZERO);
-            Boolean aBoolean = productProxyTask.notifySuccess(jdMchOrder);
+            productProxyTask.notifySuccess(jdMchOrder);
         }
-        if (status == PreConstant.THREE) {
-            log.info("订单号退款补单:{}", jdMchOrder.getTradeNo());
+        if (status == PreConstant.FOUR) {
+            log.info("订单号拉黑补单:{}", jdMchOrder.getTradeNo());
             List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
             if (CollUtil.isNotEmpty(jdLogs)) {
                 String ip = jdLogs.get(0).getIp();
