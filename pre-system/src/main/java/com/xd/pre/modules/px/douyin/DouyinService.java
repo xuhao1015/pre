@@ -1042,7 +1042,10 @@ public class DouyinService {
         if (CollUtil.isEmpty(jdMchOrders)) {
             return;
         }
-        log.info("开始补单msg:{}");
+        findOrderStatusByOutOrder(jdMchOrders);
+    }
+
+    public void findOrderStatusByOutOrder(List<JdMchOrder> jdMchOrders) {
         for (JdMchOrder jdMchOrder : jdMchOrders) {
             try {
                 Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("补单执行:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder), 40, TimeUnit.SECONDS);

@@ -19,6 +19,7 @@ import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.R;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.modules.data.tenant.PreTenantContextHolder;
+import com.xd.pre.modules.px.douyin.DouyinService;
 import com.xd.pre.modules.px.douyin.dto.IsCheckShipDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadYonghuiDto;
@@ -40,6 +41,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,6 +118,10 @@ public class JdCkSysController {
 
     @Resource
     private DouyinSignDataMapper douyinSignDataMapper;
+
+    @Autowired
+    @Lazy
+    private DouyinService douyinService;
 
     @GetMapping("/isCheckShipIgnore")
     public R isCheckShipIgnore(Integer originalTradeId) {
@@ -618,7 +624,11 @@ public class JdCkSysController {
     @GetMapping("kami")
     public R kami(@RequestParam("id") Integer id) {
         JdMchOrder jdMchOrder = jdMchOrderMapper.selectById(id);
-        weiXinPayUrl.getCartNumAndMy(jdMchOrder);
+        if (ObjectUtil.isNull(jdMchOrder.getOriginalTradeId())) {
+            return R.error("当前没有匹配订单号");
+        }
+        douyinService.findOrderStatusByOutOrder(Arrays.asList(jdMchOrder));
+        productProxyTask.notifySuccess(jdMchOrder);
         return R.ok();
     }
 
