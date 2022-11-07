@@ -627,6 +627,10 @@ public class JdCkSysController {
         if (ObjectUtil.isNull(jdMchOrder.getOriginalTradeId())) {
             return R.error("当前没有匹配订单号");
         }
+        if(jdMchOrder.getStatus() == PreConstant.TWO){
+            productProxyTask.notifySuccess(jdMchOrder);
+            return R.error("当前订单已经成功不需要查询了");
+        }
         douyinService.findOrderStatusByOutOrder(Arrays.asList(jdMchOrder));
         productProxyTask.notifySuccess(jdMchOrder);
         return R.ok();
