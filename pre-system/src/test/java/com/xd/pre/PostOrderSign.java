@@ -10,8 +10,8 @@ import com.xd.pre.common.utils.px.PreUtils;
 
 public class PostOrderSign {
     public static void main(String[] args) {
-//        创建订单();
-        查询订单();
+        创建订单();
+//        查询订单();
 
     }
 
@@ -36,8 +36,8 @@ public class PostOrderSign {
 
     private static void 创建订单() {
         String a = "{\n" +
-                "\t\"amount\": \"200.00\",\n" +
-                "\t\"out_trade_no\": \"2000\",\n" +
+                "\t\"amount\": \"500.00\",\n" +
+                "\t\"out_trade_no\": \"5000\",\n" +
                 "\t\"subject\": \"支付1000元\",\n" +
                 "\t\"sign\": \"%s\",\n" +
                 "\t\"client_ip\": \"192.168.2.1\",\n" +
