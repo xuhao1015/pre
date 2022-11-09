@@ -12,13 +12,18 @@ public class PreAesUtils {
     private static String ECBKEY = "1q2w3e4r5t6y7u8i";
 
     // 加密
-    public static String encrypt(String data) throws Exception {
-        byte[] raw = ECBKEY.getBytes("utf-8");
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");//"算法/模式/补码方式"
-        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-        byte[] encrypted = cipher.doFinal(data.getBytes("utf-8"));
-        return new BASE64Encoder().encode(encrypted);//此处使用BASE64做转码功能，同时能起到2次加密的作用。
+    public static String encrypt(String data) {
+        try {
+            byte[] raw = ECBKEY.getBytes("utf-8");
+            SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");//"算法/模式/补码方式"
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+            byte[] encrypted = cipher.doFinal(data.getBytes("utf-8"));
+            return new BASE64Encoder().encode(encrypted);//此处使用BASE64做转码功能，同时能起到2次加密的作用。
+        } catch (Exception e) {
+            log.error("加密失败msg:{}", e.getMessage());
+        }
+        return null;
     }
 
     // 解密

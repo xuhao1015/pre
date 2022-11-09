@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.R;
 import com.xd.pre.common.utils.px.PreUtils;
@@ -627,7 +628,7 @@ public class JdCkSysController {
         if (ObjectUtil.isNull(jdMchOrder.getOriginalTradeId())) {
             return R.error("当前没有匹配订单号");
         }
-        if(jdMchOrder.getStatus() == PreConstant.TWO){
+        if (jdMchOrder.getStatus() == PreConstant.TWO) {
             productProxyTask.notifySuccess(jdMchOrder);
             return R.error("当前订单已经成功不需要查询了");
         }
@@ -753,6 +754,7 @@ public class JdCkSysController {
         }
         JdOrderPt jdOrderPt = null;
         if (StrUtil.isNotBlank(carMy)) {
+            carMy = PreAesUtils.encrypt(carMy);
             PreTenantContextHolder.setCurrentTenantId(1L);
             jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getCarMy, carMy));
             if (ObjectUtil.isNotNull(jdOrderPt)) {
@@ -859,9 +861,9 @@ public class JdCkSysController {
                 JdOrderPt jdOrderPt = mapOrderPos.get(record.getOriginalTradeId());
                 if (record.getStatus() == PreConstant.TWO) {
                     jdMchOrderAndCard.setPaySuccessTime(DateUtil.formatDateTime(jdOrderPt.getPaySuccessTime()));
-                    jdMchOrderAndCard.setCardNumber(jdOrderPt.getCardNumber());
+                    jdMchOrderAndCard.setCardNumber(PreAesUtils.decrypt(jdOrderPt.getCardNumber()));
                 } else if (Integer.valueOf(record.getPassCode()) == PreConstant.NINE) {
-                    jdMchOrderAndCard.setCardNumber(jdOrderPt.getCardNumber());
+                    jdMchOrderAndCard.setCardNumber(PreAesUtils.decrypt(jdOrderPt.getCardNumber()));
                 }
                 if (ObjectUtil.isNotNull(jdOrderPt)) {
                     jdMchOrderAndCard.setPtId(jdOrderPt.getId());

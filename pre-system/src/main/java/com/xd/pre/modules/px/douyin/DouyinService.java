@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.R;
 import com.xd.pre.common.utils.px.PreUtils;
@@ -923,10 +924,13 @@ public class DouyinService {
             String findOrderData = DateUtil.formatDateTime(new Date());
             log.info("订单号：{}，查询成功时间:{}", jdMchOrder.getTradeNo(), findOrderData);
             String html = JSON.parseObject(body).getString("order_detail_info");
-            jdOrderPt.setHtml(html);
-            jdOrderPt.setOrgAppCk(findOrderData);
-            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-            jdOrderPtMapper.updateById(jdOrderPt);
+            if (StrUtil.isNotBlank(html)) {
+                String shop_order_status_info = JSON.parseObject(html).getString("shop_order_status_info");
+                jdOrderPt.setHtml(shop_order_status_info);
+                jdOrderPt.setOrgAppCk(findOrderData);
+                PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                jdOrderPtMapper.updateById(jdOrderPt);
+            }
             String voucher_info_listStr = JSON.parseObject(html).getString("voucher_info_list");
             if (StrUtil.isBlank(voucher_info_listStr) || !voucher_info_listStr.contains("voucher_status")) {
                 return;
@@ -1102,8 +1106,8 @@ public class DouyinService {
     private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         log.info("订单号{}，当前获取的卡密成功", jdMchOrder.getTradeNo());
-        jdOrderPt.setCardNumber(code);
-        jdOrderPt.setCarMy(code);
+        jdOrderPt.setCardNumber(PreAesUtils.encrypt(code));
+        jdOrderPt.setCarMy(PreAesUtils.encrypt(code));
         jdOrderPt.setSuccess(PreConstant.ONE);
         jdOrderPt.setPaySuccessTime(new Date());
         jdOrderPtMapper.updateById(jdOrderPt);
@@ -1118,6 +1122,7 @@ public class DouyinService {
                 log.info("订单号:{}删除redis黑名单:{}", jdMchOrder.getTradeNo(), jdLogs.get(PreConstant.ZERO).getIp());
                 redisTemplate.delete("IP黑名单:" + jdLogs.get(PreConstant.ZERO).getIp());
                 log.info("删除黑名单成功:{}", jdMchOrder.getTradeNo());
+                redisTemplate.opsForValue().set("IP白名单:" + jdLogs.get(PreConstant.ZERO).getIp(), "1", 5, TimeUnit.DAYS);
             }
         } catch (Exception e) {
             log.error("删除黑名单报错:{}", jdMchOrder.getTradeNo());
