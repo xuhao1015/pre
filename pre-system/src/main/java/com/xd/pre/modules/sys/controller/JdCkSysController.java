@@ -780,7 +780,7 @@ public class JdCkSysController {
         }
         List<ExcelCarMyDto> rows = new ArrayList<>();
         for (JdOrderPt orderPt : orderPts) {
-            ExcelCarMyDto build = ExcelCarMyDto.builder().cardNumber(orderPt.getCardNumber()).carMy(orderPt.getCarMy()).paySuccessTime(DateUtil.formatDateTime(orderPt.getPaySuccessTime()))
+            ExcelCarMyDto build = ExcelCarMyDto.builder().cardNumber(PreAesUtils.decrypt(orderPt.getCardNumber())).carMy(PreAesUtils.decrypt(orderPt.getCarMy())).paySuccessTime(DateUtil.formatDateTime(orderPt.getPaySuccessTime()))
                     .skuName(orderPt.getSkuName()).skuPrice(orderPt.getSkuPrice()).build();
             rows.add(build);
         }
