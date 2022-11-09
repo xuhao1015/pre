@@ -23,7 +23,7 @@ public class PreAesUtils {
         } catch (Exception e) {
             log.error("加密失败msg:{}", e.getMessage());
         }
-        return null;
+        return data;
     }
 
     // 解密
@@ -44,7 +44,7 @@ public class PreAesUtils {
             }
         } catch (Exception ex) {
             log.info("解密失败:{}", ex.getMessage());
-            return null;
+            return data;
         }
     }
 
