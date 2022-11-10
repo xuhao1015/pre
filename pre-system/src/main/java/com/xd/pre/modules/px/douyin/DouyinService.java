@@ -107,6 +107,9 @@ public class DouyinService {
                     break;
                 }
             }
+            if (ObjectUtil.isNull(client)) {
+                client = pcAppStoreService.buildClient();
+            }
             log.info("订单号:{},判断是否存在已经存在的库存，重复利用", jdMchOrder.getTradeNo());
             //  redisTemplate.opsForValue().set("锁定抖音库存订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 5, TimeUnit.MINUTES);
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
