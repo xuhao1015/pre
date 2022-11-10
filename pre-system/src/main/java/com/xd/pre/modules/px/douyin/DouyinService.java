@@ -27,6 +27,7 @@ import com.xd.pre.modules.px.douyin.pay.PayRiskInfoAndPayInfoUtils;
 import com.xd.pre.modules.px.douyin.submit.DouyinAsynCService;
 import com.xd.pre.modules.px.douyin.submit.SubmitUtils;
 import com.xd.pre.modules.px.task.ProductProxyTask;
+import com.xd.pre.modules.px.utils.SysUtils;
 import com.xd.pre.modules.sys.domain.*;
 import com.xd.pre.modules.sys.mapper.*;
 import lombok.extern.slf4j.Slf4j;
@@ -167,9 +168,13 @@ public class DouyinService {
         for (int i = 0; i < 2; i++) {
             log.info("订单号：{}第{}，次循环", jdMchOrder.getTradeNo(), i);
             payReUrl = payByOrderId(client, payDto, jdLog, jdMchOrder);
+            JdProxyIpPort t = SysUtils.parseOkHttpClent(client, null);
+            log.info("订单号:{},执行的ip:{}", jdMchOrder.getTradeNo(), t.getIp());
             if (StrUtil.isNotBlank(payReUrl)) {
                 break;
             } else {
+                deleleIPByClent(jdMchOrder, client);
+                log.info("切换ip:{}", jdMchOrder.getTradeNo());
                 client = pcAppStoreService.buildClient();
                 continue;
             }
@@ -219,6 +224,19 @@ public class DouyinService {
             return null;
         }
         return R.ok(jdMchOrder);
+    }
+
+    public void deleleIPByClent(JdMchOrder jdMchOrder, OkHttpClient client) {
+        try {
+            JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
+            if (ObjectUtil.isNotNull(jdProxyIpPort) && ObjectUtil.isNotNull(jdProxyIpPort.getId())) {
+                log.info("订单号删除缓存IP数据:{},id:{}", jdMchOrder.getTradeNo(), jdProxyIpPort.getId());
+                redisTemplate.delete("IP缓存池:" + jdProxyIpPort.getId());
+                jdProxyIpPortMapper.deleteById(jdProxyIpPort.getId());
+            }
+        } catch (Exception e) {
+            log.info("删除报错msg:{},报错信息:{}", jdMchOrder.getTradeNo(), e.getMessage());
+        }
     }
 
     public DouyinAppCk randomDouyinAppCk(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, Boolean isAppStore) {

@@ -12,6 +12,7 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.common.HybridBinarizer;
 import com.xd.pre.common.utils.px.dto.UrlEntity;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
@@ -494,4 +495,5 @@ public class PreUtils {
         }
         return sb.substring(0, sb.length() - 1);
     }
+
 }

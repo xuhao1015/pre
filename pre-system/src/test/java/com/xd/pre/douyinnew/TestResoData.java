@@ -65,7 +65,6 @@ public class TestResoData {
                 if (StrUtil.isNotBlank(deviceDBId)) {
                     continue;
                 }
-
                 if (JSON.toJSONString(keys).contains("redis临时锁定:" + devicesBd.getInt("id"))) {
                     continue;
                 }
