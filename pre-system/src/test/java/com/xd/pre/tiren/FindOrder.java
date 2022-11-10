@@ -27,7 +27,15 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("1000");
+        outOrders.add("P1590758108923379712");
+        outOrders.add("P1590758063754919936");
+        outOrders.add("P1590757997346504704");
+        outOrders.add("P1590757941698056192");
+        outOrders.add("P1590757956452040704");
+        outOrders.add("P1590757796288348160");
+        outOrders.add("P1590757767729332224");
+        outOrders.add("P1590757682878562304");
+        outOrders.add("P1590757633528381440");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }

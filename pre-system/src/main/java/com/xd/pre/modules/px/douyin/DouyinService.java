@@ -563,6 +563,7 @@ public class DouyinService {
             try {
                 Integer sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
                 if (sufMeny - new BigDecimal(jdMchOrder.getMoney()).intValue() < 0) {
+                    log.info("当前ck出现了余额不足的情况");
                     synProductMaxPrirce();
                     return null;
                 }
@@ -953,10 +954,9 @@ public class DouyinService {
         wrapper.eq(JdOrderPt::getPtPin, uid.trim());
         wrapper.lt(JdOrderPt::getPaySuccessTime, DateUtil.beginOfDay(new Date()));
         wrapper.isNotNull(JdOrderPt::getCardNumber);
-        Integer count = jdOrderPtMapper.selectCount(wrapper);
-        String s = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + uid);
-        if (count > 0) {
-            Integer balance = JSON.parseObject(s, BalanceRedisDto.class).getBalance();
+        String sdata = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + uid);
+        if (StrUtil.isNotBlank(sdata)) {
+            Integer balance = JSON.parseObject(sdata, BalanceRedisDto.class).getBalance();
             return balance;
         } else {
             log.info("查询当前账号是否有存在的订单。如果存在就返回余额0");
