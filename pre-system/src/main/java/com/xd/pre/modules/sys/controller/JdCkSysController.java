@@ -323,7 +323,7 @@ public class JdCkSysController {
                 String recommend_info = JSON.parseObject(productStr).getString("recommend_info");
                 if (StrUtil.isNotBlank(recommend_info) && recommend_info.contains("uid") && recommend_info.contains("gid")) {
                     String uid = JSON.parseObject(recommend_info, JSONObject.class).getString("uid");
-                    DouyinAppCk build = DouyinAppCk.builder().uid(uid).ck(douYinAppCk).isEnable(PreConstant.ZERO).fileName(originalFilename).createTime(new Date()).build();
+                    DouyinAppCk build = DouyinAppCk.builder().uid(uid).ck(PreAesUtils.encrypt加密(douYinAppCk)).isEnable(PreConstant.ZERO).fileName(originalFilename).createTime(new Date()).build();
                     DouyinAppCk douyinAppCkDb = douyinAppCkMapper.selectOne(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getUid, uid));
                     if (ObjectUtil.isNotNull(douyinAppCkDb)) {
                         log.info("已经存在msg:{}", JSON.toJSONString(douyinAppCkDb));
@@ -754,7 +754,7 @@ public class JdCkSysController {
         }
         JdOrderPt jdOrderPt = null;
         if (StrUtil.isNotBlank(carMy)) {
-            carMy = PreAesUtils.encrypt(carMy);
+            carMy = PreAesUtils.encrypt加密(carMy);
             PreTenantContextHolder.setCurrentTenantId(1L);
             jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getCarMy, carMy));
             if (ObjectUtil.isNotNull(jdOrderPt)) {
@@ -780,7 +780,7 @@ public class JdCkSysController {
         }
         List<ExcelCarMyDto> rows = new ArrayList<>();
         for (JdOrderPt orderPt : orderPts) {
-            ExcelCarMyDto build = ExcelCarMyDto.builder().cardNumber(PreAesUtils.decrypt(orderPt.getCardNumber())).carMy(PreAesUtils.decrypt(orderPt.getCarMy())).paySuccessTime(DateUtil.formatDateTime(orderPt.getPaySuccessTime()))
+            ExcelCarMyDto build = ExcelCarMyDto.builder().cardNumber(PreAesUtils.decrypt解密(orderPt.getCardNumber())).carMy(PreAesUtils.decrypt解密(orderPt.getCarMy())).paySuccessTime(DateUtil.formatDateTime(orderPt.getPaySuccessTime()))
                     .skuName(orderPt.getSkuName()).skuPrice(orderPt.getSkuPrice()).build();
             rows.add(build);
         }
@@ -861,9 +861,9 @@ public class JdCkSysController {
                 JdOrderPt jdOrderPt = mapOrderPos.get(record.getOriginalTradeId());
                 if (record.getStatus() == PreConstant.TWO) {
                     jdMchOrderAndCard.setPaySuccessTime(DateUtil.formatDateTime(jdOrderPt.getPaySuccessTime()));
-                    jdMchOrderAndCard.setCardNumber(PreAesUtils.decrypt(jdOrderPt.getCardNumber()));
+                    jdMchOrderAndCard.setCardNumber(PreAesUtils.decrypt解密(jdOrderPt.getCardNumber()));
                 } else if (Integer.valueOf(record.getPassCode()) == PreConstant.NINE) {
-                    jdMchOrderAndCard.setCardNumber(PreAesUtils.decrypt(jdOrderPt.getCardNumber()));
+                    jdMchOrderAndCard.setCardNumber(PreAesUtils.decrypt解密(jdOrderPt.getCardNumber()));
                 }
                 if (ObjectUtil.isNotNull(jdOrderPt)) {
                     jdMchOrderAndCard.setPtId(jdOrderPt.getId());

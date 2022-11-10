@@ -12,7 +12,7 @@ public class PreAesUtils {
     private static String ECBKEY = "1q2w3e4r5t6y7u8i";
 
     // 加密
-    public static String encrypt(String data) {
+    public static String encrypt加密(String data) {
         try {
             byte[] raw = ECBKEY.getBytes("utf-8");
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
@@ -27,7 +27,7 @@ public class PreAesUtils {
     }
 
     // 解密
-    public static String decrypt(String data) {
+    public static String decrypt解密(String data) {
         try {
             byte[] raw = ECBKEY.getBytes("utf-8");
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
@@ -48,7 +48,7 @@ public class PreAesUtils {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         /*
          * 此处使用AES-128-ECB加密模式，key需要为16位。
          */
@@ -56,10 +56,10 @@ public class PreAesUtils {
         String cSrc = "XFLHPDKMQ4JQJ7LY";
         System.out.println(cSrc);
         // 加密
-        String enString = PreAesUtils.encrypt(cSrc);
+        String enString = PreAesUtils.encrypt加密(cSrc);
         System.out.println("加密后的字串是：" + enString);
         // 解密
-        String DeString = PreAesUtils.decrypt(enString);
+        String DeString = PreAesUtils.decrypt解密(enString);
         System.out.println("解密后的字串是：" + DeString);
     }
 

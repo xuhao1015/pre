@@ -318,6 +318,7 @@ public class DouyinService {
         Integer payType = getPayType();
         log.info("订单号{}，初始化完成:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
         String tel = PreUtils.getTel();
+        douyinAppCk.setCk(PreAesUtils.decrypt解密(douyinAppCk.getCk()));
         PayDto payDto = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, douyinDeviceIUseids, timer, tel);
         if (ObjectUtil.isNull(payDto)) {
             log.info("订单号{}，当前下单失败,请查看原因", jdMchOrder.getTradeNo());
@@ -342,7 +343,7 @@ public class DouyinService {
                 .skuName(storeConfig.getSkuName()).skuId(storeConfig.getSkuId())
                 .wxPayExpireTime(DateUtil.offsetMinute(new Date(), storeConfig.getPayIdExpireTime()))
                 .createTime(new Date()).skuPrice(storeConfig.getSkuPrice())
-                .isWxSuccess(PreConstant.ONE).isMatch(PreConstant.ONE).currentCk(douyinAppCk.getCk())
+                .isWxSuccess(PreConstant.ONE).isMatch(PreConstant.ONE).currentCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()))
                 .hrefUrl(payReUrl).weixinUrl(payReUrl).wxPayUrl(payReUrl)
                 .mark(JSON.toJSONString(payDto))
                 .build();
@@ -497,7 +498,7 @@ public class DouyinService {
             Request request = builder.url(url)
                     .post(body)
                     .addHeader("X-SS-STUB", X_SS_STUB)
-                    .addHeader("Cookie", payDto.getCk())
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(payDto.getCk()))
                     .addHeader("X-Gorgon", x_gorgon)
                     .addHeader("X-Khronos", x_khronos)
                     .addHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -690,7 +691,7 @@ public class DouyinService {
                 }
                 Request request1 = builder.url(url1)
                         .post(requestBody1)
-                        .addHeader("Cookie", douyinAppCk.getCk())
+                        .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
                         .addHeader("X-SS-STUB", X_SS_STUB1)
                         .addHeader("x-tt-trace-id", tarceid1)
                         .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
@@ -728,7 +729,7 @@ public class DouyinService {
                     log.info("订单号:{}设置上次成功时间msg:{}", jdMchOrder.getTradeNo(), new Date().toLocaleString());
                     douyinDeviceIid.setLastSuccessTime(new Date());
                     douyinDeviceIidMapper.updateById(douyinDeviceIid);
-                    PayDto payDto = PayDto.builder().ck(douyinAppCk.getCk()).device_id(douyinDeviceIid.getDeviceId()).iid(douyinDeviceIid.getIid()).pay_type(payType + "")
+                    PayDto payDto = PayDto.builder().ck(PreAesUtils.encrypt加密(douyinAppCk.getCk())).device_id(douyinDeviceIid.getDeviceId()).iid(douyinDeviceIid.getIid()).pay_type(payType + "")
                             .orderId(orderId).userIp(jdLog.getIp()).build();
                     return payDto;
                 } else {
@@ -740,7 +741,6 @@ public class DouyinService {
                         redisTemplate.opsForValue().increment("抖音设备号失败次数:" + douyinDeviceIid.getDeviceId());
                         redisTemplate.opsForValue().increment("抖音账号失败次数:" + douyinAppCk.getUid());
                         douyinDeviceIid.setFail(douyinDeviceIid.getFail() + 1);
-//                        douyinAppCk.setFailReason(douyinAppCk.getFailReason() + "过多的设备号" + JSON.toJSONString(douyinDeviceIid));
                         douyinDeviceIidMapper.updateById(douyinDeviceIid);
                         if (douyinDeviceIid.getFail() > 10 && ObjectUtil.isNotNull(douyinDeviceIid.getLastSuccessTime())) {
                             log.info("订单号:{}设置当前设备号不用了deviceId:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
@@ -793,7 +793,7 @@ public class DouyinService {
                     .url(url)
                     .post(requestBody)
                     .addHeader("X-SS-STUB", X_SS_STUB)
-                    .addHeader("Cookie", douyinAppCk.getCk())
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
                     .addHeader("X-Gorgon", x_gorgon)
                     .addHeader("X-Khronos", x_khronos)
                     .addHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -902,7 +902,7 @@ public class DouyinService {
                     .url(url)
                     .addHeader("User-Agent", "okhttp/3.10.0.1")
                     .addHeader("cache-control", "no-cache")
-                    .addHeader("Cookie", jdOrderPt.getCurrentCk())
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(jdOrderPt.getCurrentCk()))
                     .addHeader("X-Khronos", x_khronos)
                     .addHeader("X-Gorgon", x_gorgon)
                     .build();
@@ -915,7 +915,6 @@ public class DouyinService {
 //                redisTemplate.delete("")
                 log.info("订单号{},订单号查询订单详情错误错误-----,切换ip查询", jdMchOrder.getTradeNo());
             }
-//            String body = HttpRequest.get(url).header("cookie", jdOrderPt.getCurrentCk()).execute().body();
             log.info("订单号{}，查询订单数据订单结果msg:有值", jdMchOrder.getTradeNo());
             if (StrUtil.isBlank(body)) {
                 log.info("订单号{}，查询订单结果为空。。。。。。。XXXXXXXXXXXXXXX", jdMchOrder.getTradeNo(), body);
@@ -1061,7 +1060,7 @@ public class DouyinService {
                 Request request = new Request.Builder()
                         .url("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?aid=45465&order_id=" + jdOrderPt.getOrderId().trim())
                         .get()
-                        .addHeader("Cookie", jdOrderPt.getCurrentCk())
+                        .addHeader("Cookie", PreAesUtils.decrypt解密(jdOrderPt.getCurrentCk()))
                         .addHeader("X-Khronos", "1665697911")
                         .addHeader("X-Gorgon", "8404d4860000775655c5b8f6315f8a608a802f3a78e4891a08cc")
                         .addHeader("User-Agent", "okhttp/3.10.0.1")
@@ -1106,8 +1105,8 @@ public class DouyinService {
     private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         log.info("订单号{}，当前获取的卡密成功", jdMchOrder.getTradeNo());
-        jdOrderPt.setCardNumber(PreAesUtils.encrypt(code));
-        jdOrderPt.setCarMy(PreAesUtils.encrypt(code));
+        jdOrderPt.setCardNumber(PreAesUtils.encrypt加密(code));
+        jdOrderPt.setCarMy(PreAesUtils.encrypt加密(code));
         jdOrderPt.setSuccess(PreConstant.ONE);
         jdOrderPt.setPaySuccessTime(new Date());
         jdOrderPtMapper.updateById(jdOrderPt);
