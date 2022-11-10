@@ -10,9 +10,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SetOldAccount {
     public static void main(String[] args) throws Exception {
-        List<Entity> query = FindOrder.db.query("select pt_pin ,count(1) as count from jd_order_pt   where create_time < '2022-11-06 22:00:00'  and    pay_success_time is not null   GROUP BY pt_pin");
-        List<Entity> query1 = FindOrder.db.query("select pt_pin ,count(1) as count from jd_order_pt_11_04   where create_time < '2022-11-06 22:00:00'  and    pay_success_time is not null   GROUP BY pt_pin");
+        List<Entity> query = FindOrder.db.query("select pt_pin ,count(1) as count from jd_order_pt   where create_time < '2022-11-10 22:00:00'  and    pay_success_time is not null   GROUP BY pt_pin");
+        List<Entity> query1 = FindOrder.db.query("select pt_pin ,count(1) as count from jd_order_pt_11_04   where create_time < '2022-11-10 22:00:00'  and    pay_success_time is not null   GROUP BY pt_pin");
+        List<Entity> query2 = FindOrder.db.query("select pt_pin ,count(1) as count from jd_order_pt_11_10   where create_time < '2022-11-10 22:00:00'  and    pay_success_time is not null   GROUP BY pt_pin");
         query.addAll(query1);
+        query.addAll(query2);
         Set<String> pt_pins = query.stream().map(it -> it.getStr("pt_pin")).collect(Collectors.toSet());
         for (String pt_pin : pt_pins) {
             FindOrder.db.execute("update douyin_app_ck set is_old =1 where uid =?", pt_pin);

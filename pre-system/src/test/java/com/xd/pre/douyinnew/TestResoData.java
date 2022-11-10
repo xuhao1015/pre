@@ -8,6 +8,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.nosql.redis.RedisDS;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
+import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.jddj.douy.Douyin3;
 import com.xd.pre.modules.px.douyin.buyRender.BuyRenderParamDto;
@@ -44,13 +45,13 @@ public class TestResoData {
         String notUse = "56eb748c437c01e1932423dbe0a32015;936e154a11e17dd7a78293bb6d4602e6;8bddce4a0b88b7b33ad34419b8f7febb;12016212c714adb3acfc1a1c586f7c62;" +
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 and file_name='doouyingappck26.txt' ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =0 and file_name='11_5_270.txt' ");
         List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 8139");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             String ck_device_lock = jedis.get("抖音和设备号关联:" + uid);
             log.info("当前执行个数:{}", entity.getInt("id"));
-            ck = entity.getStr("ck");
+            ck = PreAesUtils.decrypt解密(entity.getStr("ck"));
             if (StrUtil.isNotBlank(ck_device_lock) || notUse.contains(ck.split("sid_tt=")[1])) {
                 continue;
             }
