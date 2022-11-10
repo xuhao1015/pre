@@ -157,7 +157,7 @@ public class ProxyProductService {
                     validTime = DateUtil.parseDateTime(parseObject.getString("validTime"));
                 }
                 JdProxyIpPort jdProxyIpPort = new JdProxyIpPort().builder().agentAddress(producUrl).ip(ip)
-                        .port(port).createTime(new Date()).isUse(0).expirationTime(DateUtil.offsetMinute(validTime, -1)).build();
+                        .port(port).createTime(new Date()).isUse(0).expirationTime(validTime).build();
                 jdProxyIpPortMapper.insert(jdProxyIpPort);
             }
         }
