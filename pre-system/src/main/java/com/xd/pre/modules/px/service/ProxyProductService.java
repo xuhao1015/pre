@@ -118,12 +118,11 @@ public class ProxyProductService {
     }
 
     public void productIpAndPort2() {
-        log.info("执行1");
         ProxyAddressProduct proxyAddressProduct = proxyAddressProductMapper.selectOne(Wrappers.<ProxyAddressProduct>lambdaQuery().eq(ProxyAddressProduct::getIsProduct, 1));
         if (proxyAddressProduct.getType() != 2) {
             return;
         }
-        log.info("执行2");
+        log.info("执行生成ip:{}","productIpAndPort2");
        /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;
@@ -135,11 +134,8 @@ public class ProxyProductService {
         if (count1 == 0) {
             return;
         }
-        log.info("执行4");
-        log.info("执行5");
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("熊猫代理", "锁定", 12, TimeUnit.SECONDS);
         if (!ifAbsent) {
-            log.info("执行6");
             return;
         }
         String producUrl = String.format(proxyAddressProduct.getAgentAddress(), proxyAddressProduct.getNum());
