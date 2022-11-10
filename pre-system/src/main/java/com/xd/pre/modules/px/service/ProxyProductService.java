@@ -122,7 +122,7 @@ public class ProxyProductService {
         if (proxyAddressProduct.getType() != 2) {
             return;
         }
-        log.info("执行生成ip:{}","productIpAndPort2");
+        log.info("执行生成ip:{}", "productIpAndPort2");
        /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;
@@ -157,7 +157,7 @@ public class ProxyProductService {
                     validTime = DateUtil.parseDateTime(parseObject.getString("validTime"));
                 }
                 JdProxyIpPort jdProxyIpPort = new JdProxyIpPort().builder().agentAddress(producUrl).ip(ip)
-                        .port(port).createTime(new Date()).isUse(0).expirationTime(validTime).build();
+                        .port(port).createTime(new Date()).isUse(0).expirationTime(DateUtil.offsetMinute(validTime, -1)).build();
                 jdProxyIpPortMapper.insert(jdProxyIpPort);
             }
         }
