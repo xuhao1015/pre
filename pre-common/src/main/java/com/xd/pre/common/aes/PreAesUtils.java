@@ -39,13 +39,12 @@ public class PreAesUtils {
                 String originalString = new String(original, "utf-8");
                 return originalString;
             } catch (Exception e) {
-                System.out.println(e.toString());
-                return null;
+                return data;
             }
         } catch (Exception ex) {
             log.info("解密失败:{}", ex.getMessage());
-            return data;
         }
+        return data;
     }
 
     public static void main(String[] args) {

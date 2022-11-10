@@ -1076,6 +1076,15 @@ public class DouyinService {
                 log.info("订单号:{},查询成功数据:有数据", jdMchOrder.getTradeNo());
                 jdOrderPt.setHtml(body);
                 jdOrderPt.setOrgAppCk(DateUtil.formatDateTime(new Date()));
+                /**
+                 *    String html = JSON.parseObject(body).getString("order_detail_info");
+                 *             if (StrUtil.isNotBlank(html)) {
+                 *                 String shop_order_status_info = JSON.parseObject(html).getString("shop_order_status_info");
+                 */
+                if (StrUtil.isNotBlank(body) && body.contains("order_detail_info") && body.contains("shop_order_status_info")) {
+                    String html = JSON.parseObject(JSON.parseObject(body).getString("order_detail_info")).getString("shop_order_status_info");
+                    jdOrderPt.setHtml(html);
+                }
                 jdOrderPtMapper.updateById(jdOrderPt);
                 String html = JSON.parseObject(body).getString("order_detail_info");
                 String voucher_info_listStr = JSON.parseObject(html).getString("voucher_info_list");

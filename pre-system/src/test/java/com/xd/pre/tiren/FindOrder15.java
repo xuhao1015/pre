@@ -7,6 +7,7 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.constant.PreConstant;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -82,7 +83,7 @@ public class FindOrder15 {
         Request request = new Request.Builder()
                 .url("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?aid=45465&order_id=" + original_trade_no)
                 .get()
-                .addHeader("Cookie", current_ck)
+                .addHeader("Cookie", PreAesUtils.decrypt解密(current_ck))
                 .addHeader("X-Khronos", "1665697911")
                 .addHeader("X-Gorgon", "8404d4860000775655c5b8f6315f8a608a802f3a78e4891a08cc")
                 .addHeader("User-Agent", "okhttp/3.10.0.1")
@@ -98,9 +99,10 @@ public class FindOrder15 {
         String html = JSON.parseObject(body).getString("order_detail_info");
         String voucher_info_listStr = JSON.parseObject(html).getString("voucher_info_list");
         List<JSONObject> voucher_info_list = JSON.parseArray(voucher_info_listStr, JSONObject.class);
+        String shop_order_status_info = JSON.parseObject(html).getString("shop_order_status_info");
         if (CollUtil.isEmpty(voucher_info_list)) {
             db.use().execute("update jd_order_pt set org_app_ck = ?,html=? where order_id = ?",
-                    DateUtil.formatDateTime(new Date()), html, original_trade_no);
+                    DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
             return;
         }
         JSONObject voucher_info = voucher_info_list.get(PreConstant.ZERO);
@@ -112,6 +114,6 @@ public class FindOrder15 {
         log.info("支付成功:{}", original_trade_no);
         db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
-                code, code, DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), html, original_trade_no);
+                PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
     }
 }

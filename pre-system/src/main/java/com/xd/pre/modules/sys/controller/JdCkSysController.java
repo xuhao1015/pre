@@ -25,7 +25,6 @@ import com.xd.pre.modules.px.douyin.dto.IsCheckShipDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadYonghuiDto;
 import com.xd.pre.modules.px.service.CkService;
-import com.xd.pre.modules.px.service.NewWeiXinPayUrl;
 import com.xd.pre.modules.px.task.ProductProxyTask;
 import com.xd.pre.modules.px.vo.resvo.*;
 import com.xd.pre.modules.px.vo.sys.CkFindListVO;
@@ -91,9 +90,6 @@ public class JdCkSysController {
 
     @Resource
     private JdOrderPtMapper jdOrderPtMapper;
-
-    @Autowired
-    private NewWeiXinPayUrl weiXinPayUrl;
 
     @Autowired
     private ProductProxyTask productProxyTask;
@@ -611,7 +607,7 @@ public class JdCkSysController {
             List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
             List<String> troller = jdLogs.stream().map(it -> it.getOrderId()).collect(Collectors.toList());
             List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery().in(JdMchOrder::getTradeNo, troller)
-                    .eq(JdMchOrder::getStatus,PreConstant.TWO));
+                    .eq(JdMchOrder::getStatus, PreConstant.TWO));
             if (CollUtil.isNotEmpty(jdMchOrders)) {
                 String ip = jdLogs.get(0).getIp();
                 redisTemplate.opsForValue().set("IP白名单:" + ip, "1000");
