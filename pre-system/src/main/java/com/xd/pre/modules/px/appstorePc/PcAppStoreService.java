@@ -27,10 +27,7 @@ import com.xd.pre.modules.px.service.ProxyProductService;
 import com.xd.pre.modules.px.task.ProductProxyTask;
 import com.xd.pre.modules.px.weipinhui.service.WphService;
 import com.xd.pre.modules.sys.domain.*;
-import com.xd.pre.modules.sys.mapper.JdAppStoreConfigMapper;
-import com.xd.pre.modules.sys.mapper.JdCkMapper;
-import com.xd.pre.modules.sys.mapper.JdMchOrderMapper;
-import com.xd.pre.modules.sys.mapper.JdOrderPtMapper;
+import com.xd.pre.modules.sys.mapper.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.activemq.ScheduledMessage;
@@ -78,6 +75,10 @@ public class PcAppStoreService {
     @Autowired
     @Lazy(value = true)
     private WphService wphService;
+
+    @Resource
+    private JdProxyIpPortMapper jdProxyIpPortMapper;
+
 
     /**
      * match方法
@@ -549,30 +550,49 @@ public class PcAppStoreService {
 
     }
 
+
     public OkHttpClient buildClient() {
-        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
-        String isAble = redisTemplate.opsForValue().get("是否使用代理");
-        if (StrUtil.isNotBlank(isAble) && Integer.valueOf(isAble) == PreConstant.ONE) {
-            if (CollUtil.isNotEmpty(ProductProxyTask.okClient)) {
-                Map<Integer, OkHttpClient> okClient = ProductProxyTask.okClient;
-                for (Integer ex : okClient.keySet()) {
-                    OkHttpClient client = ProductProxyTask.okClient.get(ex);
-                    ProductProxyTask.okClient.remove(ex);
-                    return client;
+        try {
+            OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+            String isAble = redisTemplate.opsForValue().get("是否使用代理");
+            if (StrUtil.isNotBlank(isAble) && Integer.valueOf(isAble) == PreConstant.ONE) {
+                if (CollUtil.isNotEmpty(ProductProxyTask.okClient)) {
+                    Map<Integer, OkHttpClient> okClient = ProductProxyTask.okClient;
+                    for (Integer ex : okClient.keySet()) {
+                        OkHttpClient client = ProductProxyTask.okClient.get(ex);
+                        ProductProxyTask.okClient.remove(ex);
+                        return client;
+                    }
                 }
+                JdProxyIpPort oneIp = this.proxyProductService.getOneIp(PreConstant.ZERO, PreConstant.ZERO, false);
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oneIp.getIp(), Integer.valueOf(oneIp.getPort())));
+                builder.proxy(proxy);
+                log.info("当前使用的代理msg:{}", oneIp);
+            } else {
+                redisTemplate.opsForValue().set("是否使用代理", "1");
             }
-            JdProxyIpPort oneIp = this.proxyProductService.getOneIp(PreConstant.ZERO, PreConstant.ZERO, false);
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oneIp.getIp(), Integer.valueOf(oneIp.getPort())));
-            builder.proxy(proxy);
-            log.info("当前使用的代理msg:{}", oneIp);
-        } else {
-            redisTemplate.opsForValue().set("是否使用代理", "1");
+            Integer exTime = Integer.valueOf(redisTemplate.opsForValue().get("代理使用超时时间"));
+            OkHttpClient client = builder.connectTimeout(exTime, TimeUnit.SECONDS).readTimeout(exTime, TimeUnit.SECONDS)
+                    .callTimeout(exTime, TimeUnit.SECONDS).writeTimeout(exTime, TimeUnit.SECONDS)
+                    .followRedirects(false).build();
+            return client;
+        } catch (Exception e) {
+            log.info("获取代理报错msg:{}", e.getMessage());
         }
-        Integer exTime = Integer.valueOf(redisTemplate.opsForValue().get("代理使用超时时间"));
-        OkHttpClient client = builder.connectTimeout(exTime, TimeUnit.SECONDS).readTimeout(exTime, TimeUnit.SECONDS)
-                .callTimeout(exTime, TimeUnit.SECONDS).writeTimeout(exTime, TimeUnit.SECONDS)
-                .followRedirects(false).build();
-        return client;
+        List<String> ids = redisTemplate.keys("IP缓存池:*").stream().map(it -> it.replace("IP缓存池:", "")).collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(ids) && ids.size() > 2) {
+            int i = PreUtils.randomCommon(0, ids.size() - 1, 1)[0];
+            JdProxyIpPort jdProxyIpPort = jdProxyIpPortMapper.selectById(ids.get(i));
+            if (ObjectUtil.isNotNull(jdProxyIpPort)) {
+                OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+                Integer exTime = Integer.valueOf(redisTemplate.opsForValue().get("代理使用超时时间"));
+                OkHttpClient client = builder.connectTimeout(exTime, TimeUnit.SECONDS).readTimeout(exTime, TimeUnit.SECONDS)
+                        .callTimeout(exTime, TimeUnit.SECONDS).writeTimeout(exTime, TimeUnit.SECONDS)
+                        .followRedirects(false).build();
+                return client;
+            }
+        }
+        return null;
     }
 
 
