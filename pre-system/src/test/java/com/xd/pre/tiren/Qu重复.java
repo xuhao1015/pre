@@ -1,18 +1,36 @@
 package com.xd.pre.tiren;
 
 
-import com.alibaba.fastjson.JSON;
-import com.xd.pre.modules.px.utils.SysUtils;
-import com.xd.pre.modules.sys.domain.JdProxyIpPort;
-import com.xd.pre.pcScan.Demo;
-import okhttp3.OkHttpClient;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 
-import java.net.Proxy;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Qu重复 {
     public static void main(String[] args) throws Exception {
-        OkHttpClient okHttpClient = Demo.getOkHttpClient("27.159.190.78",12185);
-        JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(okHttpClient, null);
-        System.out.println(JSON.toJSONString(jdProxyIpPort));
+        String path = "C:\\Users\\Administrator\\Desktop\\卡密垃圾库\\卡密去重\\";
+        File file = new File(path);
+        String[] list = file.list();
+        List<String> data = new ArrayList<>();
+        for (String s : list) {
+            if (s.contains(".xls")) {
+                String filePathR = path + s;
+                ExcelReader reader = ExcelUtil.getReader(filePathR);
+                List<Map<String, Object>> readAll = reader.readAll();
+                for (Map<String, Object> stringObjectMap : readAll) {
+                    data.add(stringObjectMap.get("账号").toString());
+                }
+            }
+        }
+        Map<String, List<String>> collect = data.stream().collect(Collectors.groupingBy(it -> it));
+        for (String s : collect.keySet()) {
+            if (collect.get(s).size() == 1) {
+                System.out.println(s);
+            }
+        }
     }
 }
