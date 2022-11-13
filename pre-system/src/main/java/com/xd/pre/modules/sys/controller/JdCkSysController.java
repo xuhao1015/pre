@@ -801,6 +801,13 @@ public class JdCkSysController {
 //        response.setContentType("application/vnd.ms-excel;charset=utf-8");
         //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
         String dataName = DateUtil.formatDateTime(new Date());
+        DateTime startTimeDate = DateUtil.parseDateTime(startTime);
+        DateTime endTimeDate = DateUtil.parseDateTime(endTime);
+        //2022-11-14_1212_1215
+        String ymd = DateUtil.format(startTimeDate, "yyyy-MM-dd");
+        String ymd1 = DateUtil.format(startTimeDate, "HHmm");
+        String ymd2 = DateUtil.format(endTimeDate, "HHmm");
+        dataName=String.format("%s_%s_%s",ymd,ymd1,ymd2);
         response.setHeader("Content-Disposition", String.format("attachment;filename=%s.xls", dataName));
         ServletOutputStream out = response.getOutputStream();
         writer.flush(out, true);
