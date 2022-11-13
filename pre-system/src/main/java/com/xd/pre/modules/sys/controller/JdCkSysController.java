@@ -805,8 +805,8 @@ public class JdCkSysController {
         DateTime endTimeDate = DateUtil.parseDateTime(endTime);
         //2022-11-14_1212_1215
         String ymd = DateUtil.format(startTimeDate, "yyyy-MM-dd");
-        String ymd1 = DateUtil.format(startTimeDate, "HHmm");
-        String ymd2 = DateUtil.format(endTimeDate, "HHmm");
+        String ymd1 = DateUtil.format(startTimeDate, "HHmmss");
+        String ymd2 = DateUtil.format(endTimeDate, "HHmmss");
         dataName=String.format("%s_%s_%s",ymd,ymd1,ymd2);
         response.setHeader("Content-Disposition", String.format("attachment;filename=%s.xls", dataName));
         ServletOutputStream out = response.getOutputStream();
