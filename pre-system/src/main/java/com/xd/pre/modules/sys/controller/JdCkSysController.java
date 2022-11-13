@@ -759,14 +759,14 @@ public class JdCkSysController {
      */
     @RequestMapping(value = "/uploads/uploadMy")
     public void uploadMy1(HttpServletResponse response, String startTime, String endTime) throws Exception {
-        this.uploadExcel(response, startTime, endTime);
+        return;
     }
 
     /**
      * 下载Excel * * @param response
      */
     @RequestMapping(value = "/upload/uploadMy")
-    public void uploadExcel(HttpServletResponse response, String startTime, String endTime) throws Exception {
+    public void uploadExcel(HttpServletResponse response, String carMy) throws Exception {
         // 通过工具类创建writer，默认创建xls格式
         ExcelWriter writer = ExcelUtil.getWriter();
         writer.addHeaderAlias("skuName", "商品名称");
@@ -774,16 +774,32 @@ public class JdCkSysController {
         writer.addHeaderAlias("paySuccessTime", "支付成功时间");
         writer.addHeaderAlias("cardNumber", "账号");
         writer.addHeaderAlias("carMy", "卡密/密码");
-        if (StrUtil.isBlank(startTime) || StrUtil.isBlank(endTime)) {
-            throw new RuntimeException("时间传入为空");
+        if (StrUtil.isBlank(carMy)) {
+            throw new RuntimeException("请传入最后一次卡密");
         }
-        PreTenantContextHolder.setCurrentTenantId(1L);
-        List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().
-                eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT));
-        List<String> skus = jdAppStoreConfigs.stream().map(JdAppStoreConfig::getSkuId).collect(Collectors.toList());
-        List<JdOrderPt> orderPts = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery().between(JdOrderPt::getPaySuccessTime, startTime, endTime)
-                .isNotNull(JdOrderPt::getCarMy)
-                .in(JdOrderPt::getSkuId, skus));
+        JdOrderPt jdOrderPt = null;
+        if (StrUtil.isNotBlank(carMy)) {
+            carMy = PreAesUtils.encrypt加密(carMy);
+            PreTenantContextHolder.setCurrentTenantId(1L);
+            jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getCarMy, carMy));
+            if (ObjectUtil.isNotNull(jdOrderPt)) {
+                PreTenantContextHolder.setCurrentTenantId(1L);
+            } else {
+                PreTenantContextHolder.setCurrentTenantId(2L);
+                jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getCarMy, carMy));
+            }
+        }
+        if (ObjectUtil.isNull(jdOrderPt)) {
+            throw new RuntimeException("最后一次卡密错误");
+        }
+        List<JdOrderPt> orderPts = null;
+        if (StrUtil.isNotBlank(carMy)) {
+            Date lastDownloadTime = jdOrderPt.getPaySuccessTime();
+            List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT));
+            List<String> skus = jdAppStoreConfigs.stream().map(JdAppStoreConfig::getSkuId).collect(Collectors.toList());
+            orderPts = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getPaySuccessTime, lastDownloadTime).isNotNull(JdOrderPt::getCarMy)
+                    .in(JdOrderPt::getSkuId, skus));
+        }
         if (CollUtil.isEmpty(orderPts)) {
             throw new RuntimeException("没有可用数据");
         }
@@ -801,13 +817,6 @@ public class JdCkSysController {
 //        response.setContentType("application/vnd.ms-excel;charset=utf-8");
         //test.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
         String dataName = DateUtil.formatDateTime(new Date());
-        DateTime startTimeDate = DateUtil.parseDateTime(startTime);
-        DateTime endTimeDate = DateUtil.parseDateTime(endTime);
-        //2022-11-14_1212_1215
-        String ymd = DateUtil.format(startTimeDate, "yyyy-MM-dd");
-        String ymd1 = DateUtil.format(startTimeDate, "HHmmss");
-        String ymd2 = DateUtil.format(endTimeDate, "HHmmss");
-        dataName=String.format("%s_%s_%s",ymd,ymd1,ymd2);
         response.setHeader("Content-Disposition", String.format("attachment;filename=%s.xls", dataName));
         ServletOutputStream out = response.getOutputStream();
         writer.flush(out, true);
@@ -850,7 +859,6 @@ public class JdCkSysController {
         Map<Integer, JdOrderPt> mapOrderPos = null;
         Map<String, List<JdLog>> mapJdlogs = null;
         Map<String, List<DouyinSignData>> douyinSignDataMap = null;
-
         Map<String, JdCk> mapCks = null;
         if (CollUtil.isNotEmpty(records)) {
             List<Integer> orderPtIds = records.stream().map(it -> it.getOriginalTradeId()).distinct().collect(Collectors.toList());
