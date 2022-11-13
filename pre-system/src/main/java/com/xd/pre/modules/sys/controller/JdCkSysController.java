@@ -624,8 +624,7 @@ public class JdCkSysController {
             log.info("订单号加白补单:{}", jdMchOrder.getTradeNo());
             List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
             List<String> troller = jdLogs.stream().map(it -> it.getOrderId()).collect(Collectors.toList());
-            List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery().in(JdMchOrder::getTradeNo, troller)
-                    .eq(JdMchOrder::getStatus, PreConstant.TWO));
+            List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery().in(JdMchOrder::getTradeNo, troller));
             if (CollUtil.isNotEmpty(jdMchOrders)) {
                 String ip = jdLogs.get(0).getIp();
                 redisTemplate.opsForValue().set("IP白名单:" + ip, "1000");
