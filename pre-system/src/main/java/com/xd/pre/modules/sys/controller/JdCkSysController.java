@@ -757,6 +757,14 @@ public class JdCkSysController {
     /**
      * 下载Excel * * @param response
      */
+    @RequestMapping(value = "/uploads/uploadMy")
+    public void uploadMy1(HttpServletResponse response, String startTime, String endTime) throws Exception {
+        this.uploadExcel(response, startTime, endTime);
+    }
+
+    /**
+     * 下载Excel * * @param response
+     */
     @RequestMapping(value = "/upload/uploadMy")
     public void uploadExcel(HttpServletResponse response, String startTime, String endTime) throws Exception {
         // 通过工具类创建writer，默认创建xls格式
@@ -767,7 +775,7 @@ public class JdCkSysController {
         writer.addHeaderAlias("cardNumber", "账号");
         writer.addHeaderAlias("carMy", "卡密/密码");
         if (StrUtil.isBlank(startTime) || StrUtil.isBlank(endTime)) {
-            throw new RuntimeException("请传入最后一次卡密");
+            throw new RuntimeException("时间传入为空");
         }
         PreTenantContextHolder.setCurrentTenantId(1L);
         List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().
