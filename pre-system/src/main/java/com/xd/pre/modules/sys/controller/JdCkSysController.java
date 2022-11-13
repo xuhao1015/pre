@@ -121,6 +121,24 @@ public class JdCkSysController {
     private DouyinService douyinService;
 
 
+    @GetMapping("/isCheckIp")
+    public R getIpBlackData(String ip) {
+        if (StrUtil.isBlank(ip)) {
+            return R.error("IP不能为空");
+        }
+        List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getIp, ip));
+        if (CollUtil.isEmpty(jdLogs)) {
+            return R.error("不存在数据");
+        }
+        Set<String> orders = jdLogs.stream().map(it -> it.getOrderId()).collect(Collectors.toSet());
+        List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(Wrappers.<JdMchOrder>lambdaQuery().in(JdMchOrder::getTradeNo, orders));
+        if (CollUtil.isEmpty(jdMchOrders)) {
+            R.error("没有订单数据");
+        }
+        return R.ok(jdMchOrders);
+    }
+
+
     @GetMapping("/isCheckShipIgnore")
     public R isCheckShipIgnore(Integer originalTradeId) {
         JdOrderPt jdOrderPt = jdOrderPtMapper.selectById(originalTradeId);
