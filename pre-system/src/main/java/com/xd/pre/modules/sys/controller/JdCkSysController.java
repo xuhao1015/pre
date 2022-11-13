@@ -821,6 +821,14 @@ public class JdCkSysController {
         if (ObjectUtil.isNotNull(jdMchOrder) && ObjectUtil.isNotNull(jdMchOrder.getStatus())) {
             wrapper.eq(JdMchOrder::getStatus, jdMchOrder.getStatus());
         }
+        if (ObjectUtil.isNotNull(jdMchOrder) && StrUtil.isNotBlank(jdMchOrder.getUserIp())) {
+            List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getIp, jdMchOrder.getUserIp()));
+            if (CollUtil.isEmpty(jdLogs)) {
+                return R.ok();
+            }
+            Set<String> orderIdLogs = jdLogs.stream().map(it -> it.getOrderId()).collect(Collectors.toSet());
+            wrapper.in(JdMchOrder::getTradeNo, orderIdLogs);
+        }
         wrapper.orderByDesc(JdMchOrder::getId);
         Page<JdMchOrder> page1 = jdMchOrderMapper.selectPage(page, wrapper);
         List<JdMchOrderAndCard> jdMchOrderAndCards = new ArrayList<>();

@@ -96,4 +96,10 @@ public class JdMchOrder {
     private String endCreateTime;
 
 
+    @TableField(exist = false)
+    private String userIp;
+
+
+
+
 }

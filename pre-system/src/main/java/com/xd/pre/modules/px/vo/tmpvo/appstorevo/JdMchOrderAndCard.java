@@ -23,4 +23,7 @@ public class JdMchOrderAndCard extends JdMchOrder {
     private String orgAppCk;
     private String ptPin;
     private Date clickPre;
+
+
+
 }
