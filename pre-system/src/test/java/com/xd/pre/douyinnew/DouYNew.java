@@ -52,9 +52,9 @@ public class DouYNew {
 /*        String device_id = "device_id_str=2212649920104615";
         String iid = "install_id_str=3690393549678381";
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
-        String device_id = "device_id_str=4429272521116061";
-        String iid = "install_id_str=259924429124141";
-        String ck = "sid_tt=3fd7cd90b3378985e0f6b25ac91ee798;";
+        String device_id = "device_id_str=699724647905134";
+        String iid = "install_id_str=1508965206724398";
+        String ck = "sid_tt=80d2134c60441b05c98e74ff1ad06edc;";
 
 
         if (device_id.contains("device_id_str=")) {
@@ -68,8 +68,8 @@ public class DouYNew {
                 .new_source_type("product_detail").build();*/
 /*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
                 .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
-        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357325319182842").sku_id("1736502599637022").author_id("4051040200033531")
-                .ecom_scene_id("1003").origin_id("4051040200033531_3556357325319182842").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
+        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357230829939771").sku_id("1736502553929735").author_id("4051040200033531")
+                .ecom_scene_id("1003").origin_id("4051040200033531_3556357230829939771").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
         System.err.println(JSON.toJSONString(buyRenderParamDto));
 /*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
                 .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
