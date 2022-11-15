@@ -52,10 +52,9 @@ public class DouYNewTWoerma {
 /*        String device_id = "device_id_str=2212649920104615";
         String iid = "install_id_str=3690393549678381";
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
-        String device_id = "device_id_str=2599677936536782";
-        String iid = "install_id_str=1245079612687950";
-        String ck = "sid_tt=0c675d09c054283b7fe4563c395724f2;";
-
+        String device_id = "device_id_str=2538093503847412";
+        String iid = "install_id_str=3743163984904813";
+        String ck = "sid_tt=140a336dd81551eaa30bc0e9e8d336fd;";
 
         if (device_id.contains("device_id_str=")) {
             device_id = device_id.replace("device_id_str=", "");
@@ -68,8 +67,8 @@ public class DouYNewTWoerma {
                 .new_source_type("product_detail").build();*/
 /*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
                 .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
-        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3580988989001303640").sku_id("1748529777759262").author_id("")
-                .ecom_scene_id("1082").origin_id("99514375927_3580988989001303640").origin_type("3002070010").shop_id("DiSLOxMc").new_source_type("product_detail").build();
+        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3580988989001303640").sku_id("1749558839368723").author_id("96373965278")
+                .ecom_scene_id("1041").origin_id("96373965278_3580988989001303640").origin_type("3002070010").shop_id("DiSLOxMc").new_source_type("product_detail").build();
         System.err.println(JSON.toJSONString(buyRenderParamDto));
 /*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
                 .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
@@ -114,121 +113,10 @@ public class DouYNewTWoerma {
         String tel = PreUtils.getTel();
         BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
         String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=5&device_type=ELE-AL00&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528931234&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=27b54460b6dbb870&device_id=" + device_id + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
-        String bodyData1 = String.format("{ " +
-                        "\"area_type\": \"169\", " +
-                        "\"receive_type\": 1, " +
-                        "\"travel_info\": { " +
-                        "\"departure_time\": 0, " +
-                        "\"trave_type\": 1, " +
-                        "\"trave_no\": \"\" " +
-                        "}, " +
-                        "\"pickup_station\": \"\", " +
-                        "\"traveller_degrade\": \"\", " +
-                        "\"b_type\": 2, " +
-                        "\"env_type\": \"2\", " +
-                        "\"activity_id\": \"\", " +
-                        "\"origin_type\": \"%s\", " +
-                        "\"origin_id\": \"%s\", " +
-                        "\"new_source_type\": \"product_detail\", " +
-                        "\"new_source_id\": \"0\", " +
-                        "\"source_type\": \"0\", " +
-                        "\"source_id\": \"0\", " +
-                        "\"schema\": \"snssdk143://\", " +
-                        "\"extra\": \"{\\\"page_type\\\":\\\"lynx\\\",\\\"alkey\\\":\\\"1128_99514375927_0_3580988989001303640_010\\\",\\\"c_biz_combo\\\":\\\"8\\\",\\\"render_track_id\\\":\\\"%s\\\",\\\"risk_info\\\":\\\"{\\\\\\\"biometric_params\\\\\\\":\\\\\\\"1\\\\\\\",\\\\\\\"is_jailbreak\\\\\\\":\\\\\\\"2\\\\\\\",\\\\\\\"openudid\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"order_page_style\\\\\\\":0,\\\\\\\"checkout_id\\\\\\\":1,\\\\\\\"ecom_payapi\\\\\\\":true,\\\\\\\"ip\\\\\\\":\\\\\\\" %s\\\\\\\",\\\\\\\"sub_order_info\\\\\\\":[]}\\\"}\", " +
-                        "\"marketing_plan_id\": \"%s\", " +
-                        "\"s_type\": \"\", " +
-                        "\"entrance_params\": \"{\\\"ecom_scene_id\\\":\\\"%s\\\",\\\"carrier_source\\\":\\\"search_order_center\\\",\\\"source_method\\\":\\\"product_card\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"search_params\\\":\\\"{\\\\\\\"search_id\\\\\\\":\\\\\\\"2022111500572401021217009004237E72\\\\\\\",\\\\\\\"search_result_id\\\\\\\":\\\\\\\"3580988989001303640\\\\\\\"}\\\",\\\"card_status\\\":\\\"\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"discount_type\\\":\\\"\\\",\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"is_replay\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\",\\\"extra_campaign_type\\\":\\\"\\\"}\", " +
-                        "\"sub_b_type\": \"3\", " +
-                        "\"gray_feature\": \"PlatformFullDiscount\", " +
-                        "\"sub_way\": 0, " +
-                        "\"pay_type\": %d, " +
-                        "\"post_addr\": null, " +
-                        "\"post_receiver\": null, " +
-                        "\"post_tel\": null, " +
-                        "\"address_id\": \"0\", " +
-                        "\"price_info\": { " +
-                        "\"origin\": %d, " +
-                        "\"freight\": 0, " +
-                        "\"coupon\": 0, " +
-                        "\"pay\": %d, " +
-                        "\"packing_charge_amount\": 0 " +
-                        "}, " +
-                        "\"pay_info\": \"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\" %s\\\",\\\"os\\\":\\\"android\\\",\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"5.9.1\\\",\\\"aid\\\":\\\"1128\\\",\\\"ua\\\":\\\"okhttp/3.10.0.1\\\",\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\",\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"5.1.1\\\",\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\",\\\"appVersion\\\":\\\"17.3.0\\\",\\\"appName\\\":\\\"aweme\\\",\\\"devicePlatform\\\":\\\"android\\\",\\\"deviceType\\\":\\\"SM-G955N\\\",\\\"channel\\\":\\\"dy_tiny_juyouliang_dy_and24\\\",\\\"openudid\\\":\\\"\\\",\\\"versionCode\\\":\\\"170300\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"samsung\\\",\\\"iid\\\":\\\"%s\\\",\\\"bioType\\\":\\\"1\\\"},\\\"credit_pay_info\\\":{\\\"installment\\\":\\\"1\\\"},\\\"bank_card_info\\\":{},\\\"voucher_no_list\\\":[],\\\"zg_ext_param\\\":\\\"{\\\\\\\"activity_id\\\\\\\":\\\\\\\"AC221111211427902696954628\\\\\\\",\\\\\\\"credit_pay_param\\\\\\\":{\\\\\\\"fee_rate_per_day\\\\\\\":\\\\\\\"0.0267\\\\\\\",\\\\\\\"has_credit_param\\\\\\\":true,\\\\\\\"has_trade_time\\\\\\\":false,\\\\\\\"installment_starting_amount\\\\\\\":%d,\\\\\\\"is_credit_activate\\\\\\\":false,\\\\\\\"remaining_credit\\\\\\\":0,\\\\\\\"trade_time\\\\\\\":0},\\\\\\\"decision_id\\\\\\\":\\\\\\\"%s\\\\\\\",\\\\\\\"jr_uid\\\\\\\":\\\\\\\"1715702027264720\\\\\\\",\\\\\\\"merchant_info\\\\\\\":{\\\\\\\"app_id\\\\\\\":\\\\\\\"NA202208012041063016245258\\\\\\\",\\\\\\\"ext_uid_type\\\\\\\":0,\\\\\\\"jh_app_id\\\\\\\":\\\\\\\"8000104428743\\\\\\\",\\\\\\\"jh_merchant_id\\\\\\\":\\\\\\\"100000010442\\\\\\\",\\\\\\\"merchant_id\\\\\\\":\\\\\\\"8020220801671981\\\\\\\",\\\\\\\"merchant_name\\\\\\\":\\\\\\\"上海格物致品网络科技有限公司\\\\\\\",\\\\\\\"merchant_short_to_customer\\\\\\\":\\\\\\\"抖音电商商家\\\\\\\"},\\\\\\\"promotion_ext\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"IsZjyFlag\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"true\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"ParamOrderId\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"202211150057480843076096\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"PromotionActivityIDs\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"AC221114142041904185932574\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"sub_order_info_list\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"}\\\\\\\",\\\\\\\"promotion_process\\\\\\\":{\\\\\\\"create_time\\\\\\\":1668445070,\\\\\\\"process_id\\\\\\\":\\\\\\\"bcb4c7f641811d29e8768f9cfa2cce348d\\\\\\\",\\\\\\\"process_info\\\\\\\":\\\\\\\"\\\\\\\"},\\\\\\\"qt_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"retain_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"}\\\",\\\"jh_ext_info\\\":\\\"{\\\\\\\"payapi_cache_id\\\\\\\":\\\\\\\"%s\\\\\\\"}\\\",\\\"sub_ext\\\":\\\"\\\",\\\"biometric_params\\\":\\\"1\\\",\\\"is_jailbreak\\\":\\\"2\\\",\\\"order_page_style\\\":0,\\\"checkout_id\\\":1,\\\"pay_amount_composition\\\":[]}\", " +
-                        "\"render_token\": \"%s\", " +
-                        "\"win_record_id\": \"\", " +
-                        "\"marketing_channel\": \"\", " +
-                        "\"identity_card_id\": \"\", " +
-                        "\"pay_amount_composition\": [], " +
-                        "\"user_account\": { " +
-                        "\"account_list\": [ " +
-                        "{ " +
-                        "\"account_info_type\": \"Mobile\", " +
-                        "\"account_info_name\": \"手机号\", " +
-                        "\"account_info_value\": \"%s\", " +
-                        "\"extra\": \"{\\\"template_id\\\":\\\"1\\\",\\\"type_id\\\":\\\"1\\\",\\\"account_id\\\":\\\"1\\\",\\\"type_name\\\":\\\"手机号\\\"}\" " +
-                        "} " +
-                        "] " +
-                        "}, " +
-                        "\"queue_count\": 0, " +
-                        "\"store_id\": \"\", " +
-                        "\"shop_stock_out_handle_infos\": null, " +
-                        "\"shop_id\": \"DiSLOxMc\", " +
-                        "\"combo_id\": \"%s\", " +
-                        "\"combo_num\": 1, " +
-                        "\"product_id\": \"%s\", " +
-                        "\"buyer_words\": \"\", " +
-                        "\"stock_info\": [ " +
-                        "{ " +
-                        "\"stock_num\": 1, " +
-                        "\"sku_id\": \"%s\", " +
-                        "\"warehouse_id\": \"0\", " +
-                        "\"stock_type\": 1 " +
-                        "} " +
-                        "], " +
-                        "\"warehouse_id\": 0, " +
-                        "\"coupon_info\": {}, " +
-                        "\"freight_insurance\": false, " +
-                        "\"cert_insurance\": false, " +
-                        "\"allergy_insurance\": false, " +
-                        "\"room_id\": \"\", " +
-                        "\"author_id\": \"\", " +
-                        "\"content_id\": \"0\", " +
-                        "\"promotion_id\": \"\", " +
-                        "\"ecom_scene_id\": \"%s\", " +
-                        "\"shop_user_id\": \"\", " +
-                        "\"group_id\": \"\", " +
-                        "\"privilege_tag_keys\": [ " +
-                        "\"{\\\"Version\\\":2,\\\"PrivilegeV1\\\":null,\\\"PrivilegeV2\\\":null,\\\"UserIdentityV2\\\":{\\\"IdentityTag\\\":\\\"risk_user\\\"}}\" " +
-                        "], " +
-                        "\"select_privilege_properties\": [], " +
-                        "\"platform_deduction_info\": {}, " +
-                        "\"win_record_info\": { " +
-                        "\"win_record_id\": \"\", " +
-                        "\"win_record_type\": \"\" " +
-                        "} " +
-                        "}",
-                buyRenderParamDto.getOrigin_type(),
-                buyRenderParamDto.getOrigin_id(),
-                buyRenderRoot.getRender_track_id(),
-                payIp,
+        String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"},\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":2,\"env_type\":\"2\",\"activity_id\":\"\",\"origin_type\":\"3002070010\",\"origin_id\":\"96373965278_3580988989001303640\",\"new_source_type\":\"product_detail\",\"new_source_id\":\"0\",\"source_type\":\"0\",\"source_id\":\"0\",\"schema\":\"snssdk143://\",\"extra\":\"{\\\"page_type\\\":\\\"lynx\\\",\\\"alkey\\\":\\\"1128_96373965278_0_3580988989001303640_010\\\",\\\"c_biz_combo\\\":\\\"8\\\",\\\"render_track_id\\\":\\\"20221115195859010208017154151FCBD8\\\",\\\"risk_info\\\":\\\"{\\\\\\\"biometric_params\\\\\\\":\\\\\\\"1\\\\\\\",\\\\\\\"is_jailbreak\\\\\\\":\\\\\\\"2\\\\\\\",\\\\\\\"openudid\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"order_page_style\\\\\\\":0,\\\\\\\"checkout_id\\\\\\\":1,\\\\\\\"ecom_payapi\\\\\\\":true,\\\\\\\"ip\\\\\\\":\\\\\\\"159.138.54.221\\\\\\\",\\\\\\\"sub_order_info\\\\\\\":[]}\\\"}\",\"marketing_plan_id\":\"%s\",\"s_type\":\"\",\"entrance_params\":\"{\\\"order_status\\\":4,\\\"previous_page\\\":\\\"order_list_page\\\",\\\"carrier_source\\\":\\\"order_detail\\\",\\\"ecom_scene_id\\\":\\\"1041\\\",\\\"room_id\\\":\\\"\\\",\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"96373965278\\\",\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"discount_type\\\":\\\"{130:7164954765662355719,100:7166049817193021730}\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"auto_coupon\\\":1,\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"1\\\",\\\"is_replay\\\":\\\"0\\\",\\\"label_name_live\\\":\\\"\\\",\\\"is_with_video\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"new_source_type\\\":\\\"product_detail\\\",\\\"is_groupbuying\\\":\\\"0\\\",\\\"extra_campaign_type\\\":\\\"\\\"}\",\"sub_b_type\":\"3\",\"gray_feature\":\"PlatformFullDiscount\",\"sub_way\":0,\"pay_type\":2,\"post_addr\":null,\"post_receiver\":null,\"post_tel\":null,\"address_id\":\"0\",\"price_info\":{\"origin\":10000,\"freight\":0,\"coupon\":0,\"pay\":10000,\"packing_charge_amount\":0},\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"159.138.54.221\\\",\\\"os\\\":\\\"android\\\",\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"5.9.1\\\",\\\"aid\\\":\\\"1128\\\",\\\"ua\\\":\\\"okhttp/3.10.0.1\\\",\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\",\\\"deviceId\\\":\\\"2538093503847412\\\",\\\"osVersion\\\":\\\"5.1.1\\\",\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\",\\\"appVersion\\\":\\\"17.3.0\\\",\\\"appName\\\":\\\"aweme\\\",\\\"devicePlatform\\\":\\\"android\\\",\\\"deviceType\\\":\\\"SM-G955N\\\",\\\"channel\\\":\\\"dy_tiny_juyouliang_dy_and24\\\",\\\"openudid\\\":\\\"\\\",\\\"versionCode\\\":\\\"170300\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"samsung\\\",\\\"iid\\\":\\\"3743163984904813\\\",\\\"bioType\\\":\\\"1\\\"},\\\"credit_pay_info\\\":{\\\"installment\\\":\\\"1\\\"},\\\"bank_card_info\\\":{},\\\"voucher_no_list\\\":[],\\\"zg_ext_param\\\":\\\"{\\\\\\\"activity_id\\\\\\\":\\\\\\\"AC221111211427902696954628\\\\\\\",\\\\\\\"credit_pay_param\\\\\\\":{\\\\\\\"fee_rate_per_day\\\\\\\":\\\\\\\"0.0267\\\\\\\",\\\\\\\"has_credit_param\\\\\\\":true,\\\\\\\"has_trade_time\\\\\\\":false,\\\\\\\"installment_starting_amount\\\\\\\":1000,\\\\\\\"is_credit_activate\\\\\\\":false,\\\\\\\"remaining_credit\\\\\\\":0,\\\\\\\"trade_time\\\\\\\":0},\\\\\\\"decision_id\\\\\\\":\\\\\\\"659356656346136_1668513539277436\\\\\\\",\\\\\\\"jr_uid\\\\\\\":\\\\\\\"1715702027264720\\\\\\\",\\\\\\\"merchant_info\\\\\\\":{\\\\\\\"app_id\\\\\\\":\\\\\\\"NA202208012041063016245258\\\\\\\",\\\\\\\"ext_uid_type\\\\\\\":0,\\\\\\\"jh_app_id\\\\\\\":\\\\\\\"8000104428743\\\\\\\",\\\\\\\"jh_merchant_id\\\\\\\":\\\\\\\"100000010442\\\\\\\",\\\\\\\"merchant_id\\\\\\\":\\\\\\\"8020220801671981\\\\\\\",\\\\\\\"merchant_name\\\\\\\":\\\\\\\"上海格物致品网络科技有限公司\\\\\\\",\\\\\\\"merchant_short_to_customer\\\\\\\":\\\\\\\"抖音电商商家\\\\\\\"},\\\\\\\"promotion_ext\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"IsZjyFlag\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"true\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"ParamOrderId\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"202211151958564005675807\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"PromotionActivityIDs\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"AC221114142041904185932574\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"sub_order_info_list\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"}\\\\\\\",\\\\\\\"promotion_process\\\\\\\":{\\\\\\\"create_time\\\\\\\":1668513539,\\\\\\\"process_id\\\\\\\":\\\\\\\"bcf04ee4de757ff4291d9e126a2b5d515d\\\\\\\",\\\\\\\"process_info\\\\\\\":\\\\\\\"\\\\\\\"},\\\\\\\"qt_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"retain_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"}\\\",\\\"jh_ext_info\\\":\\\"{\\\\\\\"payapi_cache_id\\\\\\\":\\\\\\\"20221115195859277424a0zb71cy2x23\\\\\\\"}\\\",\\\"sub_ext\\\":\\\"\\\",\\\"biometric_params\\\":\\\"1\\\",\\\"is_jailbreak\\\":\\\"2\\\",\\\"order_page_style\\\":0,\\\"checkout_id\\\":1,\\\"pay_amount_composition\\\":[]}\",\"render_token\":\"%s\",\"win_record_id\":\"\",\"marketing_channel\":\"\",\"identity_card_id\":\"\",\"pay_amount_composition\":[],\"user_account\":{\"account_list\":[{\"account_info_type\":\"Mobile\",\"account_info_name\":\"手机号\",\"account_info_value\":\"13568502833\",\"extra\":\"{\\\"template_id\\\":\\\"1\\\",\\\"type_id\\\":\\\"1\\\",\\\"account_id\\\":\\\"1\\\",\\\"type_name\\\":\\\"手机号\\\"}\"}]},\"queue_count\":0,\"store_id\":\"\",\"shop_stock_out_handle_infos\":null,\"shop_id\":\"DiSLOxMc\",\"combo_id\":\"1749558839368723\",\"combo_num\":1,\"product_id\":\"3580988989001303640\",\"buyer_words\":\"\",\"stock_info\":[{\"stock_num\":1,\"sku_id\":\"1749558839368723\",\"warehouse_id\":\"0\",\"stock_type\":1}],\"warehouse_id\":0,\"coupon_info\":{},\"freight_insurance\":false,\"cert_insurance\":false,\"allergy_insurance\":false,\"room_id\":\"\",\"author_id\":\"96373965278\",\"content_id\":\"0\",\"promotion_id\":\"\",\"ecom_scene_id\":\"1041\",\"shop_user_id\":\"\",\"group_id\":\"\",\"privilege_tag_keys\":[],\"select_privilege_properties\":[],\"platform_deduction_info\":{},\"win_record_info\":{\"win_record_id\":\"\",\"win_record_type\":\"\"}}",
                 buyRenderRoot.getTotal_price_result().getMarketing_plan_id(),
-                buyRenderParamDto.getEcom_scene_id(),
-                2,
-                100 * 100,
-                100 * 100,
-                payIp,
-                device_id,
-                iid,
-                100 * 100,
-                buyRenderRoot.getPay_method().getDecision_id(),
-                buyRenderRoot.getPay_method().getDecision_id(),
-                buyRenderRoot.getRender_token(),
-                tel,
-                buyRenderParamDto.getSku_id(),
-                buyRenderParamDto.getProduct_id(),
-                buyRenderParamDto.getSku_id(),
-                buyRenderParamDto.getEcom_scene_id()
-        );
+                buyRenderRoot.getRender_token()
+                );
         System.out.println(bodyData1);
         String X_SS_STUB1 = SecureUtil.md5("json_form=" + URLEncoder.encode(bodyData1)).toUpperCase();
         String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
