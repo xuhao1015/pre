@@ -49,6 +49,7 @@ public class Douyin3 {
             return okHttpClient;
         }
         String s = HttpUtil.get("http://webapi.http.zhimacangku.com/getip?num=20&type=2&pro=&city=0&yys=0&port=1&time=1&ts=1&ys=0&cs=0&lb=1&sb=0&pb=4&mr=1&regions=");
+        log.info("ip:{}",s);
         String data = JSON.parseObject(s).getString("data");
         List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);
         for (JSONObject jsonObject : jsonObjects) {

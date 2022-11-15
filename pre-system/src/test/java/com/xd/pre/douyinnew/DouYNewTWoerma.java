@@ -52,9 +52,9 @@ public class DouYNewTWoerma {
 /*        String device_id = "device_id_str=2212649920104615";
         String iid = "install_id_str=3690393549678381";
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
-        String device_id = "device_id_str=2538093503847412";
-        String iid = "install_id_str=3743163984904813";
-        String ck = "sid_tt=140a336dd81551eaa30bc0e9e8d336fd;";
+        String device_id = "device_id_str=699724647905134";
+        String iid = "install_id_str=1508965206724398";
+        String ck = "sid_tt=80d2134c60441b05c98e74ff1ad06edc;";
 
         if (device_id.contains("device_id_str=")) {
             device_id = device_id.replace("device_id_str=", "");

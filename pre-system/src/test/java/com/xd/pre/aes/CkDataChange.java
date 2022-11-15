@@ -18,5 +18,10 @@ public class CkDataChange {
             FindOrder.db.execute("update douyin_app_ck set ck = ? where id = ?",ckaes,id);
             log.info("设置成功:{}",id);
         }
+        List<Entity> query1 = FindOrder.db.use().query("select * from douyin_app_ck where is_enable=-55 ");
+        for (Entity entity : query1) {
+            System.err.println(PreAesUtils.decrypt解密(entity.getStr("ck")));
+        }
+
     }
 }
