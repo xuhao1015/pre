@@ -876,7 +876,7 @@ public class DouyinService {
         }
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("当前查询订单:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder), 25, TimeUnit.SECONDS);
         if (!ifAbsent) {
-            log.info("当前订单,{},已经被锁定。请骚后查询", jdMchOrder.getTradeNo());
+            log.debug("当前订单,{},已经被锁定。请骚后查询", jdMchOrder.getTradeNo());
             return;
         }
         if (jdMchOrder.getStatus() == PreConstant.THREE) {
@@ -900,7 +900,7 @@ public class DouyinService {
                 DateTime dateTime = DateUtil.parseDateTime(jdOrderPt.getOrgAppCk());
                 String 成功查询订单数据不用查单 = redisTemplate.opsForValue().get("成功查询订单数据不用查单");
                 if (DateUtil.offsetMinute(dateTime, -Integer.valueOf(成功查询订单数据不用查单)).getTime() > jdMchOrder.getCreateTime().getTime()) {
-                    log.info("订单号：{}+{},分钟都大于创建时间》》》》》》》》已经查询过了。没必要继续查询", 成功查询订单数据不用查单, jdMchOrder.getTradeNo());
+                    log.debug("订单号：{}+{},分钟都大于创建时间》》》》》》》》已经查询过了。没必要继续查询", 成功查询订单数据不用查单, jdMchOrder.getTradeNo());
                     return;
                 }
             }

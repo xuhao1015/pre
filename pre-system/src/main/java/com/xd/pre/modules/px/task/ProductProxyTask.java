@@ -465,7 +465,7 @@ public class ProductProxyTask {
                 if (StrUtil.isNotBlank(data)) {
                     return;
                 }
-                log.info("订单号:{}回调订单定时任务", jdMchOrder.getTradeNo());
+                log.debug("订单号:{}回调订单定时任务", jdMchOrder.getTradeNo());
                 redisTemplate.opsForValue().set("查询订单:" + jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo(), 10, TimeUnit.SECONDS);
                 if (jdMchOrder.getStatus() != 2) {
                     try {
