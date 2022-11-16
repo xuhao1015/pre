@@ -11,7 +11,7 @@ host = 103.235.174.139
 # 端口，默认6379
 port = 6379
 # 超时，默认2000
-timeout = 20000
+timeout = 200000
 # 连接超时，默认timeout
 connectionTimeout = 200000
 # 读取超时，默认timeout
@@ -21,7 +21,7 @@ password = 1Q2W3E4Rasdf%
 # 数据库序号，默认0
 database = 1
 # 客户端名，默认"Hutool"
-clientName = Hutool1
+clientName = Hutoo3
 # SSL连接，默认false
 ssl = false;
 
@@ -37,11 +37,11 @@ jmxEnabled = true;
 # 是否启用后进先出, 默认true
 lifo = true;
 # 最大空闲连接数, 默认8个
-maxIdle = 2
+maxIdle = 4
 # 最小空闲连接数, 默认0
-minIdle = 0
+minIdle = 2
 # 最大连接数, 默认8个
-maxTotal = 3
+maxTotal = 4
 # 获取连接时的最大等待毫秒数(如果设置为阻塞时BlockWhenExhausted),如果超时就抛异常, 小于零:阻塞不确定的时间,  默认-1
 maxWaitMillis = -1
 # 逐出连接的最小空闲时间 默认1800000毫秒(30分钟)
