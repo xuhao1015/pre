@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.file.FileReader;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xd.pre.tiren.FindOrder;
 
 import java.io.File;
 import java.util.Date;
@@ -24,6 +25,11 @@ public class InsertData {
                     String format = String.format("INSERT INTO douyin_device_iid (  device_id, iid,fail_reason ,is_enable )VALUES('%s', '%s','%s',%d);",
                             parseObject.getString("device_id_str"), parseObject.getString("install_id_str"), DateUtil.formatDateTime(new Date()),1);
                     System.out.println(format);
+                        try {
+                            int execute = FindOrder.db.execute(format);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                 }
             }
         }

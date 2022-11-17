@@ -15,10 +15,10 @@ maximumPoolSize = 5
 
 ## 可选配置
 # 是否在日志中显示执行的SQL
-showSql = true
+showSql = false
 # 是否格式化显示的SQL
 formatSql = false
 # 是否显示SQL参数
-showParams = true
+showParams = false
 # 打印SQL的日志等级，默认debug
 sqlLevel = info

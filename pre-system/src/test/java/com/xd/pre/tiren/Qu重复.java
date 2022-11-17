@@ -1,8 +1,11 @@
 package com.xd.pre.tiren;
 
 
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.xd.pre.common.aes.PreAesUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,9 +30,20 @@ public class Qu重复 {
             }
         }
         Map<String, List<String>> collect = data.stream().collect(Collectors.groupingBy(it -> it));
+        Db db = FindOrder.db;
         for (String s : collect.keySet()) {
             if (collect.get(s).size() == 1) {
-                System.out.println(s);
+                List<Entity> query = db.query("select * from jd_order_pt where car_my = ?", PreAesUtils.encrypt加密(s));
+                String sku_price = query.get(0).getStr("sku_price");
+                System.out.println(sku_price+"---缺少---"+s);
+            }
+        }
+        System.out.println("================================");
+        for (String s : collect.keySet()) {
+            if (collect.get(s).size() == 3) {
+                List<Entity> query = db.query("select * from jd_order_pt where car_my = ?", PreAesUtils.encrypt加密(s));
+                String sku_price = query.get(0).getStr("sku_price");
+                System.out.println(sku_price+"---重复---"+s);
             }
         }
     }
