@@ -27,7 +27,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1593098329293242368");
+        outOrders.add("P1593294638304907264");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -113,6 +113,7 @@ public class FindOrder {
             log.info("没有支付");
             return;
         }
+        log.info("当前订单支付成功：{}",outOrder);
         db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);

@@ -48,19 +48,16 @@ public class Douyin3 {
             OkHttpClient okHttpClient = Demo.getOkHttpClient(linshiIpAndData.getIp(), linshiIpAndData.getPort());
             return okHttpClient;
         }
-        String s = HttpUtil.get("http://webapi.http.zhimacangku.com/getip?num=20&type=2&pro=&city=0&yys=0&port=1&time=1&ts=1&ys=0&cs=0&lb=1&sb=0&pb=4&mr=1&regions=");
+        String s = HttpUtil.get("http://route.xiongmaodaili.com/xiongmao-web/api/bgl?secret=56100da16d7b18220d236a3f918c1003&orderNo=BGL20221118040117RrcQFqxA&count=20&isTxt=0&proxyType=1");
         log.info("ip:{}",s);
-        String data = JSON.parseObject(s).getString("data");
+        String data = JSON.parseObject(s).getString("obj");
         List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);
         for (JSONObject jsonObject : jsonObjects) {
-            String expire_time = jsonObject.getString("expire_time");
             String ip = jsonObject.getString("ip");
-            Integer port = jsonObject.getInteger("port");
-            LinshiIpAndData build = LinshiIpAndData.builder().ip(ip).port(port).build();
+            String port = jsonObject.getString("port");
+            LinshiIpAndData build = LinshiIpAndData.builder().ip(ip).port(Integer.valueOf(port)).build();
             jedis.set("ip缓存临时:" + ip, JSON.toJSONString(build));
-            DateTime dateTime = DateUtil.parseDateTime(expire_time);
-            long l = (dateTime.getTime() - System.currentTimeMillis()) / 1000;
-            jedis.expire("ip缓存临时:" + ip, Integer.valueOf(l + ""));
+            jedis.expire("ip缓存临时:" + ip,130 );
         }
         return getIpAndPort20();
     }
