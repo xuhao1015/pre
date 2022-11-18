@@ -27,7 +27,7 @@ public class FindOrderDai {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1591404592370978816");
+        outOrders.add("P1593575617581993984");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -42,11 +42,11 @@ public class FindOrderDai {
                         " jd_mch_order mo " +
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
-                        " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 25 MINUTE )  " +
+                        " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 20 MINUTE )  " +
+                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 3 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
-                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 20  and op.html like '%待发卷%' " +
+                        " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 7  and op.html like '%待发卷%' " +
                         " AND mo.`status` != 2;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
