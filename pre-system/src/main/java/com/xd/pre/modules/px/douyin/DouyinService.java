@@ -543,7 +543,7 @@ public class DouyinService {
                 jdOrderPtMapper.updateById(jdOrderPt);
                 return null;
             }
-            log.info("订单号{}，原始订单号:{}支付消息返回数据msg:{}", jdMchOrder.getTradeNo(),payDto.getOrderId() ,payData);
+            log.info("订单号{}，原始订单号:{}支付消息返回数据msg:{}", jdMchOrder.getTradeNo(), payDto.getOrderId(), payData);
             String payUrl = JSON.parseObject(JSON.parseObject(JSON.parseObject(JSON.parseObject(payData).getString("data")).getString("data"))
                     .getString("sdk_info")).getString("url");
             redisTemplate.opsForValue().set("阿里支付数据:" + jdMchOrder.getTradeNo(), payUrl, 3, TimeUnit.MINUTES);
@@ -839,6 +839,14 @@ public class DouyinService {
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                 douyinAppCkMapper.updateById(douyinAppCk);
+                return null;
+            }
+            if (StrUtil.isNotBlank(resBody) && resBody.contains("商品不可购买，请返回上级页面重新选购")) {
+                douyinAppCk.setIsEnable(-2);
+                douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
+                PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                douyinAppCkMapper.updateById(douyinAppCk);
+                return null;
             }
             response.close();
             BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
