@@ -517,7 +517,7 @@ public class DouyinService {
             );
             String signUrl = getSignUrl();
             log.info("订单号{}，签证地址msg:{}", jdMchOrder.getTradeNo(), signUrl);
-            String signHt = HttpRequest.post(signUrl).body(signData).timeout(2000).execute().body();
+            String signHt = HttpRequest.post(signUrl).body(signData).timeout(4000).execute().body();
             String x_gorgon = JSON.parseObject(signHt).getString("x-gorgon");
             String x_khronos = JSON.parseObject(signHt).getString("x-khronos");
             RequestBody body = RequestBody.create(mediaType, bodyData);
