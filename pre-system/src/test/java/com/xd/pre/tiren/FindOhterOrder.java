@@ -10,12 +10,12 @@ import okhttp3.Response;
 public class FindOhterOrder {
     public static void main(String[] args) {
         try {
-                String original_trade_no = "5000186232926541196";
+                String original_trade_no = "5002754150917891307";
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder()
                         .url("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?aid=45465&order_id=" + original_trade_no)
                         .get()
-                        .addHeader("Cookie", PreAesUtils.decrypt解密("sid_tt=d70b9d75fa4bafd4cc8d0e8fcdd07369;sessionid=d70b9d75fa4bafd4cc8d0e8fcdd07369;sessionid_ss=d70b9d75fa4bafd4cc8d0e8fcdd07369;"))
+                        .addHeader("Cookie", PreAesUtils.decrypt解密("PX3Mt06tLah+uD1v40Uv7lwXma+21vgc8RXq018QhR8kA41GnWhcSfh7gUS8r/a+"))
                         .addHeader("X-Khronos", "1665697911")
                         .addHeader("X-Gorgon", "8404d4860000775655c5b8f6315f8a608a802f3a78e4891a08cc")
                         .addHeader("User-Agent", "okhttp/3.10.0.1")
