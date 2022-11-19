@@ -14,7 +14,7 @@ import java.util.List;
 
 public class 查订单 {
     public static void main(String[] args) throws Exception{
-        List<Entity> query = FindOrder.db.query("select * from douyin_app_ck where file_name = '20221119_1.txt' and uid =?","103020901100");
+        List<Entity> query = FindOrder.db.query("select * from douyin_app_ck where  uid =?","1561735893092860");
         for (Entity entity : query) {
             String ck = PreAesUtils.decrypt解密(entity.getStr("ck"));
             OkHttpClient client = new OkHttpClient();

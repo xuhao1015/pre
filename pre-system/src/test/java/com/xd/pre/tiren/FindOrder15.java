@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.constant.PreConstant;
+import com.xd.pre.modules.px.douyin.DouyinService;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -115,5 +116,15 @@ public class FindOrder15 {
         db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
+        DouyinService douyinService = new DouyinService();
+        Boolean ac100030 = douyinService.isac100030Zr100040(client,  entity.getStr("trade_no"), original_trade_no, current_ck, "100030");
+        if(ac100030){
+            db.use().execute("update jd_order_pt set action_id = ? where order_id = ?",100030,original_trade_no);
+            Boolean ac100040 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100040");
+            if(ac100040){
+                db.use().execute("update jd_order_pt set action_id = ? where order_id = ?",100040,original_trade_no);
+                log.info("删除订单成功:{}",outOrder);
+            }
+        }
     }
 }
