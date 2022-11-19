@@ -1273,6 +1273,10 @@ public class DouyinService {
 
     private void taskSetDelete(JdOrderPt jdOrderPt) {
         OkHttpClient client = pcAppStoreService.buildClient();
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除订单任务:" + jdOrderPt.getOrderId(), "查询订单删除", 20, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            return;
+        }
         JdMchOrder jdMchOrder = jdMchOrderMapper.selectOne(Wrappers.<JdMchOrder>lambdaQuery().eq(JdMchOrder::getOriginalTradeNo, jdOrderPt.getOrderId()));
         if (ObjectUtil.isNull(jdMchOrder)) {
             return;
