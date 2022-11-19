@@ -30,6 +30,8 @@ public class DouYNewCheck {
         for (Entity appCk : appCks) {
             String ck = PreAesUtils.decrypt解密(appCk.getStr("ck"));
             Integer id = appCk.getInt("id");
+            int i = appCks.indexOf(appCk);
+            log.info("当前执行位置msg:{},剩余个数:{}",i,appCks.size()-i-1);
             try {
                 checkCk(ck,id);
             }catch (Exception e){
