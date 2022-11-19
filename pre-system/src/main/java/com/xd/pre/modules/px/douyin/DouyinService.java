@@ -979,7 +979,7 @@ public class DouyinService {
                 JSONObject voucher_info = voucher_info_list.get(PreConstant.ZERO);
                 String code = voucher_info.getString("code");
                 if (StrUtil.isNotBlank(code)) {
-                    updateSuccess(jdMchOrder, jdOrderPt, code);
+                    updateSuccess(jdMchOrder, jdOrderPt, code, client);
                     log.info("订单号：{}，开始计算成功金额,pin:{}", jdMchOrder.getTradeNo());
                     return;
                 }
@@ -1140,7 +1140,7 @@ public class DouyinService {
                 }
                 log.info("订单号:{}支付成功msg:", jdMchOrder.getTradeNo());
                 if (StrUtil.isNotBlank(code)) {
-                    updateSuccess(jdMchOrder, jdOrderPt, code);
+                    updateSuccess(jdMchOrder, jdOrderPt, code, client);
                     return;
                 }
             } catch (Exception e) {
@@ -1150,7 +1150,7 @@ public class DouyinService {
         }
     }
 
-    private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code) {
+    private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code, OkHttpClient client) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         log.info("订单号{}，当前获取的卡密成功", jdMchOrder.getTradeNo());
         jdOrderPt.setCardNumber(PreAesUtils.encrypt加密(code));
@@ -1174,14 +1174,107 @@ public class DouyinService {
         } catch (Exception e) {
             log.error("删除黑名单报错:{}", jdMchOrder.getTradeNo());
         }
+        log.info("执行删除订单msg:{}", jdMchOrder.getTradeNo());
+        try {
+            isDelete(client, jdMchOrder, jdOrderPt);
+        } catch (Exception e) {
+            log.info("删除订单报错:{},e：{}", jdMchOrder.getTradeNo(), e.getMessage());
+        }
 
     }
 
+    public void isDelete(OkHttpClient client, JdMchOrder jdMchOrder, JdOrderPt jdOrderPt) {
+        jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
+        if (jdOrderPt.getActionId().equals(100040)) {
+            log.info("当前状态为100040。不需要修改", jdMchOrder.getTradeNo());
+            return;
+        }
+        if (jdOrderPt.getActionId().equals(0)) {
+            for (int i = 0; i < 2; i++) {
+                Boolean isac100030 = isac100030Zr100040(client, jdMchOrder.getTradeNo(), jdOrderPt.getOrderId(), jdOrderPt.getCurrentCk(), "100030");
+                if (isac100030) {
+                    log.info("设置使用成功msg:{}", jdMchOrder.getTradeNo());
+                    log.info("修改订单号的状态为msg:{}", jdMchOrder.getTradeNo(), "100030");
+                    jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
+                    jdOrderPt.setActionId(100030);
+                    jdOrderPtMapper.updateById(jdOrderPt);
+                    break;
+                }
+            }
+        }
+        jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
+        if (jdOrderPt.getActionId().equals(100030)) {
+            for (int i = 0; i < 2; i++) {
+                Boolean isac100040 = isac100030Zr100040(client, jdMchOrder.getTradeNo(), jdOrderPt.getOrderId(), jdOrderPt.getCurrentCk(), "100040");
+                if (isac100040) {
+                    log.info("设置删除成功msg:{}", jdMchOrder.getTradeNo());
+                    log.info("修改订单号的状态为msg:{}", jdMchOrder.getTradeNo(), "100040");
+                    jdOrderPt = jdOrderPtMapper.selectById(jdOrderPt.getId());
+                    jdOrderPt.setActionId(100040);
+                    jdOrderPtMapper.updateById(jdOrderPt);
+                    return;
+                }
+            }
+        }
+    }
+
+    public Boolean isac100030Zr100040(OkHttpClient client, String tradeNo, String originalTradeNo, String currentCk, String ac) {
+        try {
+            MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+            RequestBody body = RequestBody.create(mediaType, String.format("source=1&business_line=2&app_name=aweme&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&order_id=%s&action_id=%s",
+                    originalTradeNo, ac));
+            Request request = new Request.Builder()
+                    .url("https://aweme.snssdk.com/aweme/v1/commerce/order/action/postExec/?aid=1128&channel=dy_tiny_juyouliang_dy_and24&device_platform=android")
+                    .post(body)
+                    .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(currentCk))
+                    .build();
+            Response response = client.newCall(request).execute();
+            String str100030 = response.body().string();
+            if (StrUtil.isNotBlank(str100030) && str100030.contains(ac) && JSON.parseObject(str100030).getInteger("status_code") == 0) {
+                log.info("订单使用成功:{},msg:{},原始订单号:{}", ac, tradeNo, originalTradeNo);
+                return true;
+            }
+        } catch (Exception e) {
+            log.info("提交使用订单ac:{},数据报错msg:{},e:{}", ac, tradeNo, e.getMessage());
+        }
+        return false;
+    }
+
+
     @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
-    public void selectOrderDeail() {
+    public void deleteOrderData() {
+        List<String> skus = new ArrayList<>();
+        skus.add("1736502463777799");
+        skus.add("1739136614382624");
+        skus.add("1739136822194211");
+        skus.add("1745277214000191");
+        String shijianM = redisTemplate.opsForValue().get("订单删除有效期时间");
+        DateTime dateTime = DateUtil.offsetMinute(new Date(), -Integer.valueOf(shijianM));
+        LambdaQueryWrapper<JdOrderPt> ac0 = Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getCreateTime, dateTime).eq(JdOrderPt::getActionId, 0).isNotNull(JdOrderPt::getCarMy).in(JdOrderPt::getSkuId, skus);
+        LambdaQueryWrapper<JdOrderPt> ac100030 = Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getCreateTime, dateTime).eq(JdOrderPt::getActionId, 100030).isNotNull(JdOrderPt::getCarMy).in(JdOrderPt::getSkuId, skus);
+        List<JdOrderPt> jdOrderPtAc0 = jdOrderPtMapper.selectList(ac0);
+        List<JdOrderPt> jdOrderPtAc100030 = jdOrderPtMapper.selectList(ac100030);
+        if (CollUtil.isNotEmpty(jdOrderPtAc0)) {
+            for (JdOrderPt jdOrderPt : jdOrderPtAc0) {
+                taskSetDelete(jdOrderPt);
+            }
+        }
+        if (CollUtil.isNotEmpty(jdOrderPtAc100030)) {
+            for (JdOrderPt jdOrderPt : jdOrderPtAc100030) {
+                taskSetDelete(jdOrderPt);
+            }
+        }
+    }
 
-
+    private void taskSetDelete(JdOrderPt jdOrderPt) {
+        OkHttpClient client = pcAppStoreService.buildClient();
+        JdMchOrder jdMchOrder = jdMchOrderMapper.selectOne(Wrappers.<JdMchOrder>lambdaQuery().eq(JdMchOrder::getOriginalTradeNo, jdOrderPt.getOrderId()));
+        if (ObjectUtil.isNull(jdMchOrder)) {
+            return;
+        }
+        isDelete(client, jdMchOrder, jdOrderPt);
     }
 
     @Scheduled(cron = "0/20 * * * * ?")

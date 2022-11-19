@@ -61,6 +61,7 @@ public class JdOrderPt {
     private String wphCardPhone;
     private String mark;
     private Integer tenantId;
+    private Integer actionId;
 
     @TableField(exist = false)
     private Integer isEnable;
