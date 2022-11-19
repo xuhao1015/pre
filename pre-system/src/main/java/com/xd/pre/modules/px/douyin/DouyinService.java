@@ -1231,6 +1231,9 @@ public class DouyinService {
                     .build();
             Response response = client.newCall(request).execute();
             String str100030 = response.body().string();
+            if (str100030.contains("用户未登录")) {
+                return true;
+            }
             if (StrUtil.isNotBlank(str100030) && str100030.contains(ac) && JSON.parseObject(str100030).getInteger("status_code") == 0) {
                 log.info("订单使用成功:{},msg:{},原始订单号:{}", ac, tradeNo, originalTradeNo);
                 return true;
