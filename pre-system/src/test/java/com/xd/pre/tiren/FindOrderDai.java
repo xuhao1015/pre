@@ -43,8 +43,8 @@ public class FindOrderDai {
                         " jd_mch_order mo " +
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
-                        " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 20 MINUTE )  " +
-                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 3 MINUTE )  " +
+                        " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
+                        " AND mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL 10 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
                         " AND timestampdiff( MINUTE, mo.click_pay, op.org_app_ck ) < 7  and op.html like '%待发卷%' " +
