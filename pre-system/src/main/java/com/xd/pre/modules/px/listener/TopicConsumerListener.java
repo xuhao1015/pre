@@ -496,7 +496,7 @@ public class TopicConsumerListener {
         JdMchOrder jdMchOrderDb = jdMchOrderMapper.selectById(jdMchOrder.getId());
         if ((ObjectUtil.isNotNull(r) && (Boolean) r.getData()) || jdMchOrderDb.getStatus() == PreConstant.TWO) {
             log.info("订单号{}，支付成功++++++++，设置永久的通知", jdMchOrder.getTradeNo());
-            redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder), 30, TimeUnit.DAYS);
+            redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder), 120, TimeUnit.MINUTES);
             this.sendMessageNotTime(this.notify_success_queue, JSON.toJSONString(jdMchOrder));
             return;
         }
