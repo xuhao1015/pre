@@ -41,7 +41,7 @@ public class Check {
         String notUse = "56eb748c437c01e1932423dbe0a32015;936e154a11e17dd7a78293bb6d4602e6;8bddce4a0b88b7b33ad34419b8f7febb;12016212c714adb3acfc1a1c586f7c62;" +
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-10");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44 and id < 3810");
 //        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 2718");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
@@ -52,7 +52,6 @@ public class Check {
             }
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(device_data_str, DouyinDeviceIid.class);
             try {
-
                 boolean b = mian1(douyinDeviceIid.getDeviceId(), douyinDeviceIid.getIid(), entity.getStr("ck"), douyinDeviceIid.getId(), entity.getStr("uid"));
                 if (b) {
                     db.use().execute("update douyin_app_ck set is_enable = ? , fail_reason = ? where id = ?", -20,"{}", entity.getInt("id"));

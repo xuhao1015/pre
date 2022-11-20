@@ -22,7 +22,6 @@ import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class TestResoData {
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44  and  file_name ='20221119_1.txt' and id >5792 ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44 and id < 5863");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
         List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 12279  ");
         for (Entity entity : appCks) {
@@ -120,7 +119,7 @@ public class TestResoData {
 
     }
 
-    private static boolean mian1(String device_id, String iid, String ck, Integer deiviesId, String uid) throws IOException, SQLException {
+    private static boolean mian1(String device_id, String iid, String ck, Integer deiviesId, String uid) throws Exception {
         Integer payType = 1;
         String payIp = PreUtils.getRandomIp();
 
@@ -147,6 +146,9 @@ public class TestResoData {
 //        System.err.println(JSON.toJSONString(buyRenderParamDto));
         String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
         OkHttpClient client = Douyin3.getIpAndPort20();
+        if(false){
+            throw new Exception();
+        }
 //        OkHttpClient client = new OkHttpClient().newBuilder().build();;
 
 //        String body = "{\"address\":null,\"platform_coupon_id\":null,\"kol_coupon_id\":null,\"auto_select_best_coupons\":true,\"customize_pay_type\":\"{\\\"checkout_id\\\":1,\\\"bio_type\\\":\\\"1\\\"}\",\"first_enter\":true,\"source_type\":\"1\",\"shape\":0,\"marketing_channel\":\"\",\"forbid_redpack\":false,\"support_redpack\":true,\"use_marketing_combo\":false,\"entrance_params\":\"{\\\"order_status\\\":3,\\\"previous_page\\\":\\\"order_list_page\\\",\\\"carrier_source\\\":\\\"order_detail\\\",\\\"ecom_scene_id\\\":\\\"1041\\\",\\\"room_id\\\":\\\"\\\",\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"4051040200033531\\\",\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"is_replay\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\"}\",\"shop_requests\":[{\"shop_id\":\"GceCTPIk\",\"product_requests\":[{\"product_id\":\"3556357046087622442\",\"sku_id\":\"1736502463777799\",\"sku_num\":1,\"author_id\":\"4051040200033531\",\"ecom_scene_id\":\"1041\",\"origin_id\":\"4051040200033531_3556357046087622442\",\"origin_type\":\"3002070010\",\"new_source_type\":\"product_detail\",\"select_privilege_properties\":[]}]}]}";

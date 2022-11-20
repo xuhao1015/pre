@@ -45,7 +45,7 @@ public class 查订单 {
                         FindOrder.db.execute("insert into  temp_c  VALUES (?,?)",order_id,ck);
                     }
                     else {
-                        System.err.println("我的订单:"+order_id);
+//                        System.err.println("我的订单:"+order_id);
                     }
                 }
                 else {
