@@ -798,7 +798,7 @@ public class JdCkSysController {
             List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT));
             List<String> skus = jdAppStoreConfigs.stream().map(JdAppStoreConfig::getSkuId).collect(Collectors.toList());
             orderPts = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getPaySuccessTime, lastDownloadTime).isNotNull(JdOrderPt::getCarMy)
-                    .in(JdOrderPt::getSkuId, skus));
+                    .in(JdOrderPt::getSkuId, skus).orderByDesc(JdOrderPt::getPaySuccessTime));
         }
         if (CollUtil.isEmpty(orderPts)) {
             throw new RuntimeException("没有可用数据");
