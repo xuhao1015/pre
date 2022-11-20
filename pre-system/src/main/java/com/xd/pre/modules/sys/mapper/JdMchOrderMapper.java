@@ -56,8 +56,8 @@ public interface JdMchOrderMapper extends BaseMapper<JdMchOrder> {
             " jd_mch_order mo " +
             " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
             " WHERE " +
-            " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-            " and mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL  5  MINUTE )  " +
+            " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 30 MINUTE )  " +
+            " and mo.create_time < DATE_SUB( SYSDATE( ), INTERVAL  2  MINUTE )  " +
             " and mo.original_trade_id is not null  and mo.click_pay is not null  " +
             " and mo.click_pay !='1970-01-01 08:00:00' " +
             " AND op.html IS NULL " +

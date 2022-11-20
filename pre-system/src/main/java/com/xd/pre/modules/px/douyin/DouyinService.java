@@ -1079,8 +1079,6 @@ public class DouyinService {
         PreTenantContextHolder.setCurrentTenantId(1L);
         Integer time = Integer.valueOf(redisTemplate.opsForValue().get("补单时间"));
         List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectBuDan(time);
-        List<JdMchOrder> jdMchOrders1 = jdMchOrderMapper.selectbudanData10();
-        jdMchOrders.addAll(jdMchOrders1);
         if (CollUtil.isEmpty(jdMchOrders)) {
             return;
         }
