@@ -567,7 +567,7 @@ public class DouyinService {
     }
 
     public PayDto createOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType,
-                              DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder,TimeInterval timer, String phone) {
+                              DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, TimeInterval timer, String phone) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
 //        redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 4, TimeUnit.HOURS);
         String deviceBangDing = redisTemplate.opsForValue().get("抖音和设备号关联:" + douyinAppCk.getUid());
@@ -762,20 +762,6 @@ public class DouyinService {
                     return payDto;
                 } else {
                     douyinAppCk.setFailReason(douyinAppCk.getFailReason() + bodyRes1);
-                    if (StrUtil.isNotBlank(bodyRes1) && bodyRes1.contains("当前下单人数过多")) {
-                        log.info("订单号{}，下单次数过多记录一下当前的设备号和id号,并且切换ip", jdMchOrder.getTradeNo());
-//                        client = pcAppStoreService.buildClient();
-                        //统计一下设备号和当前ck失败的次数
-                        redisTemplate.opsForValue().increment("抖音设备号失败次数:" + douyinDeviceIid.getDeviceId());
-                        redisTemplate.opsForValue().increment("抖音账号失败次数:" + douyinAppCk.getUid());
-                        douyinDeviceIid.setFail(douyinDeviceIid.getFail() + 1);
-                        douyinDeviceIidMapper.updateById(douyinDeviceIid);
-                        if (douyinDeviceIid.getFail() > 10 && ObjectUtil.isNotNull(douyinDeviceIid.getLastSuccessTime())) {
-                            log.info("订单号:{}设置当前设备号不用了deviceId:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
-                            douyinDeviceIid.setIsEnable(PreConstant.TWO);
-                            douyinDeviceIidMapper.updateById(douyinDeviceIid);
-                        }
-                    }
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                     douyinAppCkMapper.updateById(douyinAppCk);
                 }
@@ -1244,7 +1230,7 @@ public class DouyinService {
     public void deleteOrderData() {
         List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT)
                 .eq(JdAppStoreConfig::getIsProduct, PreConstant.ONE));
-        if(CollUtil.isEmpty(jdAppStoreConfigs)){
+        if (CollUtil.isEmpty(jdAppStoreConfigs)) {
             return;
         }
         List<String> skus = jdAppStoreConfigs.stream().map(it -> it.getSkuId()).collect(Collectors.toList());
