@@ -736,7 +736,7 @@ public class NewWeiXinPayUrl {
     public R getCartNumAndMy(JdMchOrder jdMchOrder) {
         try {
             String orderPtId = jdMchOrder.getOriginalTradeNo();
-            log.info("获取卡密详情数据的OrderId msg:{}", orderPtId);
+            log.debug("获取卡密详情数据的OrderId msg:{}", orderPtId);
             JdOrderPt jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getOrderId, orderPtId));
             if (ObjectUtil.isNull(jdOrderPt)) {
                 return null;
