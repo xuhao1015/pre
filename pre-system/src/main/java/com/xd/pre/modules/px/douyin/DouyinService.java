@@ -59,6 +59,10 @@ public class DouyinService {
     @Resource
     private DouyinAppCkMapper douyinAppCkMapper;
 
+
+    @Resource
+    private JdAppStoreConfigMapper jdAppStoreConfigMapper;
+
     @Resource
     private DouyinDeviceIidMapper douyinDeviceIidMapper;
 
@@ -1246,11 +1250,12 @@ public class DouyinService {
     @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
     public void deleteOrderData() {
-        List<String> skus = new ArrayList<>();
-        skus.add("1736502463777799");
-        skus.add("1739136614382624");
-        skus.add("1739136822194211");
-        skus.add("1745277214000191");
+        List<JdAppStoreConfig> jdAppStoreConfigs = jdAppStoreConfigMapper.selectList(Wrappers.<JdAppStoreConfig>lambdaQuery().eq(JdAppStoreConfig::getGroupNum, PreConstant.EIGHT)
+                .eq(JdAppStoreConfig::getIsProduct, PreConstant.ONE));
+        if(CollUtil.isEmpty(jdAppStoreConfigs)){
+            return;
+        }
+        List<String> skus = jdAppStoreConfigs.stream().map(it -> it.getSkuId()).collect(Collectors.toList());
         String shijianM = redisTemplate.opsForValue().get("订单删除有效期时间");
         DateTime dateTime = DateUtil.offsetMinute(new Date(), -Integer.valueOf(shijianM));
         LambdaQueryWrapper<JdOrderPt> ac0 = Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getCreateTime, dateTime).eq(JdOrderPt::getActionId, 0).isNotNull(JdOrderPt::getCarMy).in(JdOrderPt::getSkuId, skus);
