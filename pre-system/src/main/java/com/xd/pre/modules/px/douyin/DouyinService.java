@@ -733,6 +733,8 @@ public class DouyinService {
                         timer.interval(),
                         bodyRes1);
                 if (bodyRes1.contains("order_id")) {
+                    douyinAppCk.setSuccessTime(new Date());
+                    douyinAppCkMapper.updateById(douyinAppCk);
                     log.info("订单号:{},设备号重复使用查询和删除", jdMchOrder.getTradeNo());
 //                    deleteLockCk(douyinAppCk, douyinDeviceIid);
                     redisTemplate.opsForValue().set("抖音锁定设备:" + douyinDeviceIid.getId(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);

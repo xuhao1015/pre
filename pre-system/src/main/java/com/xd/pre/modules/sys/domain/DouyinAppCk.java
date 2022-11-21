@@ -40,4 +40,5 @@ public class DouyinAppCk {
     private Integer maxAmount;
     private Integer isOld;
     private Integer tenantId;
+    private Date successTime;
 }
