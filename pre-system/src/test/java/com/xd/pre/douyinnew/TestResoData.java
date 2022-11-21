@@ -43,9 +43,7 @@ public class TestResoData {
         String device_id = "";
         String iid = "";
         String ck = ";";
-        String notUse = "56eb748c437c01e1932423dbe0a32015;936e154a11e17dd7a78293bb6d4602e6;8bddce4a0b88b7b33ad34419b8f7febb;12016212c714adb3acfc1a1c586f7c62;" +
-                "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
-                "6bf923d1af1c9fe3be9e03dea311382e;";
+        String notUse = "";
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44  and  file_name ='20221119_1.txt' and id >5792 ");
         List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = -10");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
