@@ -766,6 +766,9 @@ public class DouyinService {
                     if(bodyRes1.contains("设备存在异常")){
                         douyinAppCk.setIsEnable(-44);
                     }
+                    if(bodyRes1.contains("当前下单人数过")){
+                        douyinAppCk.setIsEnable(-10);
+                    }
                     douyinAppCkMapper.updateById(douyinAppCk);
                 }
             } catch (Exception e) {
