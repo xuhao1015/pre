@@ -16,6 +16,7 @@ import com.xd.pre.modules.px.douyin.buyRender.BuyRenderParamDto;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.submit.SubmitUtils;
 import com.xd.pre.modules.sys.domain.DouyinDeviceIid;
+import com.xd.pre.tiren.FindOrder;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import redis.clients.jedis.Jedis;
@@ -46,9 +47,9 @@ public class TestResoData {
                 "ee8c10ff32bdbb4263aa051b43f987d1;33f2eb6aef641d58b7859f6ef4403e05;a0ee1313a37eea915763ec5da6012726;" +
                 "6bf923d1af1c9fe3be9e03dea311382e;";
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44  and  file_name ='20221119_1.txt' and id >5792 ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44 and id > 5875");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = -10");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 12632  ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 12758  ");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             jedis.del("抖音和设备号关联:" + uid);
@@ -147,6 +148,10 @@ public class TestResoData {
         String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
         OkHttpClient client = Douyin3.getIpAndPort20();
         if(false){
+            Set<String> keys = jedis.keys("ip缓存临时:*");
+            for (String key : keys) {
+                jedis.del(key);
+            }
             throw new Exception();
         }
 //        OkHttpClient client = new OkHttpClient().newBuilder().build();;
@@ -340,6 +345,9 @@ public class TestResoData {
             String s = jedis.get("抖音和设备号关联:" + uid.trim());
             log.info("数据库查询管理关系为msg:{}", s);
             return true;
+        }
+        if(bodyRes1.contains("唤起支付")){
+            db.use().execute("update douyin_app_ck set is_enable = ? , fail_reason = ? where uid = ?", -55, "唤起支付",uid);
         }
         log.info("msg:{}", bodyRes1);
         return false;
