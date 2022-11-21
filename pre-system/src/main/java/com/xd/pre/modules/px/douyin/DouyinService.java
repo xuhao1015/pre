@@ -763,6 +763,9 @@ public class DouyinService {
                 } else {
                     douyinAppCk.setFailReason(douyinAppCk.getFailReason() + bodyRes1);
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                    if(bodyRes1.contains("设备存在异常")){
+                        douyinAppCk.setIsEnable(-44);
+                    }
                     douyinAppCkMapper.updateById(douyinAppCk);
                 }
             } catch (Exception e) {
