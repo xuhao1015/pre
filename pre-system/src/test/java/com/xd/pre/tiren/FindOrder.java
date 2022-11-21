@@ -28,7 +28,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1594685610716745728");
+        outOrders.add("P1594761823351132160");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -54,7 +54,7 @@ public class FindOrder {
             }
             if (CollUtil.isEmpty(query)) {
                 log.info("没有数据需要补单,全部查询完毕");
-                Thread.sleep(5 * 1000);
+                Thread.sleep(10 * 1000);
                 continue;
             } else {
                 for (Entity entity : query) {
@@ -67,7 +67,7 @@ public class FindOrder {
                 }
             }
             log.info("全部查询完毕++++++++++=");
-            Thread.sleep(5 * 1000);
+            Thread.sleep(20 * 1000);
         }
     }
 
