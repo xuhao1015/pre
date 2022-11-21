@@ -299,13 +299,10 @@ public class TopicConsumerListener {
     //queue模式的消费者
     @JmsListener(destination = "product_douyin_stock_queue", containerFactory = "queueListener", concurrency = "30")
     public void product_douyin_stock_queue(String message) {
-        log.info("生产库存appstore");
         JdAppStoreConfig jdAppStoreConfig = JSON.parseObject(message, JdAppStoreConfig.class);
-        log.info("生产appstore");
         Integer 抖音生产订单最快每天放入MQ速度 = Integer.valueOf(redisTemplate.opsForValue().get("抖音生产订单最快每天放入MQ速度"));
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("抖音生产订单刚刚放入最大小号数:" + jdAppStoreConfig.getId(), "1", 抖音生产订单最快每天放入MQ速度, TimeUnit.SECONDS);
         if (!ifAbsent) {
-            log.info("刚刚放入。不需要再放");
             return;
         }
         PreTenantContextHolder.setCurrentTenantId(1L);
