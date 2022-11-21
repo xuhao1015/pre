@@ -862,7 +862,7 @@ public class DouyinService {
     public void selectOrderStataus(JdOrderPt jdOrderPt, JdMchOrder jdMchOrder) {
         String isfindOrderStatus = redisTemplate.opsForValue().get("是否查询阿里支付数据:" + jdMchOrder.getTradeNo().trim());
         if (StrUtil.isBlank(isfindOrderStatus)) {
-            log.info("订单号:{}没有访问数据。不需要查询", jdMchOrder.getTradeNo());
+            log.debug("订单号:{}没有访问数据。不需要查询", jdMchOrder.getTradeNo());
             return;
         }
         Integer sufClickPay = Integer.valueOf(redisTemplate.opsForValue().get("查单点击时间相隔时间"));
