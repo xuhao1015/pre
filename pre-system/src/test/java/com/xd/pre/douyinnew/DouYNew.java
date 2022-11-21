@@ -54,7 +54,7 @@ public class DouYNew {
         String ck = "sid_tt=a49fc00a89ad7b3871d3b2244b1cc4c8;";*/
         String device_id = "device_id_str=4182986699862839";
         String iid = "install_id_str=2599689955581773";
-        String ck = "sid_tt=2211c0c78b4d6593ab75a37ad9b89766;";
+        String ck = "sid_tt=15d7b5605b644d68a6c4c643d884b4d8;";
 
 
         if (device_id.contains("device_id_str=")) {

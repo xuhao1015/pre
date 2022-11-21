@@ -36,8 +36,8 @@ public class PostOrderSign {
 
     private static void 创建订单() {
         String a = "{\n" +
-                "\t\"amount\": \"500.00\",\n" +
-                "\t\"out_trade_no\": \"5000\",\n" +
+                "\t\"amount\": \"1000.00\",\n" +
+                "\t\"out_trade_no\": \"8000\",\n" +
                 "\t\"subject\": \"支付1000元\",\n" +
                 "\t\"sign\": \"%s\",\n" +
                 "\t\"client_ip\": \"192.168.2.1\",\n" +

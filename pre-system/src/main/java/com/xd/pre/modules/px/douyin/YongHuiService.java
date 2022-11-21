@@ -65,7 +65,7 @@ public class YongHuiService {
         }
         BuyRenderParamDto buyRenderParamDto = JSON.parseObject(storeConfig.getConfig(), BuyRenderParamDto.class);
         Integer payType = douyinService.getPayType();
-        PayDto payDto = douyinService.createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, douyinDeviceIUseids, timer,
+        PayDto payDto = douyinService.createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer,
                 douyinHexiaoPhone.getHexiaoPhone());
         String payReUrl = douyinService.getPayReUrl(jdMchOrder, jdLog, timer, client, payDto);
         if (StrUtil.isBlank(payReUrl)) {

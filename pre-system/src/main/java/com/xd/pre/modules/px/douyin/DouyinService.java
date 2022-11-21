@@ -339,14 +339,6 @@ public class DouyinService {
             return null;
         }
         JdMchOrder jdMchOrderDb = jdMchOrderMapper.selectById(jdMchOrder.getId());
-        List<DouyinDeviceIid> douyinDeviceIUseids = getDouyinDeviceIids(jdMchOrder);
-        if (CollUtil.isEmpty(douyinDeviceIUseids)) {
-            String deviceBangDing = redisTemplate.opsForValue().get("抖音和设备号关联:" + douyinAppCk.getUid());
-            log.info("订单号:{},查询是否有管理ck，日光没有就没有必要继续了:{}", jdMchOrder.getTradeNo(), deviceBangDing);
-            if (StrUtil.isBlank(deviceBangDing)) {
-                return null;
-            }
-        }
         String config = storeConfig.getConfig();
         BuyRenderParamDto buyRenderParamDto = JSON.parseObject(config, BuyRenderParamDto.class);
         log.info("订单号{}，开始下单,执行双端支付信息msg:{}", jdMchOrder.getTradeNo());
@@ -354,7 +346,7 @@ public class DouyinService {
         log.info("订单号{}，初始化完成:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
         String tel = PreUtils.getTel();
         douyinAppCk.setCk(PreAesUtils.decrypt解密(douyinAppCk.getCk()));
-        PayDto payDto = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, douyinDeviceIUseids, timer, tel);
+        PayDto payDto = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel);
         if (ObjectUtil.isNull(payDto)) {
             log.info("订单号{}，当前下单失败,请查看原因", jdMchOrder.getTradeNo());
             return null;
@@ -575,17 +567,17 @@ public class DouyinService {
     }
 
     public PayDto createOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType,
-                              DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, List<DouyinDeviceIid> douyinDeviceIids, TimeInterval timer, String phone) {
+                              DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder,TimeInterval timer, String phone) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
 //        redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 4, TimeUnit.HOURS);
         String deviceBangDing = redisTemplate.opsForValue().get("抖音和设备号关联:" + douyinAppCk.getUid());
-        List<DouyinDeviceIid> douyinDeviceIidsT = new ArrayList<>();
+        List<DouyinDeviceIid> douyinDeviceIids = new ArrayList<>();
         if (StrUtil.isNotBlank(deviceBangDing)) {
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
             log.info("订单号：{}管理，关联设备号:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
-            douyinDeviceIidsT.add(douyinDeviceIid);
-            douyinDeviceIidsT.add(douyinDeviceIid);
-            douyinDeviceIidsT.add(douyinDeviceIid);
+            douyinDeviceIids.add(douyinDeviceIid);
+            douyinDeviceIids.add(douyinDeviceIid);
+            douyinDeviceIids.add(douyinDeviceIid);
         }
         if (StrUtil.isBlank(deviceBangDing)) {
             log.info("订单号:{},ck:udi:{},关闭账号未待使用", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
@@ -593,7 +585,7 @@ public class DouyinService {
             douyinAppCkMapper.updateById(douyinAppCk);
             return null;
         }
-        douyinDeviceIids = douyinDeviceIidsT;
+
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
             try {
                 Integer sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);

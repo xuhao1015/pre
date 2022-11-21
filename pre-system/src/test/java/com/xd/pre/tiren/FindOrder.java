@@ -28,7 +28,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1594399030714224640");
+        outOrders.add("P1594612556871421952");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -45,7 +45,7 @@ public class FindOrder {
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
-                        " AND mo.click_pay < DATE_SUB( SYSDATE( ), INTERVAL 2 MINUTE )  " +
+                        " AND mo.click_pay < DATE_SUB( SYSDATE( ), INTERVAL 1 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL and op.html is null  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
                         " AND mo.`status` != 2;");
@@ -54,7 +54,7 @@ public class FindOrder {
             }
             if (CollUtil.isEmpty(query)) {
                 log.info("没有数据需要补单,全部查询完毕");
-                Thread.sleep(60 * 1000);
+                Thread.sleep(30 * 1000);
                 continue;
             } else {
                 for (Entity entity : query) {
