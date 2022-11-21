@@ -48,7 +48,7 @@ public class Douyin3 {
             OkHttpClient okHttpClient = Demo.getOkHttpClient(linshiIpAndData.getIp(), linshiIpAndData.getPort());
             return okHttpClient;
         }
-        String s = HttpUtil.get("http://route.xiongmaodaili.com/xiongmao-web/api/bgl?secret=56100da16d7b18220d236a3f918c1003&orderNo=BGL202211192355030BE382pH&count=10&isTxt=0&proxyType=1");
+        String s = HttpUtil.get("http://route.xiongmaodaili.com/xiongmao-web/api/bgl?secret=56100da16d7b18220d236a3f918c1003&orderNo=BGL20221121193957gnArbt5C&count=10&isTxt=0&proxyType=1");
         log.info("ip:{}",s);
         String data = JSON.parseObject(s).getString("obj");
         List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);

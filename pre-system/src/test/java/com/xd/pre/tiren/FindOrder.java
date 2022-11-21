@@ -28,7 +28,29 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1594612556871421952");
+        outOrders.add("P1594681057430654976");
+        outOrders.add("P1594681042884808704");
+        outOrders.add("P1594680900525936640");
+        outOrders.add("P1594680847337967616");
+        outOrders.add("P1594680806892294144");
+        outOrders.add("P1594680753737879552");
+        outOrders.add("P1594680732757970944");
+        outOrders.add("P1594680758666186752");
+        outOrders.add("P1594680744980172800");
+        outOrders.add("P1594680724524552192");
+        outOrders.add("P1594680696712122368");
+        outOrders.add("P1594680665649106944");
+        outOrders.add("P1594680632249864192");
+        outOrders.add("P1594680623752204288");
+        outOrders.add("P1594680560868573184");
+        outOrders.add("P1594680568211230720");
+        outOrders.add("P1594680496421523456");
+        outOrders.add("P1594680422434000896");
+        outOrders.add("P1594680126211280896");
+        outOrders.add("P1594679999950147584");
+        outOrders.add("P1594679704507568128");
+        outOrders.add("P1594679686417534976");
+        outOrders.add("P1594679088695660544");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -48,13 +70,13 @@ public class FindOrder {
                         " AND mo.click_pay < DATE_SUB( SYSDATE( ), INTERVAL 1 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL and op.html is null  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
-                        " AND mo.`status` != 2;");
+                        " AND mo.`status` != 2  order by mo.click_pay ;");
             } catch (Exception e) {
                 log.info("创建数据库链接失败");
             }
             if (CollUtil.isEmpty(query)) {
                 log.info("没有数据需要补单,全部查询完毕");
-                Thread.sleep(30 * 1000);
+                Thread.sleep(5 * 1000);
                 continue;
             } else {
                 for (Entity entity : query) {
@@ -67,7 +89,7 @@ public class FindOrder {
                 }
             }
             log.info("全部查询完毕++++++++++=");
-            Thread.sleep(60 * 1000);
+            Thread.sleep(5 * 1000);
         }
     }
 
