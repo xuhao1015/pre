@@ -26,12 +26,12 @@ public class DouYNewCheck {
     public static void main(String[] args) throws Exception {
 
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where  file_name ='221116.txt'   ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =1  and file_name = '20221119_1.txt' and id >=5848 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =  -44 and id >6480  ");
         for (Entity appCk : appCks) {
             String ck = PreAesUtils.decrypt解密(appCk.getStr("ck"));
             Integer id = appCk.getInt("id");
             int i = appCks.indexOf(appCk);
-            log.info("当前执行位置msg:{},剩余个数:{}",i,appCks.size()-i-1);
+            log.info("当前执行位置id:{}:顺位{},剩余个数:{}",id,i,appCks.size()-i-1);
             try {
                 checkCk(ck,id);
             }catch (Exception e){
@@ -97,14 +97,18 @@ public class DouYNewCheck {
         log.info("预下单数据msg:{}", resBody);
         Entity entity = db.use().queryOne("select * from douyin_app_ck where id=? ", id);
 
+        if(StrUtil.isNotBlank(resBody) && resBody.contains("用户信息获取失败")){
+            db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", -1, id);
+            return;
+        }
         if (ObjectUtil.isNotNull(resBody)  && !resBody.contains("部分商品无法购买，请在无效商品中查看") && entity.getInt("is_enable") !=1 ) {
             db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", -44, id);
+            return;
         }
         if(StrUtil.isNotBlank(resBody) && resBody.contains("部分商品无法购买，请在无效商品中查看")){
             db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", -2, id);
+            return;
         }
-        if(StrUtil.isNotBlank(resBody) && resBody.contains("用户信息获取失败")){
-            db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", -1, id);
-        }
+
     }
 }
