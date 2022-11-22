@@ -765,7 +765,6 @@ public class NewWeiXinPayUrl {
                     if (jdMchOrder.getStatus() == PreConstant.TWO) {
                         return null;
                     }
-                    log.info("订单号:{}，是当前订单准查询订单", orderIdDb);
                     douyinService.selectOrderStataus(jdOrderPt, jdMchOrder);
                 } else {
                     log.info("订单号:{}订单查单已经过期,当前订单已经匹配跟另外的数据请看日志，支付地址msg：{}", jdMchOrder.getTradeNo(), jdOrderPt.getHrefUrl());

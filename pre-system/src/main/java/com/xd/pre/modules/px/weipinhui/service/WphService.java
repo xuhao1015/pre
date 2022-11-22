@@ -656,7 +656,6 @@ public class WphService {
             JdProxyIpPort zhiLianIp = jdDjService.getZhiLianIp();
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(zhiLianIp.getIp(), Integer.valueOf(zhiLianIp.getPort())));
             builder.proxy(proxy);
-            log.info("当前使用的代理msg:{}", zhiLianIp);
         }
         OkHttpClient client = builder.connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS).followRedirects(false).build();
         return client;

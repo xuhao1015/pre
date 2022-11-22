@@ -284,6 +284,7 @@ public class DouyinService {
             log.info("订单号:{}，没有ck，请导入ck", jdMchOrder.getTradeNo());
             return null;
         }
+
         if (storeConfig.getGroupNum() == PreConstant.EIGHT && CollUtil.isNotEmpty(accounts)) {
             DouyinAppCk douyinAppCk = null;
             Integer let = Integer.valueOf(redisTemplate.opsForValue().get("抖音苹果卡最大下单金额"));
@@ -345,6 +346,25 @@ public class DouyinService {
         DouyinAppCk douyinAppCk = randomDouyinAppCk(jdMchOrder, storeConfig, true);
         if (ObjectUtil.isNull(douyinAppCk)) {
             return null;
+        }
+        //
+        if (douyinAppCk.getIsOld() == 1) {
+            log.info("替换ck让同一个账号同时下单如果发现超过3个老号存在。就让老号继续下单");
+            Set<String> oldruning = redisTemplate.keys("老号正在下单:*");
+            if (CollUtil.isEmpty(oldruning) || oldruning.size() <= 4) {
+                Integer lockDouYinCkTime = Integer.valueOf(redisTemplate.opsForValue().get("抖音ck锁定分钟数"));
+                redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), lockDouYinCkTime, TimeUnit.MINUTES);
+            } else {
+                log.info("替换ck让老号继续下单");
+                int i = PreUtils.randomCommon(0, oldruning.size() - 1, 1)[0];
+                String key = oldruning.stream().collect(Collectors.toList()).get(i);
+                String s = redisTemplate.opsForValue().get(key);
+                DouyinAppCk douyinAppCkT = JSON.parseObject(s, DouyinAppCk.class);
+                douyinAppCkT = douyinAppCkMapper.selectById(douyinAppCkT.getId());
+                if (douyinAppCkT.getIsEnable() == PreConstant.ONE) {
+                    douyinAppCk = douyinAppCkT;
+                }
+            }
         }
         String config = storeConfig.getConfig();
         BuyRenderParamDto buyRenderParamDto = JSON.parseObject(config, BuyRenderParamDto.class);
@@ -686,16 +706,12 @@ public class DouyinService {
             douyinAppCkMapper.updateById(douyinAppCk);
             return null;
         }
-        String 抖音ck锁定分钟数 = redisTemplate.opsForValue().get("抖音ck锁定分钟数");
         Integer sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
-        if (sufMeny == PreConstant.ZERO) {
+        if (sufMeny < 100) {
+            redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
+            log.info("删除额度不够的数据");
             return null;
         }
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("当前账号循环额度:" + douyinAppCk.getUid(), sufMeny + "", Integer.valueOf(抖音ck锁定分钟数) - 1, TimeUnit.MINUTES);
-        if (!ifAbsent) {
-            return null;
-        }
-        // 9100/100
         if (sufMeny > 200) {
             int times = sufMeny / new BigDecimal(jdMchOrder.getMoney()).intValue();//96
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
@@ -722,6 +738,7 @@ public class DouyinService {
                 return null;
             }
             try {
+                sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
                 if (sufMeny - new BigDecimal(jdMchOrder.getMoney()).intValue() < 0) {
                     log.info("当前ck出现了余额不足的情况");
                     synProductMaxPrirce();
@@ -732,6 +749,7 @@ public class DouyinService {
                     continue;
                 }
                 if (bodyRes1.contains("order_id")) {
+                    redisTemplate.opsForValue().set("抖音下单次数过多:" + douyinAppCk.getUid(), "0");//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
                     douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                     douyinAppCkMapper.updateById(douyinAppCk);
@@ -780,7 +798,10 @@ public class DouyinService {
                         douyinAppCk.setIsEnable(-44);
                     }
                     if (bodyRes1.contains("当前下单人数过")) {
-                        douyinAppCk.setIsEnable(-10);
+                        Long increment = redisTemplate.opsForValue().increment("抖音下单次数过多:" + douyinAppCk.getUid(), 1);
+                        if (increment >= 15) {
+                            douyinAppCk.setIsEnable(-10);
+                        }
                     }
                     douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                     douyinAppCkMapper.updateById(douyinAppCk);
