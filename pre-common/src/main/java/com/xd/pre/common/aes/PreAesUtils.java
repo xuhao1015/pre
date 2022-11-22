@@ -13,6 +13,10 @@ public class PreAesUtils {
 
     // 加密
     public static String encrypt加密(String data) {
+        //douyinAppCk.getCk().contains("sid_tt=")
+        if(!data.contains("sid_tt=")){
+            return data;
+        }
         try {
             byte[] raw = ECBKEY.getBytes("utf-8");
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");

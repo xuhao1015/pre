@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.jms.Destination;
 import javax.jms.Queue;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.*;
@@ -128,7 +129,8 @@ public class DouyinService {
             stockWrapper.isNull(JdOrderPt::getPaySuccessTime);
             List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
             String payReUrl = "";
-            if (CollUtil.isNotEmpty(jdOrderPtStocks)) {
+            JdMchOrder jdMchOrderDb = jdMchOrderMapper.selectById(jdMchOrder.getId());
+            if (CollUtil.isNotEmpty(jdOrderPtStocks) && ObjectUtil.isNotNull(jdMchOrderDb)) {
                 log.info("订单号:{}.使用库存", jdMchOrder.getTradeNo());
                 sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 3);
                 sendMessageSenc(product_douyin_stock_queue, JSON.toJSONString(storeConfig), 3);
@@ -263,20 +265,20 @@ public class DouyinService {
         LambdaQueryWrapper<DouyinAppCk> wrapper = Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getIsEnable, PreConstant.ONE);
         log.info("查询剩余额度，并且只能在有效额度范围内的数据才能被查询出来");
         if (isAppStore) {
+            //查询了锁定账号
             buildNotUseAccout(storeConfig, wrapper, jdMchOrder.getTradeNo());
         }
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         Integer count = douyinAppCkMapper.selectCount(wrapper);
         int pageIndex = PreUtils.randomCommon(0, count, 1)[0];
         List<Integer> accounts = new ArrayList<>();
-        if (count > 50) {
-            int[] ints = PreUtils.randomCommon(0, count, 30);
+        if (count > 30) {
+            int[] ints = PreUtils.randomCommon(0, count, 25);
             for (int anInt : ints) {
                 accounts.add(anInt);
             }
             accounts = accounts.stream().sorted().collect(Collectors.toList());
             pageIndex = accounts.get(PreConstant.ZERO);
-
         }
         if (count == 0) {
             log.info("订单号:{}，没有ck，请导入ck", jdMchOrder.getTradeNo());
@@ -285,6 +287,7 @@ public class DouyinService {
         if (storeConfig.getGroupNum() == PreConstant.EIGHT && CollUtil.isNotEmpty(accounts)) {
             DouyinAppCk douyinAppCk = null;
             Integer let = Integer.valueOf(redisTemplate.opsForValue().get("抖音苹果卡最大下单金额"));
+            Integer maxEd = let;
             for (Integer account : accounts) {
                 Page<DouyinAppCk> douyinAppCkPage = new Page<>(account, PreConstant.ONE);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
@@ -297,7 +300,12 @@ public class DouyinService {
                 }
                 if (StrUtil.isNotBlank(ed) && Integer.valueOf(ed) >= storeConfig.getSkuPrice().intValue()) {
                     if (let >= Integer.valueOf(ed) && Integer.valueOf(ed) == 200) {
-                        let = Integer.valueOf(ed);
+                        douyinAppCk = douyinAppCkT;
+                        break;
+                    }
+                    if (let >= Integer.valueOf(ed) && Integer.valueOf(ed) <= maxEd) {
+                        // 8000
+                        maxEd = Integer.valueOf(ed);//8000
                         douyinAppCk = douyinAppCkT;
                     }
                 }
@@ -338,7 +346,6 @@ public class DouyinService {
         if (ObjectUtil.isNull(douyinAppCk)) {
             return null;
         }
-        JdMchOrder jdMchOrderDb = jdMchOrderMapper.selectById(jdMchOrder.getId());
         String config = storeConfig.getConfig();
         BuyRenderParamDto buyRenderParamDto = JSON.parseObject(config, BuyRenderParamDto.class);
         log.info("订单号{}，开始下单,执行双端支付信息msg:{}", jdMchOrder.getTradeNo());
@@ -346,63 +353,8 @@ public class DouyinService {
         log.info("订单号{}，初始化完成:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
         String tel = PreUtils.getTel();
         douyinAppCk.setCk(PreAesUtils.decrypt解密(douyinAppCk.getCk()));
-        PayDto payDto = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel);
-        if (ObjectUtil.isNull(payDto)) {
-            log.info("订单号{}，当前下单失败,请查看原因", jdMchOrder.getTradeNo());
-            return null;
-        }
-        if (ObjectUtil.isNotNull(jdMchOrderDb)) {
-            payReUrl = getPayReUrl(jdMchOrder, jdLog, timer, client, payDto);
-        }
-        log.info("订单号{}，获取支付链接成功:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
-        if (StrUtil.isBlank(payReUrl) && ObjectUtil.isNotNull(jdMchOrderDb)) {
-            return null;
-        }
-//        封装订单数据msg:{}
-        Boolean isLockMath = redisTemplate.opsForValue().setIfAbsent("匹配锁定成功:" + jdMchOrder.getTradeNo(), JSON.toJSONString(jdMchOrder),
-                storeConfig.getExpireTime(), TimeUnit.MINUTES);
-        if (!isLockMath && ObjectUtil.isNotNull(jdMchOrderDb)) {
-            log.error("订单号{}，当前已经匹配了,请查看数据库msg:{}", jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo());
-            return null;
-        }
-        JdOrderPt jdOrderPtDb = JdOrderPt.builder().orderId(payDto.getOrderId()).ptPin(douyinAppCk.getUid()).success(PreConstant.ZERO)
-                .expireTime(DateUtil.offsetMinute(new Date(), storeConfig.getPayIdExpireTime())).createTime(new Date()).skuPrice(storeConfig.getSkuPrice())
-                .skuName(storeConfig.getSkuName()).skuId(storeConfig.getSkuId())
-                .wxPayExpireTime(DateUtil.offsetMinute(new Date(), storeConfig.getPayIdExpireTime()))
-                .createTime(new Date()).skuPrice(storeConfig.getSkuPrice())
-                .isWxSuccess(PreConstant.ONE).isMatch(PreConstant.ONE).currentCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()))
-                .hrefUrl(payReUrl).weixinUrl(payReUrl).wxPayUrl(payReUrl)
-                .mark(JSON.toJSONString(payDto))
-                .build();
-        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        if (ObjectUtil.isNull(jdOrderPtDb.getId())) {
-            log.info("+++++++++++++订单号:{},放入数据库失败:{}", jdMchOrder.getTradeNo(), jdOrderPtDb.getOrderId());
-            log.info("+++++++++++++订单号:{}", jdMchOrder.getTradeNo());
-            jdOrderPtMapper.insert(jdOrderPtDb);
-        }
-        log.info("订单号{}，放入数据数据为msg:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
-        if (ObjectUtil.isNotNull(jdMchOrderDb)) {
-            log.info("订单号:{}开始匹配成功。完成最后的顺序", jdMchOrder.getTradeNo());
-            long l = (System.currentTimeMillis() - jdMchOrder.getCreateTime().getTime()) / 1000;
-            jdMchOrder.setMatchTime(l);
-            jdMchOrder.setOriginalTradeId(jdOrderPtDb.getId());
-            jdMchOrder.setOriginalTradeNo(jdOrderPtDb.getOrderId());
-            PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-            jdMchOrderMapper.updateById(jdMchOrder);
-            log.info("订单号第一个成功修改");
-            jdMchOrder = jdMchOrderMapper.selectById(jdMchOrder.getId());
-            if (ObjectUtil.isNull(jdMchOrder.getOriginalTradeId())) {
-                log.info("+++++++++++++订单号:{}没有更新成功", jdMchOrder.getTradeNo());
-                jdMchOrderMapper.updateById(jdMchOrder);
-            }
-            String lockOrderTime = redisTemplate.opsForValue().get("锁定抖音库存订单锁定分钟数");
-            redisTemplate.opsForValue().set("锁定抖音库存订单:" + jdOrderPtDb.getId(), jdMchOrder.getTradeNo(), Integer.valueOf(lockOrderTime), TimeUnit.MINUTES);
-            log.info("订单号{}，完成匹配:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
-            return R.ok(jdOrderPtDb);
-        } else {
-            redisTemplate.delete("匹配锁定成功:" + jdMchOrder.getTradeNo());
-            return R.ok(jdOrderPtDb);
-        }
+        List<PayDto> payDtos = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel, storeConfig);
+        return R.ok();
     }
 
     public List<DouyinDeviceIid> getDouyinDeviceIids(JdMchOrder jdMchOrder) {
@@ -566,174 +518,222 @@ public class DouyinService {
         return null;
     }
 
-    public PayDto createOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType,
-                              DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, TimeInterval timer, String phone) {
-        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-//        redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 4, TimeUnit.HOURS);
-        String deviceBangDing = redisTemplate.opsForValue().get("抖音和设备号关联:" + douyinAppCk.getUid());
-        List<DouyinDeviceIid> douyinDeviceIids = new ArrayList<>();
-        if (StrUtil.isNotBlank(deviceBangDing)) {
-            DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
-            log.info("订单号：{}管理，关联设备号:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
-            douyinDeviceIids.add(douyinDeviceIid);
-            douyinDeviceIids.add(douyinDeviceIid);
-            douyinDeviceIids.add(douyinDeviceIid);
-        }
-        if (StrUtil.isBlank(deviceBangDing)) {
-            log.info("订单号:{},ck:udi:{},关闭账号未待使用", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
-            douyinAppCk.setIsEnable(PreConstant.ZERO);
-            douyinAppCkMapper.updateById(douyinAppCk);
-            return null;
-        }
-
-        for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
-            try {
-                Integer sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
-                if (sufMeny - new BigDecimal(jdMchOrder.getMoney()).intValue() < 0) {
-                    log.info("当前ck出现了余额不足的情况");
-                    synProductMaxPrirce();
-                    return null;
-                }
-                log.info("订单号:{},锁定设备号:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
+    private String geSuccessOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType, DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, TimeInterval timer, String phone, List<DouyinDeviceIid> douyinDeviceIids, DouyinDeviceIid douyinDeviceIid) throws IOException {
+        try {
+            log.info("订单号:{},锁定设备号:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
                /* Boolean isLockDeviceId = redisTemplate.opsForValue().setIfAbsent("抖音锁定设备:" + douyinDeviceIid.getId(), JSON.toJSONString(douyinDeviceIid), 1, TimeUnit.MINUTES);
                 if (!isLockDeviceId) {
                     log.info("订单号{}，当前设备号已经锁定:deviceId:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
                     continue;
                 }*/
-                BuyRenderRoot buyRenderRoot = getAndBuildBuyRender(client, douyinAppCk, buyRenderParamDto, douyinDeviceIid, jdMchOrder);
-                log.info("订单号:{},循环次数：{},预下单时间戳:{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid), timer.interval());
-                if (ObjectUtil.isNull(buyRenderRoot)) {
-                    log.info("订单号{}，预下单失败", jdMchOrder.getTradeNo());
+            BuyRenderRoot buyRenderRoot = getAndBuildBuyRender(client, douyinAppCk, buyRenderParamDto, douyinDeviceIid, jdMchOrder);
+            log.info("订单号:{},循环次数：{},预下单时间戳:{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid), timer.interval());
+            if (ObjectUtil.isNull(buyRenderRoot)) {
+                log.info("订单号{}，预下单失败", jdMchOrder.getTradeNo());
+                return null;
+            }
+            //PreUtils.getTel()
+            buyRenderRoot.setPost_tel(phone);
+            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid="
+                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id="
+                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=5.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
+            String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
+                            "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
+                            "\"origin_type\":\"%s\"," +
+                            "\"origin_id\":\"%s\"," +
+                            "\"new_source_type\":\"product_detail\",\"new_source_id\":\"0\",\"source_type\":\"0\"," +
+                            "\"source_id\":\"0\",\"schema\":\"snssdk143://\",\"extra\":\"{\\\"page_type\\\":\\\"lynx\\\"," +
+                            "\\\"alkey\\\":\\\"1128_99514375927_0_3556357046087622442_010\\\"," +
+                            "\\\"c_biz_combo\\\":\\\"8\\\"," +
+                            "\\\"render_track_id\\\":\\\"%s\\\"," +
+                            "\\\"risk_info\\\":\\\"{\\\\\\\"biometric_params\\\\\\\":\\\\\\\"1\\\\\\\"" +
+                            ",\\\\\\\"is_jailbreak\\\\\\\":\\\\\\\"2\\\\\\\",\\\\\\\"openudid\\\\\\\":\\\\\\\"\\\\\\\"," +
+                            "\\\\\\\"order_page_style\\\\\\\":0,\\\\\\\"checkout_id\\\\\\\":1,\\\\\\\"ecom_payapi\\\\\\\":true," +
+                            "\\\\\\\"ip\\\\\\\":\\\\\\\"%s\\\\\\\"," +
+                            "\\\\\\\"sub_order_info\\\\\\\":[]}\\\"}\"," +
+                            "\"marketing_plan_id\":\"%s\"," +
+                            "\"s_type\":\"\"" +
+                            ",\"entrance_params\":\"{\\\"order_status\\\":4,\\\"previous_page\\\":\\\"toutiao_mytab__order_list_page\\\"," +
+                            "\\\"carrier_source\\\":\\\"order_detail\\\"," +
+                            "\\\"ecom_scene_id\\\":\\\"%s\\\",\\\"room_id\\\":\\\"\\\"," +
+                            "\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"\\\"," +
+                            "\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"\\\",\\\"module_label\\\":\\\"\\\"," +
+                            "\\\"ecom_icon\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\"," +
+                            "\\\"is_activity_banner\\\":0," +
+                            "\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\"," +
+                            "\\\"is_replay\\\":\\\"0\\\",\\\"is_short_screen\\\":\\\"0\\\",\\\"is_with_video\\\":1,\\\"label_name\\\":\\\"\\\"," +
+                            "\\\"market_channel_hot_fix\\\":\\\"\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_dou_campaign\\\":0," +
+                            "\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"upfront_presell\\\":0,\\\"warm_up_status\\\":\\\"0\\\",\\\"auto_coupon\\\":0," +
+                            "\\\"coupon_id\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"item_id\\\":\\\"0\\\"," +
+                            "\\\"commodity_id\\\":\\\"%s\\\",\\\"commodity_type\\\":6," +
+                            "\\\"product_id\\\":\\\"%s\\\",\\\"extra_campaign_type\\\":\\\"\\\"}\"," +
+                            "\"sub_b_type\":\"3\",\"gray_feature\":\"PlatformFullDiscount\",\"sub_way\":0," +
+                            "\"pay_type\":%d," +
+                            "\"post_addr\":{\"province\":{},\"city\":{},\"town\":{},\"street\":{\"id\":\"\",\"name\":\"\"}}," +
+                            "\"post_tel\":\"%s\",\"address_id\":\"0\",\"price_info\":{\"origin\":1000,\"freight\":0,\"coupon\":0," +
+                            "\"pay\":1000}," +
+                            "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"39.144.42.162\\\",\\\"os\\\":\\\"android\\\"," +
+                            "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"6.3.5\\\",\\\"aid\\\":\\\"13\\\"," +
+                            "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;" +
+                            "+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+QuicVersion:12a1d5c5+2022-06-27)\\\"," +
+                            "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
+                            "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
+                            "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
+                            "\\\"appVersion\\\":\\\"8.9.6\\\",\\\"appName\\\":\\\"news_article\\\"," +
+                            "\\\"devicePlatform\\\":\\\"android\\\",\\\"deviceType\\\":\\\"PACT00\\\"," +
+                            "\\\"channel\\\":\\\"oppo_13_64\\\",\\\"openudid\\\":\\\"\\\"," +
+                            "\\\"versionCode\\\":\\\"896\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"OPPO\\\",\\\"iid\\\":\\\"%s\\\",\\\"bioType\\\":\\\"1\\\"}," +
+                            "\\\"credit_pay_info\\\":{\\\"installment\\\":\\\"1\\\"},\\\"bank_card_info\\\":{},\\\"voucher_no_list\\\":[]," +
+                            "\\\"zg_ext_param\\\":" +
+                            "\\\"{\\\\\\\"decision_id\\\\\\\":\\\\\\\"%s\\\\\\\",\\\\\\\"qt_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"," +
+                            "\\\\\\\"retain_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"}\\\"," +
+                            "\\\"jh_ext_info\\\":\\\"{\\\\\\\"payapi_cache_id\\\\\\\":\\\\\\\"%s\\\\\\\"}\\\"," +
+                            "\\\"sub_ext\\\":\\\"\\\",\\\"biometric_params\\\":\\\"1\\\",\\\"is_jailbreak\\\":\\\"2\\\"," +
+                            "\\\"order_page_style\\\":0,\\\"checkout_id\\\":1,\\\"pay_amount_composition\\\":[]}\"," +
+                            "\"render_token\":\"%s\"," +
+                            "\"win_record_id\":\"\",\"marketing_channel\":\"\",\"identity_card_id\":\"\"," +
+                            "\"pay_amount_composition\":[],\"user_account\":{},\"queue_count\":0,\"store_id\":\"\"," +
+                            "\"shop_id\":\"%s\"," +
+                            "\"combo_id\":\"%s\"," +
+                            "\"combo_num\":1," +
+                            "\"product_id\":\"%s\",\"buyer_words\":\"\",\"stock_info\":[{\"stock_type\":1,\"stock_num\":1," +
+                            "\"sku_id\":\"%s\"" +
+                            ",\"warehouse_id\":\"0\"}],\"warehouse_id\":0,\"coupon_info\":{},\"freight_insurance\":false,\"cert_insurance\":false," +
+                            "\"allergy_insurance\":false,\"room_id\":\"\",\"author_id\":\"\",\"content_id\":\"0\",\"promotion_id\":\"\"," +
+                            "\"ecom_scene_id\":\"%s\"," +
+                            "\"shop_user_id\":\"\",\"group_id\":\"\"," +
+                            "\"privilege_tag_keys\":[],\"select_privilege_properties\":[]," +
+                            "\"platform_deduction_info\":{},\"win_record_info\":{\"win_record_id\":\"\",\"win_record_type\":\"\"}}",
+                    buyRenderParamDto.getOrigin_type(),
+                    buyRenderParamDto.getOrigin_id(),
+                    buyRenderRoot.getRender_track_id(),
+                    jdLog.getIp(),
+                    buyRenderRoot.getTotal_price_result().getMarketing_plan_id(),
+                    buyRenderParamDto.getEcom_scene_id(),
+                    buyRenderParamDto.getProduct_id(),
+                    buyRenderParamDto.getProduct_id(),
+                    payType,
+                    buyRenderRoot.getPost_tel(),
+                    douyinDeviceIid.getDeviceId(),
+                    douyinDeviceIid.getIid(),
+                    buyRenderRoot.getPay_method().getDecision_id(),
+                    buyRenderRoot.getPay_method().getPayapi_cache_id(),
+                    buyRenderRoot.getRender_token(),
+                    buyRenderParamDto.getShop_id(),
+                    buyRenderParamDto.getSku_id(),
+                    buyRenderParamDto.getProduct_id(),
+                    buyRenderParamDto.getSku_id(),
+                    buyRenderParamDto.getEcom_scene_id()
+            );
+            String X_SS_STUB1 = SecureUtil.md5("json_form=" + URLEncoder.encode(bodyData1)).toUpperCase();
+            String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
+                    X_SS_STUB1, url1
+            );
+            String signUrl = getSignUrl();
+            log.info("订单号{}，签证地址msg:{}", jdMchOrder.getTradeNo(), signUrl);
+            String signHt1 = HttpRequest.post(signUrl).body(signData1).timeout(2000).execute().body();
+            String x_gorgon1 = JSON.parseObject(signHt1).getString("x-gorgon");
+            String x_khronos1 = JSON.parseObject(signHt1).getString("x-khronos");
+            String tarceid1 = JSON.parseObject(signHt1).getString("tarceid");
+            RequestBody requestBody1 = new FormBody.Builder()
+                    .add("json_form", bodyData1)
+                    .build();
+            Map<String, String> headers = PreUtils.buildIpMap(jdLog.getIp());
+            Request.Builder builder = new Request.Builder();
+            for (String s : headers.keySet()) {
+                builder.header(s, headers.get(s));
+            }
+            Request request1 = builder.url(url1)
+                    .post(requestBody1)
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                    .addHeader("X-SS-STUB", X_SS_STUB1)
+                    .addHeader("x-tt-trace-id", tarceid1)
+                    .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
+                    .addHeader("X-Gorgon", x_gorgon1)
+                    .addHeader("X-Khronos", x_khronos1)
+                    .build();
+            Response response1 = client.newCall(request1).execute();
+            String bodyRes1 = response1.body().string();
+            response1.close();
+            log.info("订单号{},下单时间循环次数msg:{},时间戳：{},下单结果信息结果：{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid),
+                    timer.interval(),
+                    bodyRes1);
+            return bodyRes1;
+        } catch (Exception e) {
+            log.error("订单号msg:{},失败:{}", jdMchOrder.getTradeNo(), e.getMessage());
+        }
+        return null;
+    }
+
+    public List<PayDto> createOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType,
+                                    DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, TimeInterval timer, String phone, JdAppStoreConfig storeConfig) {
+        List<PayDto> payDtos = new ArrayList<>();
+        PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+//        redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 4, TimeUnit.HOURS);
+        String deviceBangDing = redisTemplate.opsForValue().get("抖音和设备号关联:" + douyinAppCk.getUid());
+        List<DouyinDeviceIid> douyinDeviceIids = new ArrayList<>();
+   /*     if (StrUtil.isNotBlank(deviceBangDing)) {
+            DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
+            log.info("订单号：{}管理，关联设备号:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
+            douyinDeviceIids.add(douyinDeviceIid);
+            douyinDeviceIids.add(douyinDeviceIid);
+            douyinDeviceIids.add(douyinDeviceIid);
+        }*/
+        if (StrUtil.isBlank(deviceBangDing)) {
+            log.info("订单号:{},ck:udi:{},关闭账号未待使用", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
+            douyinAppCk.setIsEnable(PreConstant.ZERO);
+            douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
+            douyinAppCkMapper.updateById(douyinAppCk);
+            return null;
+        }
+        String 抖音ck锁定分钟数 = redisTemplate.opsForValue().get("抖音ck锁定分钟数");
+        Integer sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
+        if (sufMeny == PreConstant.ZERO) {
+            return null;
+        }
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("当前账号循环额度:" + douyinAppCk.getUid(), sufMeny + "", Integer.valueOf(抖音ck锁定分钟数) - 1, TimeUnit.MINUTES);
+        if (!ifAbsent) {
+            return null;
+        }
+        // 9100/100
+        if (sufMeny > 200) {
+            int times = sufMeny / new BigDecimal(jdMchOrder.getMoney()).intValue();//96
+            DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
+            if (times > 10) {
+                times = times / 2;
+            }
+            for (int i = 0; i < times; i++) {
+                douyinDeviceIids.add(douyinDeviceIid);
+            }
+        } else {
+            DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
+            douyinDeviceIids.add(douyinDeviceIid);
+        }
+        for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
+            if (isProductElef(storeConfig)) {
+                log.info("订单号:{},已经够了库存。", jdMchOrder.getTradeNo());
+                redisTemplate.delete("当前账号循环额度:" + douyinAppCk.getUid());
+                redisTemplate.delete("抖音ck锁定3分钟:" + douyinAppCk.getUid());
+                return null;
+            }
+            douyinAppCk = douyinAppCkMapper.selectById(douyinAppCk.getId());
+            if (douyinAppCk.getIsEnable() != 1) {
+                log.info("订单号:{},当前ck已经失效 uid:{}", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
+                return null;
+            }
+            try {
+                if (sufMeny - new BigDecimal(jdMchOrder.getMoney()).intValue() < 0) {
+                    log.info("当前ck出现了余额不足的情况");
+                    synProductMaxPrirce();
+                    return null;
+                }
+                String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIids, douyinDeviceIid);
+                if (bodyRes1 == null) {
                     continue;
                 }
-                //PreUtils.getTel()
-                buyRenderRoot.setPost_tel(phone);
-                String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid="
-                        + douyinDeviceIid.getIid() + "&version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id="
-                        + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=5.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
-                String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
-                                "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
-                                "\"origin_type\":\"%s\"," +
-                                "\"origin_id\":\"%s\"," +
-                                "\"new_source_type\":\"product_detail\",\"new_source_id\":\"0\",\"source_type\":\"0\"," +
-                                "\"source_id\":\"0\",\"schema\":\"snssdk143://\",\"extra\":\"{\\\"page_type\\\":\\\"lynx\\\"," +
-                                "\\\"alkey\\\":\\\"1128_99514375927_0_3556357046087622442_010\\\"," +
-                                "\\\"c_biz_combo\\\":\\\"8\\\"," +
-                                "\\\"render_track_id\\\":\\\"%s\\\"," +
-                                "\\\"risk_info\\\":\\\"{\\\\\\\"biometric_params\\\\\\\":\\\\\\\"1\\\\\\\"" +
-                                ",\\\\\\\"is_jailbreak\\\\\\\":\\\\\\\"2\\\\\\\",\\\\\\\"openudid\\\\\\\":\\\\\\\"\\\\\\\"," +
-                                "\\\\\\\"order_page_style\\\\\\\":0,\\\\\\\"checkout_id\\\\\\\":1,\\\\\\\"ecom_payapi\\\\\\\":true," +
-                                "\\\\\\\"ip\\\\\\\":\\\\\\\"%s\\\\\\\"," +
-                                "\\\\\\\"sub_order_info\\\\\\\":[]}\\\"}\"," +
-                                "\"marketing_plan_id\":\"%s\"," +
-                                "\"s_type\":\"\"" +
-                                ",\"entrance_params\":\"{\\\"order_status\\\":4,\\\"previous_page\\\":\\\"toutiao_mytab__order_list_page\\\"," +
-                                "\\\"carrier_source\\\":\\\"order_detail\\\"," +
-                                "\\\"ecom_scene_id\\\":\\\"%s\\\",\\\"room_id\\\":\\\"\\\"," +
-                                "\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"\\\"," +
-                                "\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"\\\",\\\"module_label\\\":\\\"\\\"," +
-                                "\\\"ecom_icon\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\"," +
-                                "\\\"is_activity_banner\\\":0," +
-                                "\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\"," +
-                                "\\\"is_replay\\\":\\\"0\\\",\\\"is_short_screen\\\":\\\"0\\\",\\\"is_with_video\\\":1,\\\"label_name\\\":\\\"\\\"," +
-                                "\\\"market_channel_hot_fix\\\":\\\"\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_dou_campaign\\\":0," +
-                                "\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"upfront_presell\\\":0,\\\"warm_up_status\\\":\\\"0\\\",\\\"auto_coupon\\\":0," +
-                                "\\\"coupon_id\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"item_id\\\":\\\"0\\\"," +
-                                "\\\"commodity_id\\\":\\\"%s\\\",\\\"commodity_type\\\":6," +
-                                "\\\"product_id\\\":\\\"%s\\\",\\\"extra_campaign_type\\\":\\\"\\\"}\"," +
-                                "\"sub_b_type\":\"3\",\"gray_feature\":\"PlatformFullDiscount\",\"sub_way\":0," +
-                                "\"pay_type\":%d," +
-                                "\"post_addr\":{\"province\":{},\"city\":{},\"town\":{},\"street\":{\"id\":\"\",\"name\":\"\"}}," +
-                                "\"post_tel\":\"%s\",\"address_id\":\"0\",\"price_info\":{\"origin\":1000,\"freight\":0,\"coupon\":0," +
-                                "\"pay\":1000}," +
-                                "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"39.144.42.162\\\",\\\"os\\\":\\\"android\\\"," +
-                                "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"6.3.5\\\",\\\"aid\\\":\\\"13\\\"," +
-                                "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;" +
-                                "+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+QuicVersion:12a1d5c5+2022-06-27)\\\"," +
-                                "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
-                                "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
-                                "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
-                                "\\\"appVersion\\\":\\\"8.9.6\\\",\\\"appName\\\":\\\"news_article\\\"," +
-                                "\\\"devicePlatform\\\":\\\"android\\\",\\\"deviceType\\\":\\\"PACT00\\\"," +
-                                "\\\"channel\\\":\\\"oppo_13_64\\\",\\\"openudid\\\":\\\"\\\"," +
-                                "\\\"versionCode\\\":\\\"896\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"OPPO\\\",\\\"iid\\\":\\\"%s\\\",\\\"bioType\\\":\\\"1\\\"}," +
-                                "\\\"credit_pay_info\\\":{\\\"installment\\\":\\\"1\\\"},\\\"bank_card_info\\\":{},\\\"voucher_no_list\\\":[]," +
-                                "\\\"zg_ext_param\\\":" +
-                                "\\\"{\\\\\\\"decision_id\\\\\\\":\\\\\\\"%s\\\\\\\",\\\\\\\"qt_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"," +
-                                "\\\\\\\"retain_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"}\\\"," +
-                                "\\\"jh_ext_info\\\":\\\"{\\\\\\\"payapi_cache_id\\\\\\\":\\\\\\\"%s\\\\\\\"}\\\"," +
-                                "\\\"sub_ext\\\":\\\"\\\",\\\"biometric_params\\\":\\\"1\\\",\\\"is_jailbreak\\\":\\\"2\\\"," +
-                                "\\\"order_page_style\\\":0,\\\"checkout_id\\\":1,\\\"pay_amount_composition\\\":[]}\"," +
-                                "\"render_token\":\"%s\"," +
-                                "\"win_record_id\":\"\",\"marketing_channel\":\"\",\"identity_card_id\":\"\"," +
-                                "\"pay_amount_composition\":[],\"user_account\":{},\"queue_count\":0,\"store_id\":\"\"," +
-                                "\"shop_id\":\"%s\"," +
-                                "\"combo_id\":\"%s\"," +
-                                "\"combo_num\":1," +
-                                "\"product_id\":\"%s\",\"buyer_words\":\"\",\"stock_info\":[{\"stock_type\":1,\"stock_num\":1," +
-                                "\"sku_id\":\"%s\"" +
-                                ",\"warehouse_id\":\"0\"}],\"warehouse_id\":0,\"coupon_info\":{},\"freight_insurance\":false,\"cert_insurance\":false," +
-                                "\"allergy_insurance\":false,\"room_id\":\"\",\"author_id\":\"\",\"content_id\":\"0\",\"promotion_id\":\"\"," +
-                                "\"ecom_scene_id\":\"%s\"," +
-                                "\"shop_user_id\":\"\",\"group_id\":\"\"," +
-                                "\"privilege_tag_keys\":[],\"select_privilege_properties\":[]," +
-                                "\"platform_deduction_info\":{},\"win_record_info\":{\"win_record_id\":\"\",\"win_record_type\":\"\"}}",
-                        buyRenderParamDto.getOrigin_type(),
-                        buyRenderParamDto.getOrigin_id(),
-                        buyRenderRoot.getRender_track_id(),
-                        jdLog.getIp(),
-                        buyRenderRoot.getTotal_price_result().getMarketing_plan_id(),
-                        buyRenderParamDto.getEcom_scene_id(),
-                        buyRenderParamDto.getProduct_id(),
-                        buyRenderParamDto.getProduct_id(),
-                        payType,
-                        buyRenderRoot.getPost_tel(),
-                        douyinDeviceIid.getDeviceId(),
-                        douyinDeviceIid.getIid(),
-                        buyRenderRoot.getPay_method().getDecision_id(),
-                        buyRenderRoot.getPay_method().getPayapi_cache_id(),
-                        buyRenderRoot.getRender_token(),
-                        buyRenderParamDto.getShop_id(),
-                        buyRenderParamDto.getSku_id(),
-                        buyRenderParamDto.getProduct_id(),
-                        buyRenderParamDto.getSku_id(),
-                        buyRenderParamDto.getEcom_scene_id()
-                );
-                String X_SS_STUB1 = SecureUtil.md5("json_form=" + URLEncoder.encode(bodyData1)).toUpperCase();
-                String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
-                        X_SS_STUB1, url1
-                );
-                String signUrl = getSignUrl();
-                log.info("订单号{}，签证地址msg:{}", jdMchOrder.getTradeNo(), signUrl);
-                String signHt1 = HttpRequest.post(signUrl).body(signData1).timeout(2000).execute().body();
-                String x_gorgon1 = JSON.parseObject(signHt1).getString("x-gorgon");
-                String x_khronos1 = JSON.parseObject(signHt1).getString("x-khronos");
-                String tarceid1 = JSON.parseObject(signHt1).getString("tarceid");
-                RequestBody requestBody1 = new FormBody.Builder()
-                        .add("json_form", bodyData1)
-                        .build();
-                Map<String, String> headers = PreUtils.buildIpMap(jdLog.getIp());
-                Request.Builder builder = new Request.Builder();
-                for (String s : headers.keySet()) {
-                    builder.header(s, headers.get(s));
-                }
-                Request request1 = builder.url(url1)
-                        .post(requestBody1)
-                        .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
-                        .addHeader("X-SS-STUB", X_SS_STUB1)
-                        .addHeader("x-tt-trace-id", tarceid1)
-                        .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
-                        .addHeader("X-Gorgon", x_gorgon1)
-                        .addHeader("X-Khronos", x_khronos1)
-                        .build();
-                Response response1 = client.newCall(request1).execute();
-                String bodyRes1 = response1.body().string();
-                response1.close();
-                log.info("订单号{},下单时间循环次数msg:{},时间戳：{},下单结果信息结果：{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid),
-                        timer.interval(),
-                        bodyRes1);
                 if (bodyRes1.contains("order_id")) {
                     douyinAppCk.setSuccessTime(new Date());
+                    douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                     douyinAppCkMapper.updateById(douyinAppCk);
                     log.info("订单号:{},设备号重复使用查询和删除", jdMchOrder.getTradeNo());
 //                    deleteLockCk(douyinAppCk, douyinDeviceIid);
@@ -759,18 +759,30 @@ public class DouyinService {
                     log.info("订单号:{}设置上次成功时间msg:{}", jdMchOrder.getTradeNo(), new Date().toLocaleString());
                     douyinDeviceIid.setLastSuccessTime(new Date());
                     douyinDeviceIidMapper.updateById(douyinDeviceIid);
+
                     PayDto payDto = PayDto.builder().ck(PreAesUtils.encrypt加密(douyinAppCk.getCk())).device_id(douyinDeviceIid.getDeviceId()).iid(douyinDeviceIid.getIid()).pay_type(payType + "")
                             .orderId(orderId).userIp(jdLog.getIp()).build();
-                    return payDto;
+                    JdOrderPt jdOrderPtDb = JdOrderPt.builder().orderId(payDto.getOrderId()).ptPin(douyinAppCk.getUid()).success(PreConstant.ZERO)
+                            .expireTime(DateUtil.offsetMinute(new Date(), storeConfig.getPayIdExpireTime())).createTime(new Date()).skuPrice(storeConfig.getSkuPrice())
+                            .skuName(storeConfig.getSkuName()).skuId(storeConfig.getSkuId())
+                            .wxPayExpireTime(DateUtil.offsetMinute(new Date(), storeConfig.getPayIdExpireTime()))
+                            .createTime(new Date()).skuPrice(storeConfig.getSkuPrice())
+                            .isWxSuccess(PreConstant.ONE).isMatch(PreConstant.ONE).currentCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()))
+                            .mark(JSON.toJSONString(payDto))
+                            .build();
+                    PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                    log.info("+++++++++++++订单号:{},{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
+                    jdOrderPtMapper.insert(jdOrderPtDb);
                 } else {
                     douyinAppCk.setFailReason(douyinAppCk.getFailReason() + bodyRes1);
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-                    if(bodyRes1.contains("设备存在异常")){
+                    if (bodyRes1.contains("设备存在异常")) {
                         douyinAppCk.setIsEnable(-44);
                     }
-                    if(bodyRes1.contains("当前下单人数过")){
+                    if (bodyRes1.contains("当前下单人数过")) {
                         douyinAppCk.setIsEnable(-10);
                     }
+                    douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                     douyinAppCkMapper.updateById(douyinAppCk);
                 }
             } catch (Exception e) {
@@ -781,7 +793,30 @@ public class DouyinService {
                 log.error("订单号{}，当前抖音报错:{},时间戳:{}", jdMchOrder.getTradeNo(), e.getMessage(), timer.interval());
             }
         }
-        return null;
+        if (CollUtil.isEmpty(payDtos)) {
+            log.info("订单号{}，当前下单失败,请查看原因", jdMchOrder.getTradeNo());
+            return null;
+        }
+        redisTemplate.delete("当前账号循环额度:" + douyinAppCk.getUid());
+        redisTemplate.delete("抖音ck锁定3分钟:" + douyinAppCk.getUid());
+        return payDtos;
+    }
+
+    private boolean isProductElef(JdAppStoreConfig storeConfig) {
+        LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
+        stockWrapper.eq(JdOrderPt::getSkuPrice, storeConfig.getSkuPrice());
+        Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
+        if (CollUtil.isNotEmpty(stockNums)) {
+            List<String> sockIds = stockNums.stream().map(it -> it.split(":")[1]).collect(Collectors.toList());
+            stockWrapper.notIn(JdOrderPt::getId, sockIds);
+        }
+        stockWrapper.isNull(JdOrderPt::getPaySuccessTime).gt(JdOrderPt::getWxPayExpireTime, new Date());
+        List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
+        if (jdOrderPtStocks.size() >= storeConfig.getProductStockNum()) {
+            log.info("超过库存。不用生产");
+            return true;
+        }
+        return false;
     }
 
 
@@ -828,6 +863,7 @@ public class DouyinService {
                 douyinAppCk.setIsEnable(PreConstant.FUYI_1);
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                 douyinAppCkMapper.updateById(douyinAppCk);
                 return null;
             }
@@ -835,6 +871,7 @@ public class DouyinService {
                 douyinAppCk.setIsEnable(-2);
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                 douyinAppCkMapper.updateById(douyinAppCk);
                 return null;
             }

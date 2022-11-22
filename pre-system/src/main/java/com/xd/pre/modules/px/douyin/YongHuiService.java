@@ -1,6 +1,7 @@
 package com.xd.pre.modules.px.douyin;
 
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.util.ObjectUtil;
@@ -65,8 +66,12 @@ public class YongHuiService {
         }
         BuyRenderParamDto buyRenderParamDto = JSON.parseObject(storeConfig.getConfig(), BuyRenderParamDto.class);
         Integer payType = douyinService.getPayType();
-        PayDto payDto = douyinService.createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer,
-                douyinHexiaoPhone.getHexiaoPhone());
+        List<PayDto> order = douyinService.createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer,
+                douyinHexiaoPhone.getHexiaoPhone(), storeConfig);
+        if (CollUtil.isEmpty(order)) {
+            return null;
+        }
+        PayDto payDto = order.get(0);
         String payReUrl = douyinService.getPayReUrl(jdMchOrder, jdLog, timer, client, payDto);
         if (StrUtil.isBlank(payReUrl)) {
             log.error("订单号:{}", jdMchOrder.getTradeNo());
