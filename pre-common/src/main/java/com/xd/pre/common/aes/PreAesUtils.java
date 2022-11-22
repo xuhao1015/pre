@@ -14,7 +14,7 @@ public class PreAesUtils {
     // 加密
     public static String encrypt加密(String data) {
         //douyinAppCk.getCk().contains("sid_tt=")
-        if(!data.contains("sid_tt=")){
+        if(!data.contains("sid_tt=") && data.length()!=16){
             return data;
         }
         try {
