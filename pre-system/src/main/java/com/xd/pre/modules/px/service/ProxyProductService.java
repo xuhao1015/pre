@@ -122,7 +122,6 @@ public class ProxyProductService {
         if (proxyAddressProduct.getType() != 2) {
             return;
         }
-        log.info("执行生成ip:{}", "productIpAndPort2");
        /* Integer count = jdProxyIpPortMapper.selectCount(Wrappers.<JdProxyIpPort>lambdaQuery().gt(JdProxyIpPort::getExpirationTime, new Date()));
         if (count >= Integer.valueOf(proxyNumStr)) {
             return;

@@ -879,7 +879,7 @@ public class DouyinService {
             Response response = client.newCall(request).execute();
             String resBody = response.body().string();
             log.info("订单号{}，预下单数据msg:{}", jdMchOrder.getTradeNo(), resBody);
-            if (StrUtil.isNotBlank(resBody) && resBody.contains("失败")) {
+            if (StrUtil.isNotBlank(resBody) && (resBody.contains("用户信息获取失败")||resBody.contains("用户未登录"))) {
                 log.error("订单号{}，当前账号ck过期", jdMchOrder.getTradeNo());
                 douyinAppCk.setIsEnable(PreConstant.FUYI_1);
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
@@ -947,7 +947,6 @@ public class DouyinService {
             client = pcAppStoreService.buildClient();
         }
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
-        log.info("订单号{}，开始查询订单", jdMchOrder.getTradeNo());
         String findOrderTime = redisTemplate.opsForValue().get("查询订单次数");
         for (int i = 0; i < Integer.valueOf(findOrderTime); i++) {
             client = pcAppStoreService.buildClient();
