@@ -749,7 +749,7 @@ public class DouyinService {
                     continue;
                 }
                 if (bodyRes1.contains("order_id")) {
-                    redisTemplate.opsForValue().set("抖音下单次数过多:" + douyinAppCk.getUid(), "0");//重置下单次数
+                    redisTemplate.delete("抖音下单次数过多:" + douyinAppCk.getUid());//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
                     douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
                     douyinAppCkMapper.updateById(douyinAppCk);
