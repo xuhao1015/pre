@@ -36,10 +36,10 @@ public class Douyin3 {
         return stringObjectHashMap;
     }
 
-    public static OkHttpClient getIpAndPort20() {
+    public static OkHttpClient getIpAndPort20() throws Exception{
         Jedis jedis = TestResoData.jedis;
         Set<String> keys = jedis.keys("ip缓存临时:*");
-        if (CollUtil.isNotEmpty(keys) && keys.size() > 20) {
+        if (CollUtil.isNotEmpty(keys) && keys.size() >=20) {
             List<String> collect = keys.stream().collect(Collectors.toList());
             int i = PreUtils.randomCommon(0, keys.size() - 1, 1)[0];
             String s1 = collect.get(i);
@@ -48,7 +48,7 @@ public class Douyin3 {
             OkHttpClient okHttpClient = Demo.getOkHttpClient(linshiIpAndData.getIp(), linshiIpAndData.getPort());
             return okHttpClient;
         }
-        String s = HttpUtil.get("http://route.xiongmaodaili.com/xiongmao-web/api/bgl?secret=56100da16d7b18220d236a3f918c1003&orderNo=BGL202211222127242pzJ5Gl1&count=20&isTxt=0&proxyType=1");
+        String s = HttpUtil.get("http://pandavip.xiongmaodaili.com/xiongmao-web/apiPlus/vgb?secret=56100da16d7b18220d236a3f918c1003&orderNo=VGB20221031233728l8aDjj8F&count=10&isTxt=0&proxyType=1&validTime=0&removal=0&cityIds=");
         log.info("ip:{}",s);
         String data = JSON.parseObject(s).getString("obj");
         List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);
@@ -59,6 +59,7 @@ public class Douyin3 {
             jedis.set("ip缓存临时:" + ip, JSON.toJSONString(build));
             jedis.expire("ip缓存临时:" + ip,130 );
         }
+        Thread.sleep(20*1000);
         return getIpAndPort20();
     }
 

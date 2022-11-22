@@ -10,7 +10,6 @@ import javax.crypto.spec.SecretKeySpec;
 @Slf4j
 public class PreAesUtils {
     private static String ECBKEY = "1q2w3e4r5t6y7u8i";
-
     // 加密
     public static String encrypt加密(String data) {
         //douyinAppCk.getCk().contains("sid_tt=")
@@ -56,7 +55,7 @@ public class PreAesUtils {
          * 此处使用AES-128-ECB加密模式，key需要为16位。
          */
         // 需要加密的字串
-        String cSrc = "XFLHPDKMQ4JQJ7LY";
+        String cSrc = "X3Z5MJLP86DQ8NTV";
         System.out.println(cSrc);
         // 加密
         String enString = PreAesUtils.encrypt加密(cSrc);
