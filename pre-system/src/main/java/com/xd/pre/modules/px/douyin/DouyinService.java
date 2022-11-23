@@ -349,24 +349,27 @@ public class DouyinService {
         }
         //
         if (douyinAppCk.getIsOld() == 1) {
-            log.info("替换ck让同一个账号同时下单如果发现超过3个老号存在。就让老号继续下单");
+            log.info("woaini1:替换ck让同一个账号同时下单如果发现超过3个老号存在。就让老号继续下单");
             Set<String> oldruning = redisTemplate.keys("老号正在下单:*");
             String oldRuningTime = redisTemplate.opsForValue().get("老号持续下单个数");
             if (CollUtil.isEmpty(oldruning) || oldruning.size() < Integer.valueOf(oldRuningTime)) {
                 Integer 老号锁定分钟数 = Integer.valueOf(redisTemplate.opsForValue().get("老号锁定分钟数"));
+                log.info("woaini:2替换ck让老号继续下单");
                 redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), Integer.valueOf(老号锁定分钟数), TimeUnit.MINUTES);
             } else {
-                log.info("替换ck让老号继续下单");
+                log.info("woaini:3替换ck让老号继续下单");
                 Integer i = 0;
                 if (oldruning.size() > 1) {
                     i = PreUtils.randomCommon(0, oldruning.size() - 1, 1)[0];
                 }
+                log.info("woaini:4第二步");
                 String key = oldruning.stream().collect(Collectors.toList()).get(i);
                 String s = redisTemplate.opsForValue().get(key);
                 DouyinAppCk douyinAppCkT = JSON.parseObject(s, DouyinAppCk.class);
                 douyinAppCkT = douyinAppCkMapper.selectById(douyinAppCkT.getId());
                 if (douyinAppCkT.getIsEnable() == PreConstant.ONE) {
                     douyinAppCk = douyinAppCkT;
+                    log.info("woaini:5第三步");
                 }
             }
         }
