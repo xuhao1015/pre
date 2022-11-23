@@ -183,6 +183,11 @@ public class DouyinService {
     private R douyinUseStock(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog, TimeInterval timer, OkHttpClient client, List<JdOrderPt> jdOrderPtStocks, String payReUrl) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         JdOrderPt jdOrderPtDb = jdOrderPtStocks.get(PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 1)[0]);
+        String ptPin = jdOrderPtDb.getPtPin();
+        String balanceStr = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + ptPin);
+        if (StrUtil.isNotBlank(balanceStr) && JSON.parseObject(balanceStr).getInteger("balance") < 0) {
+            return null;
+        }
         PayDto payDto = JSON.parseObject(jdOrderPtDb.getMark(), PayDto.class);
         for (int i = 0; i < 2; i++) {
             log.info("订单号：{}第{}，次循环", jdMchOrder.getTradeNo(), i);
