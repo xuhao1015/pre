@@ -6,7 +6,7 @@ import java.util.List;
 
 public class 抖音账号处理 {
     public static void main(String[] args) {
-        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\1123.txt", "UTF-8");
+        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\250.txt", "UTF-8");
         for (String string : STRINGS) {
             String[] split = string.split("\\|");
             for (int i =0;i<split.length;i++){

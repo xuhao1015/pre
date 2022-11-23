@@ -44,9 +44,9 @@ public class TestResoData {
         String ck = ";";
         String notUse = "";
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44  and  file_name ='20221119_1.txt' and id >5792 ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name ='20221123_200.txt'and id >6651 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name ='20221123_700.txt' and  id >6660 ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 13140  ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 13185  ");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             jedis.del("抖音和设备号关联:" + uid);
@@ -104,7 +104,7 @@ public class TestResoData {
                         boolean b = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
                         if (b) {
                             log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
-                            db.use().execute("update douyin_app_ck set is_enable = ?,success_time=? where id = ?", 1,DateUtil.formatDateTime(new Date()), entity.getInt("id"));
+                            db.use().execute("update douyin_app_ck set is_enable = ?,success_time=? where id = ?", 1, DateUtil.formatDateTime(new Date()), entity.getInt("id"));
                             db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, devicesBd.getInt("id"));
                             log.info("22222222>>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
                         }
@@ -144,7 +144,7 @@ public class TestResoData {
 //        System.err.println(JSON.toJSONString(buyRenderParamDto));
         String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
         OkHttpClient client = Douyin3.getIpAndPort20();
-        if(false){
+        if (false) {
             Set<String> keys = jedis.keys("ip缓存临时:*");
             for (String key : keys) {
                 jedis.del(key);
@@ -192,7 +192,7 @@ public class TestResoData {
             db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -1, uid);
         }
         BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
-        String url1 = "https://ec5-core-lq.ecombdapi.com/order/newcreate/vtl?can_queue=1&b_type_new=2&sub_b_type=3&live_request_from_jsb=1&live_sdk_version=220401&webcast_sdk_version=2650&webcast_language=zh&webcast_locale=zh_CN&webcast_gps_access=1&current_network_quality_info=%7B%22http_rtt%22%3A214%2C%22tcp_rtt%22%3A119%2C%22quic_rtt%22%3A119%2C%22downstream_throughput_kbps%22%3A891%2C%22net_effective_connection_type%22%3A4%2C%22video_download_speed%22%3A187%2C%22quic_receive_loss_rate%22%3A-1%2C%22quic_send_loss_rate%22%3A-1%7D&address_book_access=2&user_id=68624060367&is_pad=false&is_android_pad=0&is_landscape=false&carrier_region=CN&sec_user_id=MS4wLjABAAAA8bta1JiE-eD-YxgijSTIRDo47OOuYQ_uXFG3UMTqkjs&iid="+iid+"&device_id="+device_id+"&ac=wifi&channel=shenmasem_ls_dy_031&aid=1128&app_name=aweme&version_code=220400&version_name=22.4.0&device_platform=android&os=android&ssmix=a&device_type=Redmi+8A&device_brand=Xiaomi&language=zh&os_api=28&os_version=9&manifest_version_code=220401&resolution=720*1369&dpi=320&update_version_code=22409900&_rticket=1665718169618&package=com.ss.android.ugc.aweme&mcc_mnc=46011&cpu_support64=false&host_abi=armeabi-v7a&is_guest_mode=0&app_type=normal&minor_status=0&appTheme=light&need_personal_recommend=1&ts=1665718169&cdid=40c38bf3-f9c3-474d-b0d6-9c04da89dab5&md=0";
+        String url1 = "https://ec5-core-lq.ecombdapi.com/order/newcreate/vtl?can_queue=1&b_type_new=2&sub_b_type=3&live_request_from_jsb=1&live_sdk_version=220401&webcast_sdk_version=2650&webcast_language=zh&webcast_locale=zh_CN&webcast_gps_access=1&current_network_quality_info=%7B%22http_rtt%22%3A214%2C%22tcp_rtt%22%3A119%2C%22quic_rtt%22%3A119%2C%22downstream_throughput_kbps%22%3A891%2C%22net_effective_connection_type%22%3A4%2C%22video_download_speed%22%3A187%2C%22quic_receive_loss_rate%22%3A-1%2C%22quic_send_loss_rate%22%3A-1%7D&address_book_access=2&user_id=68624060367&is_pad=false&is_android_pad=0&is_landscape=false&carrier_region=CN&sec_user_id=MS4wLjABAAAA8bta1JiE-eD-YxgijSTIRDo47OOuYQ_uXFG3UMTqkjs&iid=" + iid + "&device_id=" + device_id + "&ac=wifi&channel=shenmasem_ls_dy_031&aid=1128&app_name=aweme&version_code=220400&version_name=22.4.0&device_platform=android&os=android&ssmix=a&device_type=Redmi+8A&device_brand=Xiaomi&language=zh&os_api=28&os_version=9&manifest_version_code=220401&resolution=720*1369&dpi=320&update_version_code=22409900&_rticket=1665718169618&package=com.ss.android.ugc.aweme&mcc_mnc=46011&cpu_support64=false&host_abi=armeabi-v7a&is_guest_mode=0&app_type=normal&minor_status=0&appTheme=light&need_personal_recommend=1&ts=1665718169&cdid=40c38bf3-f9c3-474d-b0d6-9c04da89dab5&md=0";
         String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                         "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                         "\"origin_type\":\"%s\"," +
@@ -343,8 +343,8 @@ public class TestResoData {
             log.info("数据库查询管理关系为msg:{}", s);
             return true;
         }
-        if(bodyRes1.contains("唤起支付")){
-            db.use().execute("update douyin_app_ck set is_enable = ? , fail_reason = ? where uid = ?", -55, "唤起支付",uid);
+        if (bodyRes1.contains("唤起支付失败")) {
+            db.use().execute("update douyin_app_ck set is_enable = ? , fail_reason = ? where uid = ?", -55, "唤起支付", uid);
         }
         log.info("msg:{}", bodyRes1);
         return false;

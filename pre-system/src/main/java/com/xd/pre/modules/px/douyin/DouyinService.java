@@ -351,7 +351,8 @@ public class DouyinService {
         if (douyinAppCk.getIsOld() == 1) {
             log.info("替换ck让同一个账号同时下单如果发现超过3个老号存在。就让老号继续下单");
             Set<String> oldruning = redisTemplate.keys("老号正在下单:*");
-            if (CollUtil.isEmpty(oldruning) || oldruning.size() <= 4) {
+            String oldRuningTime = redisTemplate.opsForValue().get("老号持续下单个数");
+            if (CollUtil.isEmpty(oldruning) || oldruning.size() <= Integer.valueOf(oldRuningTime)) {
                 Integer lockDouYinCkTime = Integer.valueOf(redisTemplate.opsForValue().get("抖音ck锁定分钟数"));
                 redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), lockDouYinCkTime, TimeUnit.MINUTES);
             } else {
@@ -734,6 +735,7 @@ public class DouyinService {
             }
             douyinAppCk = douyinAppCkMapper.selectById(douyinAppCk.getId());
             if (douyinAppCk.getIsEnable() != 1) {
+                redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                 log.info("订单号:{},当前ck已经失效 uid:{}", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
                 return null;
             }
@@ -799,7 +801,7 @@ public class DouyinService {
                     }
                     if (bodyRes1.contains("当前下单人数过")) {
                         Long increment = redisTemplate.opsForValue().increment("抖音下单次数过多:" + douyinAppCk.getUid(), 1);
-                        if (increment >= 15) {
+                        if (increment >= 10) {
                             douyinAppCk.setIsEnable(-10);
                         }
                     }
@@ -879,7 +881,7 @@ public class DouyinService {
             Response response = client.newCall(request).execute();
             String resBody = response.body().string();
             log.info("订单号{}，预下单数据msg:{}", jdMchOrder.getTradeNo(), resBody);
-            if (StrUtil.isNotBlank(resBody) && (resBody.contains("用户信息获取失败")||resBody.contains("用户未登录"))) {
+            if (StrUtil.isNotBlank(resBody) && (resBody.contains("用户信息获取失败") || resBody.contains("用户未登录"))) {
                 log.error("订单号{}，当前账号ck过期", jdMchOrder.getTradeNo());
                 douyinAppCk.setIsEnable(PreConstant.FUYI_1);
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
