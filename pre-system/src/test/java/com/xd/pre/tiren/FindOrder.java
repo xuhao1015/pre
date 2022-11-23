@@ -28,7 +28,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1594761823351132160");
+        outOrders.add("P1595530794903982080");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -44,7 +44,7 @@ public class FindOrder {
                         " jd_mch_order mo " +
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
-                        " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 100 MINUTE )  " +
+                        " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 30 MINUTE )  " +
                         " AND mo.click_pay < DATE_SUB( SYSDATE( ), INTERVAL 1 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL and op.html is null  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +

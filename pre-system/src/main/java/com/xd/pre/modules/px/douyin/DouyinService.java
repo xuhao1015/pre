@@ -380,10 +380,7 @@ public class DouyinService {
         try {
             List<PayDto> payDtos = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel, storeConfig);
         } catch (Exception e) {
-            redisTemplate.delete("老号锁定线程账号:" + douyinAppCk.getUid());
             log.info("释放当前线程的锁");
-        } finally {
-            redisTemplate.delete("老号锁定线程账号:" + douyinAppCk.getUid());
         }
         return R.ok();
     }
@@ -727,7 +724,7 @@ public class DouyinService {
         if (sufMeny > 200) {
             int times = sufMeny / new BigDecimal(jdMchOrder.getMoney()).intValue();//96
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
-            if (times > 10) {
+            if (times > 10 && storeConfig.getSkuPrice().intValue() == 100) {
                 times = times / 2;
             }
             for (int i = 0; i < times; i++) {
