@@ -21,25 +21,26 @@ import java.util.Map;
 public class DouYNewCheck {
 
     public static Db db = Db.use();
+
     public static void main(String[] args) throws Exception {
 
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where  file_name ='221116.txt'   ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221123%' and id > 7125 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221123%' and id > 7125 and id <7452 ");
         for (Entity appCk : appCks) {
             String ck = PreAesUtils.decrypt解密(appCk.getStr("ck"));
             Integer id = appCk.getInt("id");
             int i = appCks.indexOf(appCk);
-            log.info("当前执行位置id:{}:顺位{},剩余个数:{}",id,i,appCks.size()-i-1);
+            log.info("当前执行位置id:{}:顺位{},剩余个数:{}", id, i, appCks.size() - i - 1);
             try {
-                checkCk(ck,id);
-            }catch (Exception e){
+                checkCk(ck, id);
+            } catch (Exception e) {
 
             }
         }
 
     }
 
-    private static void checkCk(String ck,Integer id) throws Exception {
+    private static void checkCk(String ck, Integer id) throws Exception {
         String device_id = "device_id_str=4182986699862839";
         String iid = "install_id_str=2599689955581773";
 //        String ck = "sid_tt=2211c0c78b4d6593ab75a37ad9b89766;";
@@ -95,12 +96,12 @@ public class DouYNewCheck {
         log.info("预下单数据msg:{}", resBody);
         Entity entity = db.use().queryOne("select * from douyin_app_ck where id=? ", id);
 
-        if(StrUtil.isNotBlank(resBody) && resBody.contains("用户信息获取失败")){
+        if (StrUtil.isNotBlank(resBody) && resBody.contains("用户信息获取失败")) {
             db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", -1, id);
             log.info("失效----------------------");
             return;
         }
-        if(StrUtil.isNotBlank(resBody) && resBody.contains("部分商品无法购买，请在无效商品中查看")){
+        if (StrUtil.isNotBlank(resBody) && resBody.contains("部分商品无法购买，请在无效商品中查看")) {
             db.use().execute("update douyin_app_ck set is_enable = ? where id = ?", -2, id);
             log.info("无法购买");
             return;
