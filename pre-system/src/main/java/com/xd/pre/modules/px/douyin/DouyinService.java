@@ -352,7 +352,7 @@ public class DouyinService {
             log.info("替换ck让同一个账号同时下单如果发现超过3个老号存在。就让老号继续下单");
             Set<String> oldruning = redisTemplate.keys("老号正在下单:*");
             String oldRuningTime = redisTemplate.opsForValue().get("老号持续下单个数");
-            if (CollUtil.isEmpty(oldruning) || oldruning.size() <= Integer.valueOf(oldRuningTime)) {
+            if (CollUtil.isEmpty(oldruning) || oldruning.size() < Integer.valueOf(oldRuningTime)) {
                 Integer lockDouYinCkTime = Integer.valueOf(redisTemplate.opsForValue().get("抖音ck锁定分钟数"));
                 redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), lockDouYinCkTime, TimeUnit.MINUTES);
             } else {
