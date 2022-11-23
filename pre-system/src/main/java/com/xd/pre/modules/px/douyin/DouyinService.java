@@ -377,16 +377,6 @@ public class DouyinService {
         log.info("订单号{}，初始化完成:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
         String tel = PreUtils.getTel();
         douyinAppCk.setCk(PreAesUtils.decrypt解密(douyinAppCk.getCk()));
-        if (douyinAppCk.getIsOld() == 1) {
-            log.info("老号锁定线程IP:{}", douyinAppCk.getUid());
-            JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
-            if (ObjectUtil.isNotNull(jdProxyIpPort)) {
-                Date expirationTime = jdProxyIpPort.getExpirationTime();
-                long suf = expirationTime.getTime() - new Date().getTime();
-                redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
-                log.info("设置老号线程的ip成功uid:{}", douyinAppCk.getUid());
-            }
-        }
         try {
             List<PayDto> payDtos = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel, storeConfig);
         } catch (Exception e) {
@@ -755,11 +745,6 @@ public class DouyinService {
                 redisTemplate.delete("抖音ck锁定3分钟:" + douyinAppCk.getUid());
                 return null;
             }
-            String ipAndPortStr = redisTemplate.opsForValue().get("老号锁定线程账号IP:" + douyinAppCk.getUid());
-            if (StrUtil.isNotBlank(ipAndPortStr)) {
-                JdProxyIpPort jdProxyIpPort = JSON.parseObject(ipAndPortStr, JdProxyIpPort.class);
-                client = pcAppStoreService.buildClient(jdProxyIpPort);
-            }
             douyinAppCk = douyinAppCkMapper.selectById(douyinAppCk.getId());
             if (douyinAppCk.getIsEnable() != 1) {
                 redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
@@ -777,12 +762,6 @@ public class DouyinService {
                 String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIid);
                 if (StrUtil.isNotBlank(bodyRes1) & bodyRes1.equals("checkIp")) {
                     client = pcAppStoreService.buildClient();
-                    JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
-                    if (ObjectUtil.isNotNull(jdProxyIpPort)) {
-                        Date expirationTime = jdProxyIpPort.getExpirationTime();
-                        long suf = expirationTime.getTime() - new Date().getTime();
-                        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
-                    }
                     continue;
                 }
                 if (bodyRes1 == null) {
