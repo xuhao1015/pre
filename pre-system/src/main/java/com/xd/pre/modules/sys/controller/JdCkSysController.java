@@ -20,6 +20,7 @@ import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.R;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.modules.data.tenant.PreTenantContextHolder;
+import com.xd.pre.modules.px.douyin.BalanceAndstockVo;
 import com.xd.pre.modules.px.douyin.DouyinService;
 import com.xd.pre.modules.px.douyin.dto.IsCheckShipDto;
 import com.xd.pre.modules.px.douyin.huadan.ReadDto;
@@ -120,6 +121,22 @@ public class JdCkSysController {
     @Lazy
     private DouyinService douyinService;
 
+    @GetMapping("/balanceAndStock")
+    public R getbalanceAndStock() {
+        List<Map<String, Object>> stock = jdOrderPtMapper.selectBalanceAndStock();
+        List<DouyinAppCk> douyinAppCks = douyinAppCkMapper.selectList(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getIsEnable, PreConstant.ONE));
+        Integer suf = 0;
+        for (DouyinAppCk douyinAppCk : douyinAppCks) {
+            String eduStr = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + douyinAppCk.getUid());
+            if (StrUtil.isBlank(eduStr)) {
+                continue;
+            }
+            Integer balance = JSON.parseObject(eduStr).getInteger("balance");
+            suf = suf + balance;
+        }
+        BalanceAndstockVo build = BalanceAndstockVo.builder().suf(suf).stock(stock).build();
+        return R.ok(build);
+    }
 
     @GetMapping("/isCheckIp")
     public R getIpBlackData(String ip) {

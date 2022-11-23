@@ -70,4 +70,16 @@ public interface JdOrderPtMapper extends BaseMapper<JdOrderPt> {
             "and (pay_success_time is not null or  wx_pay_expire_time >NOW()   ) " +
             "GROUP BY pt_pin ")
     List<Map<String, Object>> selectDouYinByStartTimeAndEndAndUidGroup(@Param("beginOfDay") DateTime beginOfDay, @Param("endOfDay") DateTime endOfDay);
+
+
+    @Select("SELECT count( 1 ) as stockCount , sku_price as skuPrice,tenant_id as tenant_id  " +
+            "FROM " +
+            " jd_order_pt  " +
+            "WHERE wx_pay_expire_time > now( ) AND success = 0  AND  (href_url = '' or  href_url is null ) " +
+            "GROUP BY sku_price,tenant_id  " +
+            "ORDER BY " +
+            " tenant_id, " +
+            " sku_price;")
+    List<Map<String, Object>> selectBalanceAndStock();
+
 }
