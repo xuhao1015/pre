@@ -572,6 +572,9 @@ public class DouyinService {
                 log.info("订单号{}，预下单失败", jdMchOrder.getTradeNo());
                 return null;
             }
+            if (ObjectUtil.isNotNull(buyRenderRoot) && ObjectUtil.isNotNull(buyRenderRoot.getCheckIp()) && buyRenderRoot.getCheckIp()) {
+                return "checkIp";
+            }
             //PreUtils.getTel()
             buyRenderRoot.setPost_tel(phone);
             String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=5&device_type=ELE-AL00&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528931234&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy&device_platform=android&iid=" + douyinDeviceIid.getIid() + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=27b54460b6dbb870&device_id="
@@ -745,18 +748,17 @@ public class DouyinService {
             douyinDeviceIids.add(douyinDeviceIid);
         }
 //        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
-        jdLog.setIp("189.222.12.272");
-        String ipAndPortStr = redisTemplate.opsForValue().get("老号锁定线程账号IP:" + douyinAppCk.getUid());
-        if (StrUtil.isNotBlank(ipAndPortStr)) {
-            JdProxyIpPort jdProxyIpPort = JSON.parseObject(ipAndPortStr, JdProxyIpPort.class);
-            client = pcAppStoreService.buildClient(jdProxyIpPort);
-        }
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
             if (isProductElef(storeConfig) && douyinAppCk.getIsOld() != 1) {
                 log.info("订单号:{},已经够了库存。", jdMchOrder.getTradeNo());
                 redisTemplate.delete("当前账号循环额度:" + douyinAppCk.getUid());
                 redisTemplate.delete("抖音ck锁定3分钟:" + douyinAppCk.getUid());
                 return null;
+            }
+            String ipAndPortStr = redisTemplate.opsForValue().get("老号锁定线程账号IP:" + douyinAppCk.getUid());
+            if (StrUtil.isNotBlank(ipAndPortStr)) {
+                JdProxyIpPort jdProxyIpPort = JSON.parseObject(ipAndPortStr, JdProxyIpPort.class);
+                client = pcAppStoreService.buildClient(jdProxyIpPort);
             }
             douyinAppCk = douyinAppCkMapper.selectById(douyinAppCk.getId());
             if (douyinAppCk.getIsEnable() != 1) {
@@ -773,6 +775,16 @@ public class DouyinService {
                     return null;
                 }
                 String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIid);
+                if (ObjectUtil.isNotNull(bodyRes1) & bodyRes1.equals("checkIp")) {
+                    client = pcAppStoreService.buildClient();
+                    JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
+                    if (ObjectUtil.isNotNull(jdProxyIpPort)) {
+                        Date expirationTime = jdProxyIpPort.getExpirationTime();
+                        long suf = expirationTime.getTime() - new Date().getTime();
+                        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
+                    }
+                    continue;
+                }
                 if (bodyRes1 == null) {
                     Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
                     if (failOldTimes >= 30) {
@@ -928,13 +940,9 @@ public class DouyinService {
         } catch (Exception e) {
             if (StrUtil.isNotBlank(e.getMessage()) && e.getMessage().contains("out")) {
                 log.error("订单号:{},预下单超时，切换client", jdMchOrder.getTradeNo());
-                client = pcAppStoreService.buildClient();
-                JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
-                if (ObjectUtil.isNotNull(jdProxyIpPort)) {
-                    Date expirationTime = jdProxyIpPort.getExpirationTime();
-                    long suf = expirationTime.getTime() - new Date().getTime();
-                    redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
-                }
+                BuyRenderRoot buyRenderRoot = new BuyRenderRoot();
+                buyRenderRoot.setCheckIp(true);
+                return buyRenderRoot;
             }
             log.error("订单号{}，预下单失败请查看详情msg:{}", jdMchOrder.getTradeNo(), e.getMessage());
         }

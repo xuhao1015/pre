@@ -28,4 +28,5 @@ public class BuyRenderRoot {
     private String over_layer;
     private List<String> service_guarantee_infos;
     private String post_tel;
+    private Boolean checkIp;
 }
