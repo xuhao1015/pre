@@ -86,9 +86,16 @@ public class PreUtils {
             return ints;
         }
         if (min == 0 && max == 1 && n == 1) {
-            int[] ints = new int[1];
-            ints[0] = 0;
-            return ints;
+            int i = new Random().nextInt(100) % 2;
+            if(i==1){
+                int[] ints = new int[1];
+                ints[0] = 0;
+                return ints;
+            }else {
+                int[] ints = new int[1];
+                ints[0] = 1;
+                return ints;
+            }
         }
         if (n > (max - min + 1) || max < min) {
             return null;

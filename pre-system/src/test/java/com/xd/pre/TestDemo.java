@@ -1,22 +1,18 @@
 package com.xd.pre;
 
 import cn.hutool.core.io.FileUtil;
+import com.xd.pre.common.utils.px.PreUtils;
 
 import java.util.List;
 
 public class TestDemo {
 
 
-    public static void main(String[] args) {
-        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\1152.txt", "UTF-8");
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String line : STRINGS) {
-            String[] split = line.split("\\|");
-            for (String s : split) {
-                if(s.contains("sid_tt=")){
-                    System.out.println(s);
-                }
-            }
+    public static void main(String[] args) throws Exception{
+        while (true){
+            Integer i = PreUtils.randomCommon(0, 2 - 1, 1)[0];
+            System.out.println(i);
+            Thread.sleep(1000);
         }
     }
 }

@@ -353,11 +353,14 @@ public class DouyinService {
             Set<String> oldruning = redisTemplate.keys("老号正在下单:*");
             String oldRuningTime = redisTemplate.opsForValue().get("老号持续下单个数");
             if (CollUtil.isEmpty(oldruning) || oldruning.size() < Integer.valueOf(oldRuningTime)) {
-                Integer lockDouYinCkTime = Integer.valueOf(redisTemplate.opsForValue().get("抖音ck锁定分钟数"));
+                Integer lockDouYinCkTime = Integer.valueOf(redisTemplate.opsForValue().get("老号锁定分钟数"));
                 redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), lockDouYinCkTime, TimeUnit.MINUTES);
             } else {
                 log.info("替换ck让老号继续下单");
-                int i = PreUtils.randomCommon(0, oldruning.size() - 1, 1)[0];
+                Integer i = 0;
+                if (oldruning.size() > 1) {
+                    i = PreUtils.randomCommon(0, oldruning.size() - 1, 1)[0];
+                }
                 String key = oldruning.stream().collect(Collectors.toList()).get(i);
                 String s = redisTemplate.opsForValue().get(key);
                 DouyinAppCk douyinAppCkT = JSON.parseObject(s, DouyinAppCk.class);

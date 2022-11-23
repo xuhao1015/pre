@@ -44,9 +44,9 @@ public class TestResoData {
         String ck = ";";
         String notUse = "";
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44  and  file_name ='20221119_1.txt' and id >5792 ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name ='20221123_700.txt' and  id >6818 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name ='20221123_700.txt'  ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 13344  ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 13751  ");
         for (Entity entity : appCks) {
             String uid = entity.getStr("uid");
             jedis.del("抖音和设备号关联:" + uid);
