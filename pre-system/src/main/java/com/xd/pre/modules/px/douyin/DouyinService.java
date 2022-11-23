@@ -727,8 +727,8 @@ public class DouyinService {
         if (sufMeny > 200) {
             int times = sufMeny / new BigDecimal(jdMchOrder.getMoney()).intValue();//96
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
-            if (times > 10 && storeConfig.getSkuPrice().intValue() == 100) {
-                times = times / 2;
+            if (times > 10) {
+                times = times / 3;
             }
             for (int i = 0; i < times; i++) {
                 douyinDeviceIids.add(douyinDeviceIid);
