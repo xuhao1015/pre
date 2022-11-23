@@ -558,7 +558,7 @@ public class DouyinService {
         return null;
     }
 
-    private String geSuccessOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType, DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, TimeInterval timer, String phone, List<DouyinDeviceIid> douyinDeviceIids, DouyinDeviceIid douyinDeviceIid) throws IOException {
+    private String geSuccessOrder(OkHttpClient client, BuyRenderParamDto buyRenderParamDto, Integer payType, DouyinAppCk douyinAppCk, JdLog jdLog, JdMchOrder jdMchOrder, TimeInterval timer, String phone, DouyinDeviceIid douyinDeviceIid) throws IOException {
         try {
             log.info("订单号:{},锁定设备号:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getDeviceId());
                /* Boolean isLockDeviceId = redisTemplate.opsForValue().setIfAbsent("抖音锁定设备:" + douyinDeviceIid.getId(), JSON.toJSONString(douyinDeviceIid), 1, TimeUnit.MINUTES);
@@ -567,17 +567,16 @@ public class DouyinService {
                     continue;
                 }*/
             BuyRenderRoot buyRenderRoot = getAndBuildBuyRender(client, douyinAppCk, buyRenderParamDto, douyinDeviceIid, jdMchOrder);
-            log.info("订单号:{},循环次数：{},预下单时间戳:{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid), timer.interval());
+            log.info("订单号:{},循环次数,预下单时间戳:{}", jdMchOrder.getTradeNo(), timer.interval());
             if (ObjectUtil.isNull(buyRenderRoot)) {
                 log.info("订单号{}，预下单失败", jdMchOrder.getTradeNo());
                 return null;
             }
             //PreUtils.getTel()
             buyRenderRoot.setPost_tel(phone);
-            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid="
-                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id="
+            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=5&device_type=ELE-AL00&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528931234&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy&device_platform=android&iid=" + douyinDeviceIid.getIid() + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=27b54460b6dbb870&device_id="
                     + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
-            String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
+            String bodyData1 = String.format("{\"area_type\":\"170\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                             "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                             "\"origin_type\":\"%s\"," +
                             "\"origin_id\":\"%s\"," +
@@ -619,7 +618,7 @@ public class DouyinService {
                             "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
                             "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
                             "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
-                            "\\\"appVersion\\\":\\\"8.9.6\\\",\\\"appName\\\":\\\"news_article\\\"," +
+                            "\\\"appVersion\\\":\\\"8.9.6\\\",\\\"appName\\\":\\\"aweme\\\"," +
                             "\\\"devicePlatform\\\":\\\"android\\\",\\\"deviceType\\\":\\\"PACT00\\\"," +
                             "\\\"channel\\\":\\\"oppo_13_64\\\",\\\"openudid\\\":\\\"\\\"," +
                             "\\\"versionCode\\\":\\\"896\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"OPPO\\\",\\\"iid\\\":\\\"%s\\\",\\\"bioType\\\":\\\"1\\\"}," +
@@ -633,7 +632,7 @@ public class DouyinService {
                             "\"render_token\":\"%s\"," +
                             "\"win_record_id\":\"\",\"marketing_channel\":\"\",\"identity_card_id\":\"\"," +
                             "\"pay_amount_composition\":[],\"user_account\":{},\"queue_count\":0,\"store_id\":\"\"," +
-                            "\"shop_id\":\"%s\"," +
+                            "\"shop_id\":\"GceCTPIk\"," +
                             "\"combo_id\":\"%s\"," +
                             "\"combo_num\":1," +
                             "\"product_id\":\"%s\",\"buyer_words\":\"\",\"stock_info\":[{\"stock_type\":1,\"stock_num\":1," +
@@ -653,13 +652,12 @@ public class DouyinService {
                     buyRenderParamDto.getProduct_id(),
                     buyRenderParamDto.getProduct_id(),
                     payType,
-                    buyRenderRoot.getPost_tel(),
+                    PreUtils.getTel(),
                     douyinDeviceIid.getDeviceId(),
                     douyinDeviceIid.getIid(),
                     buyRenderRoot.getPay_method().getDecision_id(),
                     buyRenderRoot.getPay_method().getPayapi_cache_id(),
                     buyRenderRoot.getRender_token(),
-                    buyRenderParamDto.getShop_id(),
                     buyRenderParamDto.getSku_id(),
                     buyRenderParamDto.getProduct_id(),
                     buyRenderParamDto.getSku_id(),
@@ -695,7 +693,7 @@ public class DouyinService {
             Response response1 = client.newCall(request1).execute();
             String bodyRes1 = response1.body().string();
             response1.close();
-            log.info("订单号{},下单时间循环次数msg:{},时间戳：{},下单结果信息结果：{},uid:{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid),
+            log.info("订单号{},下单时间循环次数msg,时间戳：{},下单结果信息结果：{},uid:{}", jdMchOrder.getTradeNo(),
                     timer.interval(),
                     bodyRes1, douyinAppCk.getUid());
             return bodyRes1;
@@ -774,7 +772,7 @@ public class DouyinService {
                     synProductMaxPrirce();
                     return null;
                 }
-                String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIids, douyinDeviceIid);
+                String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIid);
                 if (bodyRes1 == null) {
                     Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
                     if (failOldTimes >= 30) {
@@ -798,14 +796,6 @@ public class DouyinService {
                     log.info("订单号:{},当前设备号和uid绑定其他人不能使用msg:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getId());
                     redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);
                     redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);
-                    String proxyString = client.proxy().toString().split("HTTP @ /")[1];
-                    String ip = proxyString.split(":")[0];
-                    String port = proxyString.split(":")[1];
-                    JdProxyIpPort oneIp = jdProxyIpPortMapper.selectOne(Wrappers.<JdProxyIpPort>lambdaQuery().eq(JdProxyIpPort::getIp, ip).eq(JdProxyIpPort::getPort, port));
-                    if (ObjectUtil.isNotNull(oneIp)) {
-                        log.info("订单号:{}重新放入静态资源,ip:{},port:{}", jdMchOrder.getTradeNo(), ip, port);
-                        productProxyTask.buildStaticIp(oneIp);
-                    }
                     log.info("订单号{}，下单成功", jdMchOrder);
                     String orderId = JSON.parseObject(JSON.parseObject(bodyRes1).getString("data")).getString("order_id");
                     log.info("订单号{}，当前订单号msg:{}", jdMchOrder.getTradeNo(), orderId);
@@ -890,14 +880,8 @@ public class DouyinService {
             if (Integer.valueOf(jdMchOrder.getPassCode()) == PreConstant.TEN) {
                 body = SubmitUtils.buildBuyRenderYongHui(buyRenderParamDto);
             }
-            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=22&" +
-                    "device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825" +
-                    "&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark" +
-                    "&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid="
-                    + douyinDeviceIid.getIid() +
-                    "&version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id="
-                    + douyinDeviceIid.getDeviceId() + "&resolution=720%2A1280&os_version=5.1.1&language" +
-                    "=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
+            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=SM-G973N&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid="
+                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + douyinDeviceIid.getDeviceId() + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
             String X_SS_STUB = SecureUtil.md5("json_form=" + URLEncoder.encode(body)).toUpperCase();
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB, url
@@ -946,10 +930,11 @@ public class DouyinService {
                 log.error("订单号:{},预下单超时，切换client", jdMchOrder.getTradeNo());
                 client = pcAppStoreService.buildClient();
                 JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
-                Date expirationTime = jdProxyIpPort.getExpirationTime();
-                long suf = expirationTime.getTime() - new Date().getTime();
-                redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
-
+                if (ObjectUtil.isNotNull(jdProxyIpPort)) {
+                    Date expirationTime = jdProxyIpPort.getExpirationTime();
+                    long suf = expirationTime.getTime() - new Date().getTime();
+                    redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
+                }
             }
             log.error("订单号{}，预下单失败请查看详情msg:{}", jdMchOrder.getTradeNo(), e.getMessage());
         }
