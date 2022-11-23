@@ -751,9 +751,16 @@ public class DouyinService {
                 }
                 String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIids, douyinDeviceIid);
                 if (bodyRes1 == null) {
+                    Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
+                    if (failOldTimes >= 30) {
+                        redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
+                        douyinAppCk.setIsEnable(88);
+                        this.douyinAppCkMapper.updateById(douyinAppCk);
+                    }
                     continue;
                 }
                 if (bodyRes1.contains("order_id")) {
+                    redisTemplate.delete("老号失败次数:" + douyinAppCk.getUid());///重置下单失败次数
                     redisTemplate.delete("抖音下单次数过多:" + douyinAppCk.getUid());//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
                     douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
@@ -782,7 +789,6 @@ public class DouyinService {
                     log.info("订单号:{}设置上次成功时间msg:{}", jdMchOrder.getTradeNo(), new Date().toLocaleString());
                     douyinDeviceIid.setLastSuccessTime(new Date());
                     douyinDeviceIidMapper.updateById(douyinDeviceIid);
-
                     PayDto payDto = PayDto.builder().ck(PreAesUtils.encrypt加密(douyinAppCk.getCk())).device_id(douyinDeviceIid.getDeviceId()).iid(douyinDeviceIid.getIid()).pay_type(payType + "")
                             .orderId(orderId).userIp(jdLog.getIp()).build();
                     JdOrderPt jdOrderPtDb = JdOrderPt.builder().orderId(payDto.getOrderId()).ptPin(douyinAppCk.getUid()).success(PreConstant.ZERO)
@@ -797,6 +803,12 @@ public class DouyinService {
                     log.info("+++++++++++++订单号:{},{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
                     jdOrderPtMapper.insert(jdOrderPtDb);
                 } else {
+                    Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
+                    if (failOldTimes >= 30) {
+                        douyinAppCk.setIsEnable(88);
+                        douyinAppCkMapper.updateById(douyinAppCk);
+                        return null;
+                    }
                     douyinAppCk.setFailReason(douyinAppCk.getFailReason() + bodyRes1);
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                     if (bodyRes1.contains("设备存在异常")) {
