@@ -353,8 +353,8 @@ public class DouyinService {
             Set<String> oldruning = redisTemplate.keys("老号正在下单:*");
             String oldRuningTime = redisTemplate.opsForValue().get("老号持续下单个数");
             if (CollUtil.isEmpty(oldruning) || oldruning.size() < Integer.valueOf(oldRuningTime)) {
-                Integer lockDouYinCkTime = Integer.valueOf(redisTemplate.opsForValue().get("老号锁定分钟数"));
-                redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), lockDouYinCkTime, TimeUnit.MINUTES);
+                Integer 老号锁定分钟数 = Integer.valueOf(redisTemplate.opsForValue().get("老号锁定分钟数"));
+                redisTemplate.opsForValue().set("老号正在下单:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), Integer.valueOf(老号锁定分钟数), TimeUnit.MINUTES);
             } else {
                 log.info("替换ck让老号继续下单");
                 Integer i = 0;
@@ -432,7 +432,6 @@ public class DouyinService {
         }
         List<String> allData = redisTemplate.opsForValue().multiGet(edus);
         Map<String, Integer> balanceMap = allData.stream().map(it -> JSON.parseObject(it, BalanceRedisDto.class)).collect(Collectors.toMap(it -> it.getUid(), it -> it.getBalance()));
-
         log.info("新用户只能下一单");
         if (CollUtil.isNotEmpty(edus)) {
             List<String> noUseData = new ArrayList<>();
@@ -730,7 +729,7 @@ public class DouyinService {
             douyinDeviceIids.add(douyinDeviceIid);
         }
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
-            if (isProductElef(storeConfig)) {
+            if (isProductElef(storeConfig) && douyinAppCk.getIsOld() != 1) {
                 log.info("订单号:{},已经够了库存。", jdMchOrder.getTradeNo());
                 redisTemplate.delete("当前账号循环额度:" + douyinAppCk.getUid());
                 redisTemplate.delete("抖音ck锁定3分钟:" + douyinAppCk.getUid());
@@ -746,6 +745,7 @@ public class DouyinService {
                 sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
                 if (sufMeny - new BigDecimal(jdMchOrder.getMoney()).intValue() < 0) {
                     log.info("当前ck出现了余额不足的情况");
+                    redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                     synProductMaxPrirce();
                     return null;
                 }
@@ -800,11 +800,13 @@ public class DouyinService {
                     douyinAppCk.setFailReason(douyinAppCk.getFailReason() + bodyRes1);
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                     if (bodyRes1.contains("设备存在异常")) {
+                        redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                         douyinAppCk.setIsEnable(-44);
                     }
                     if (bodyRes1.contains("当前下单人数过")) {
                         Long increment = redisTemplate.opsForValue().increment("抖音下单次数过多:" + douyinAppCk.getUid(), 1);
                         if (increment >= 10) {
+                            redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                             douyinAppCk.setIsEnable(-10);
                         }
                     }
