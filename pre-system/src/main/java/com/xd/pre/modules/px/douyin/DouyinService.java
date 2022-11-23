@@ -775,7 +775,7 @@ public class DouyinService {
                     return null;
                 }
                 String bodyRes1 = geSuccessOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, phone, douyinDeviceIid);
-                if (ObjectUtil.isNotNull(bodyRes1) & bodyRes1.equals("checkIp")) {
+                if (StrUtil.isNotBlank(bodyRes1) & bodyRes1.equals("checkIp")) {
                     client = pcAppStoreService.buildClient();
                     JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
                     if (ObjectUtil.isNotNull(jdProxyIpPort)) {
