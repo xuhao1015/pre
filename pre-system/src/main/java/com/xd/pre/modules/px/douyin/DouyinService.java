@@ -377,7 +377,24 @@ public class DouyinService {
         log.info("订单号{}，初始化完成:时间戳{}", jdMchOrder.getTradeNo(), timer.interval());
         String tel = PreUtils.getTel();
         douyinAppCk.setCk(PreAesUtils.decrypt解密(douyinAppCk.getCk()));
-        List<PayDto> payDtos = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel, storeConfig);
+        if (douyinAppCk.getIsOld() == 1) {
+            log.info("老号锁定线程IP:{}", douyinAppCk.getUid());
+            JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
+            if (ObjectUtil.isNotNull(jdProxyIpPort)) {
+                Date expirationTime = jdProxyIpPort.getExpirationTime();
+                long suf = expirationTime.getTime() - new Date().getTime();
+                redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
+                log.info("设置老号线程的ip成功uid:{}", douyinAppCk.getUid());
+            }
+        }
+        try {
+            List<PayDto> payDtos = createOrder(client, buyRenderParamDto, payType, douyinAppCk, jdLog, jdMchOrder, timer, tel, storeConfig);
+        } catch (Exception e) {
+            redisTemplate.delete("老号锁定线程账号:" + douyinAppCk.getUid());
+            log.info("释放当前线程的锁");
+        } finally {
+            redisTemplate.delete("老号锁定线程账号:" + douyinAppCk.getUid());
+        }
         return R.ok();
     }
 
@@ -559,7 +576,7 @@ public class DouyinService {
             buyRenderRoot.setPost_tel(phone);
             String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid="
                     + douyinDeviceIid.getIid() + "&version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id="
-                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=5.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
+                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
             String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                             "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                             "\"origin_type\":\"%s\"," +
@@ -678,9 +695,9 @@ public class DouyinService {
             Response response1 = client.newCall(request1).execute();
             String bodyRes1 = response1.body().string();
             response1.close();
-            log.info("订单号{},下单时间循环次数msg:{},时间戳：{},下单结果信息结果：{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid),
+            log.info("订单号{},下单时间循环次数msg:{},时间戳：{},下单结果信息结果：{},uid:{}", jdMchOrder.getTradeNo(), douyinDeviceIids.indexOf(douyinDeviceIid),
                     timer.interval(),
-                    bodyRes1);
+                    bodyRes1, douyinAppCk.getUid());
             return bodyRes1;
         } catch (Exception e) {
             log.error("订单号msg:{},失败:{}", jdMchOrder.getTradeNo(), e.getMessage());
@@ -728,6 +745,13 @@ public class DouyinService {
         } else {
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
             douyinDeviceIids.add(douyinDeviceIid);
+        }
+//        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
+        jdLog.setIp("189.222.12.272");
+        String ipAndPortStr = redisTemplate.opsForValue().get("老号锁定线程账号IP:" + douyinAppCk.getUid());
+        if (StrUtil.isNotBlank(ipAndPortStr)) {
+            JdProxyIpPort jdProxyIpPort = JSON.parseObject(ipAndPortStr, JdProxyIpPort.class);
+            client = pcAppStoreService.buildClient(jdProxyIpPort);
         }
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
             if (isProductElef(storeConfig) && douyinAppCk.getIsOld() != 1) {
@@ -828,10 +852,6 @@ public class DouyinService {
                     douyinAppCkMapper.updateById(douyinAppCk);
                 }
             } catch (Exception e) {
-                if (StrUtil.isNotBlank(e.getMessage()) && e.getMessage().contains("out")) {
-                    log.error("订单号:{},下单超时", jdMchOrder.getTradeNo());
-                    client = pcAppStoreService.buildClient();
-                }
                 redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
                 log.error("订单号{}，当前抖音报错:{},时间戳:{}", jdMchOrder.getTradeNo(), e.getMessage(), timer.interval());
             }
@@ -925,6 +945,11 @@ public class DouyinService {
             if (StrUtil.isNotBlank(e.getMessage()) && e.getMessage().contains("out")) {
                 log.error("订单号:{},预下单超时，切换client", jdMchOrder.getTradeNo());
                 client = pcAppStoreService.buildClient();
+                JdProxyIpPort jdProxyIpPort = SysUtils.parseOkHttpClent(client, jdProxyIpPortMapper);
+                Date expirationTime = jdProxyIpPort.getExpirationTime();
+                long suf = expirationTime.getTime() - new Date().getTime();
+                redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
+
             }
             log.error("订单号{}，预下单失败请查看详情msg:{}", jdMchOrder.getTradeNo(), e.getMessage());
         }

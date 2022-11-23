@@ -401,8 +401,6 @@ public class ProductProxyTask {
         if (StrUtil.isNotBlank(isAble) && Integer.valueOf(isAble) == PreConstant.ONE) {
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oneIp.getIp(), Integer.valueOf(oneIp.getPort())));
             builder.proxy(proxy);
-        } else {
-            redisTemplate.opsForValue().set("是否使用代理", "1");
         }
         OkHttpClient client = builder.connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS)
                 .callTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS)

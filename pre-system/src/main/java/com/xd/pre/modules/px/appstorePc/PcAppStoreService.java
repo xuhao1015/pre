@@ -549,6 +549,16 @@ public class PcAppStoreService {
         }
 
     }
+    public OkHttpClient buildClient(JdProxyIpPort oneIp) {
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder();
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oneIp.getIp(), Integer.valueOf(oneIp.getPort())));
+        builder.proxy(proxy);
+        Integer exTime = Integer.valueOf(redisTemplate.opsForValue().get("代理使用超时时间"));
+        OkHttpClient client = builder.connectTimeout(exTime, TimeUnit.SECONDS).readTimeout(exTime, TimeUnit.SECONDS)
+                .callTimeout(exTime, TimeUnit.SECONDS).writeTimeout(exTime, TimeUnit.SECONDS)
+                .followRedirects(false).build();
+        return client;
+    }
 
 
     public OkHttpClient buildClient() {
@@ -567,9 +577,6 @@ public class PcAppStoreService {
                 JdProxyIpPort oneIp = this.proxyProductService.getOneIp(PreConstant.ZERO, PreConstant.ZERO, false);
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oneIp.getIp(), Integer.valueOf(oneIp.getPort())));
                 builder.proxy(proxy);
-                log.info("当前使用的代理msg:{}", oneIp);
-            } else {
-                redisTemplate.opsForValue().set("是否使用代理", "1");
             }
             Integer exTime = Integer.valueOf(redisTemplate.opsForValue().get("代理使用超时时间"));
             OkHttpClient client = builder.connectTimeout(exTime, TimeUnit.SECONDS).readTimeout(exTime, TimeUnit.SECONDS)
