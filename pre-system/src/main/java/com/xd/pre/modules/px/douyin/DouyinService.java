@@ -706,6 +706,7 @@ public class DouyinService {
             log.info("订单号:{},ck:udi:{},关闭账号未待使用", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
             douyinAppCk.setIsEnable(PreConstant.ZERO);
             douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
+            redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
             douyinAppCkMapper.updateById(douyinAppCk);
             return null;
         }
@@ -756,6 +757,7 @@ public class DouyinService {
                         redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                         douyinAppCk.setIsEnable(88);
                         this.douyinAppCkMapper.updateById(douyinAppCk);
+                        return null;
                     }
                     continue;
                 }
@@ -830,6 +832,7 @@ public class DouyinService {
                     log.error("订单号:{},下单超时", jdMchOrder.getTradeNo());
                     client = pcAppStoreService.buildClient();
                 }
+                redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
                 log.error("订单号{}，当前抖音报错:{},时间戳:{}", jdMchOrder.getTradeNo(), e.getMessage(), timer.interval());
             }
         }
