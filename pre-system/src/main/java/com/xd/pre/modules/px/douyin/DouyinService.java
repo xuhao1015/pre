@@ -185,7 +185,7 @@ public class DouyinService {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         JdOrderPt jdOrderPtDb = jdOrderPtStocks.get(PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 1)[0]);
         if (jdOrderPtStocks.size() >= 20) {
-            int[] ints = PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 15);
+            int[] ints = PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 10);
             for (int i = 0; i < ints.length; i++) {
                 int anInt = ints[i];
                 JdOrderPt jdOrderPtT = jdOrderPtStocks.get(anInt);
