@@ -745,7 +745,7 @@ public class DouyinService {
             int times = sufMeny / new BigDecimal(jdMchOrder.getMoney()).intValue();//96
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
             if (times > 10) {
-                times = times / 3;
+                times = times - 5;
             }
             for (int i = 0; i < times; i++) {
                 douyinDeviceIids.add(douyinDeviceIid);
