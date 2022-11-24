@@ -28,7 +28,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1595568590242893824");
+        outOrders.add("P1595578192422424576");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -45,7 +45,7 @@ public class FindOrder {
                         " LEFT JOIN jd_order_pt op ON op.id = mo.original_trade_id  " +
                         "WHERE " +
                         " mo.create_time > DATE_SUB( SYSDATE( ), INTERVAL 30 MINUTE )  " +
-                        " AND mo.click_pay < DATE_SUB( SYSDATE( ), INTERVAL 1 MINUTE )  " +
+                        " AND mo.click_pay < DATE_SUB( SYSDATE( ), INTERVAL 2 MINUTE )  " +
                         " AND mo.click_pay IS NOT NULL and op.html is null  " +
                         " AND mo.click_pay != '1970-01-01 08:00:00'  " +
                         " AND mo.`status` != 2  order by mo.click_pay ;");
@@ -115,18 +115,18 @@ public class FindOrder {
             log.info("没有支付");
             return;
         }
-        log.info("当前订单支付成功：{}",outOrder);
+        log.info("当前订单支付成功：{}", outOrder);
         db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
         DouyinService douyinService = new DouyinService();
-        Boolean ac100030 = douyinService.isac100030Zr100040(client,  entity.getStr("trade_no"), original_trade_no, current_ck, "100030");
-        if(ac100030){
-            db.use().execute("update jd_order_pt set action_id = ? where order_id = ?",100030,original_trade_no);
+        Boolean ac100030 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100030");
+        if (ac100030) {
+            db.use().execute("update jd_order_pt set action_id = ? where order_id = ?", 100030, original_trade_no);
             Boolean ac100040 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100040");
-            if(ac100040){
-                db.use().execute("update jd_order_pt set action_id = ? where order_id = ?",100040,original_trade_no);
-                log.info("删除订单成功:{}",outOrder);
+            if (ac100040) {
+                db.use().execute("update jd_order_pt set action_id = ? where order_id = ?", 100040, original_trade_no);
+                log.info("删除订单成功:{}", outOrder);
             }
         }
     }

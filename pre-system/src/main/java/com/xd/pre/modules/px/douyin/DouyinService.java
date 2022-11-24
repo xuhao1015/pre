@@ -207,9 +207,8 @@ public class DouyinService {
         if (StrUtil.isBlank(payReUrl)) {
             return null;
         }
-        String lockOrderTime = redisTemplate.opsForValue().get("锁定抖音库存订单锁定分钟数");
         Boolean ifLockStock = redisTemplate.opsForValue().setIfAbsent("锁定抖音库存订单:" + jdOrderPtDb.getId(), jdMchOrder.getTradeNo(),
-                Integer.valueOf(lockOrderTime), TimeUnit.MINUTES);
+                50, TimeUnit.MINUTES);
         if (!ifLockStock) {
             log.error("订单号{}，有人已经使用库存,请查看数据库msg:{}", jdMchOrder.getTradeNo(), jdMchOrder.getTradeNo());
             return null;
