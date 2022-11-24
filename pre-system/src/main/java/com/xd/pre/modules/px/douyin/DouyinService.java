@@ -1394,7 +1394,7 @@ public class DouyinService {
                 LambdaQueryWrapper<JdOrderPt> wrapperLockW = Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getCreateTime, DateUtil.beginOfDay(new Date())).eq(JdOrderPt::getPtPin, uid);
                 wrapperLockW.like(JdOrderPt::getHtml, "待发券");
                 List<JdOrderPt> lockStocks = jdOrderPtMapper.selectList(wrapperLockW);
-                if (CollUtil.isEmpty(lockStocks) || lockStocks.size() <= 2) {
+                if (CollUtil.isEmpty(lockStocks) || lockStocks.size() <= 1) {
                     redisTemplate.delete("抽风账号锁定:" + uid);
                     redisTemplate.delete("抖音ck锁定3分钟:" + uid);
                     List<JdOrderPt> jdOrderPtsDbByUid = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery()
@@ -1411,7 +1411,7 @@ public class DouyinService {
         }
         for (String uid : groupByuid.keySet()) {
             List<JdOrderPt> jdOrderPtByUids = groupByuid.get(uid);
-            if (jdOrderPtByUids.size() >= 3) {
+            if (jdOrderPtByUids.size() >= 2) {
                 log.info("uid:{},这批库存全部禁用", uid);
                 redisTemplate.delete("老号正在下单:" + uid);
                 DouyinAppCk douyinAppCk = douyinAppCkMapper.selectOne(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getUid, uid));
