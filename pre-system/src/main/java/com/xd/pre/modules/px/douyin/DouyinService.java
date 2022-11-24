@@ -742,6 +742,7 @@ public class DouyinService {
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
             douyinDeviceIids.add(douyinDeviceIid);
         }
+
 //        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
             if (isProductElef(storeConfig) && douyinAppCk.getIsOld() != 1) {
@@ -813,6 +814,11 @@ public class DouyinService {
                             .build();
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                     log.info("+++++++++++++订单号:{},{}", jdMchOrder.getTradeNo(), JSON.toJSONString(jdOrderPtDb));
+                    sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
+                    Map<String, Object> balanceDto = new HashMap<>();
+                    balanceDto.put("balance", sufMeny - storeConfig.getSkuPrice().intValue());
+                    balanceDto.put("uid", douyinAppCk.getUid());
+                    redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + douyinAppCk.getUid(), JSON.toJSONString(balanceDto));
                     jdOrderPtMapper.insert(jdOrderPtDb);
                 } else {
                     Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
