@@ -877,7 +877,7 @@ public class DouyinService {
             List<String> sockIds = stockNums.stream().map(it -> it.split(":")[1]).collect(Collectors.toList());
             stockWrapper.notIn(JdOrderPt::getId, sockIds);
         }
-        stockWrapper.eq(JdOrderPt::getIsWxSuccess,PreConstant.ONE);
+        stockWrapper.eq(JdOrderPt::getIsWxSuccess, PreConstant.ONE);
         stockWrapper.isNull(JdOrderPt::getPaySuccessTime).gt(JdOrderPt::getWxPayExpireTime, new Date());
         List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
         if (jdOrderPtStocks.size() >= storeConfig.getProductStockNum()) {
@@ -1332,6 +1332,64 @@ public class DouyinService {
         return false;
     }
 
+    @Scheduled(cron = "0/20 * * * * ?")
+    @Async("asyncPool")
+    public void deleteChoufengShu() {
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("deleteChoufengShu", "deleteChoufengShu", 15, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            return;
+        }
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        LambdaQueryWrapper<JdOrderPt> wrapper = Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getCreateTime, DateUtil.beginOfDay(new Date()));
+        wrapper.like(JdOrderPt::getHtml, "待发券");
+        List<JdOrderPt> jdOrderPts = jdOrderPtMapper.selectList(wrapper);
+        if (CollUtil.isEmpty(jdOrderPts)) {
+            return;
+        }
+        Map<String, List<JdOrderPt>> groupByuid = jdOrderPts.stream().collect(Collectors.groupingBy(JdOrderPt::getPtPin));
+        Set<String> choufengAccounts = redisTemplate.keys("抽风账号锁定:*");
+        if (CollUtil.isNotEmpty(choufengAccounts)) {
+            for (String choufengAccount : choufengAccounts) {
+                String uid = choufengAccount.replace("抽风账号锁定:", "");
+                LambdaQueryWrapper<JdOrderPt> wrapperLockW = Wrappers.<JdOrderPt>lambdaQuery().gt(JdOrderPt::getCreateTime, DateUtil.beginOfDay(new Date())).eq(JdOrderPt::getPtPin, uid);
+                wrapperLockW.like(JdOrderPt::getHtml, "待发券");
+                List<JdOrderPt> lockStocks = jdOrderPtMapper.selectList(wrapperLockW);
+                if (CollUtil.isEmpty(lockStocks) || lockStocks.size() <= 2) {
+                    redisTemplate.delete("抽风账号锁定:" + uid);
+                    redisTemplate.delete("抖音ck锁定3分钟:" + uid);
+                    List<JdOrderPt> jdOrderPtsDbByUid = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery()
+                            .gt(JdOrderPt::getCreateTime, DateUtil.beginOfDay(new Date())).eq(JdOrderPt::getPtPin, uid).eq(JdOrderPt::getIsWxSuccess, PreConstant.ZERO));
+                    if (CollUtil.isNotEmpty(jdOrderPtsDbByUid)) {
+                        for (JdOrderPt jdOrderPtByUid : jdOrderPtsDbByUid) {
+                            redisTemplate.delete("锁定抖音库存订单:" + jdOrderPtByUid.getId());
+                            jdOrderPtByUid.setIsWxSuccess(PreConstant.ONE);
+                            jdOrderPtMapper.updateById(jdOrderPtByUid);
+                        }
+                    }
+                }
+            }
+        }
+        for (String uid : groupByuid.keySet()) {
+            List<JdOrderPt> jdOrderPtByUids = groupByuid.get(uid);
+            if (jdOrderPtByUids.size() >= 3) {
+                log.info("uid:{},这批库存全部禁用", uid);
+                redisTemplate.delete("老号正在下单:" + uid);
+                DouyinAppCk douyinAppCk = douyinAppCkMapper.selectOne(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getUid, uid));
+                redisTemplate.opsForValue().set("抖音ck锁定3分钟:" + uid, JSON.toJSONString(douyinAppCk), 5, TimeUnit.MINUTES);
+                redisTemplate.opsForValue().set("抽风账号锁定:" + uid, uid, 5, TimeUnit.MINUTES);
+                List<JdOrderPt> jdOrderPtsDbByUid = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery()
+                        .gt(JdOrderPt::getCreateTime, DateUtil.beginOfDay(new Date())).eq(JdOrderPt::getPtPin, uid).eq(JdOrderPt::getIsWxSuccess, PreConstant.ONE));
+                for (JdOrderPt jdOrderPtByUid : jdOrderPtsDbByUid) {
+                    Boolean ifLockStock = redisTemplate.opsForValue().setIfAbsent("锁定抖音库存订单:" + jdOrderPtByUid.getId(), jdOrderPtByUid.getOrderId(),
+                            50, TimeUnit.MINUTES);
+                    if (ifLockStock) {
+                        jdOrderPtByUid.setIsWxSuccess(PreConstant.ZERO);
+                        jdOrderPtMapper.updateById(jdOrderPtByUid);
+                    }
+                }
+            }
+        }
+    }
 
     @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
