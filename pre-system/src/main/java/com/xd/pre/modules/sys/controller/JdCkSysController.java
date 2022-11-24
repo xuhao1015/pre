@@ -634,6 +634,7 @@ public class JdCkSysController {
             List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
             if (CollUtil.isNotEmpty(jdLogs)) {
                 String ip = jdLogs.get(0).getIp();
+                redisTemplate.delete("IP白名单:"+ip);
                 redisTemplate.opsForValue().set("IP黑名单:" + ip, "1000");
             }
         }
