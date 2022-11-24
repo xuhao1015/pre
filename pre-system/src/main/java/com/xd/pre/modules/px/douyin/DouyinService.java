@@ -376,6 +376,18 @@ public class DouyinService {
                     log.info("woaini:5第三步");
                 }
             }
+        } else {
+            log.info("绕开1点到2点的时间");
+            DateTime beginOfDay = DateUtil.beginOfDay(new Date());
+            DateTime dateTime0 = DateUtil.offsetMinute(beginOfDay, 0);
+            String 首单开始跑时间 = redisTemplate.opsForValue().get("首单开始跑时间");
+            DateTime dateTime4 = DateUtil.offsetMinute(beginOfDay, Integer.valueOf(首单开始跑时间) * 60);
+            if (System.currentTimeMillis() > dateTime0.getTime() && System.currentTimeMillis() < dateTime4.getTime()) {
+                long l = (dateTime4.getTime() - System.currentTimeMillis()) / 1000;
+                redisTemplate.opsForValue().set("抖音ck锁定3分钟:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), l, TimeUnit.SECONDS);
+                log.info("当前不跑首单号锁定号uid:{}", douyinAppCk.getUid());
+                return null;
+            }
         }
         String config = storeConfig.getConfig();
         BuyRenderParamDto buyRenderParamDto = JSON.parseObject(config, BuyRenderParamDto.class);
