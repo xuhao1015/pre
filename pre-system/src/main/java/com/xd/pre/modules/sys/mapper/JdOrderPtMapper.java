@@ -75,7 +75,7 @@ public interface JdOrderPtMapper extends BaseMapper<JdOrderPt> {
     @Select("SELECT count( 1 ) as stockCount , sku_price as skuPrice,tenant_id as tenant_id  " +
             "FROM " +
             " jd_order_pt  " +
-            "WHERE wx_pay_expire_time > now( ) AND success = 0  AND  (href_url = '' or  href_url is null ) " +
+            "WHERE wx_pay_expire_time > now( ) AND success = 0  AND is_wx_success =1  AND  (href_url = '' or  href_url is null ) " +
             "GROUP BY sku_price,tenant_id  " +
             "ORDER BY " +
             " tenant_id, " +
