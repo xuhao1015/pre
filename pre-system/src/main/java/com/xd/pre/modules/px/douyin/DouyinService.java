@@ -1367,6 +1367,8 @@ public class DouyinService {
         //   Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
         for (JdOrderPt jdOrderPt : jdOrderPts) {
             redisTemplate.delete("锁定抖音库存订单:" + jdOrderPt.getId());
+            jdOrderPt.setHrefUrl("");
+            this.jdOrderPtMapper.updateById(jdOrderPt);
         }
     }
 
