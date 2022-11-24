@@ -1342,10 +1342,10 @@ public class DouyinService {
         return false;
     }
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0/40 * * * * ?")
     @Async("asyncPool")
     public void freeOrderStock() {
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("freeOrderStock", "freeOrderStock", 15, TimeUnit.SECONDS);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("freeOrderStock", "freeOrderStock", 20, TimeUnit.SECONDS);
         if (!ifAbsent) {
             return;
         }
