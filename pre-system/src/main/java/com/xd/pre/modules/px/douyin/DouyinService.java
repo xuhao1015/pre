@@ -120,6 +120,7 @@ public class DouyinService {
             LambdaQueryWrapper<JdOrderPt> stockWrapper = Wrappers.lambdaQuery();
             stockWrapper.gt(JdOrderPt::getWxPayExpireTime, new Date());
             stockWrapper.eq(JdOrderPt::getSkuPrice, storeConfig.getSkuPrice());
+            stockWrapper.eq(JdOrderPt::getIsWxSuccess, PreConstant.ONE);
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
             Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
             if (CollUtil.isNotEmpty(stockNums)) {
