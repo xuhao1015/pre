@@ -20,9 +20,9 @@ public class DouYNew {
         for (int i = 0; i < 100; i++) {
             Integer payType = 2;
             String payIp = "189.222.12.272";
-            String device_id = "device_id_str=3197825760377757";
-            String iid = "install_id_str=3408931994740749";
-            String ck = "sid_tt=e4d5597474fc3ea39bda943e3a5ebcda;";
+            String device_id = "device_id_str=400668791154424";
+            String iid = "install_id_str=400668791676222";
+            String ck = "sid_tt=aee0b0886dbf3b5a91456efff61f5840;";
 
             if (device_id.contains("device_id_str=")) {
                 device_id = device_id.replace("device_id_str=", "");
