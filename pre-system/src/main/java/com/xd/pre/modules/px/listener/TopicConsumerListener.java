@@ -317,6 +317,7 @@ public class TopicConsumerListener {
                 List<String> sockIds = stockNums.stream().map(it -> it.split(":")[1]).collect(Collectors.toList());
                 stockWrapper.notIn(JdOrderPt::getId, sockIds);
             }
+            stockWrapper.eq(JdOrderPt::getIsWxSuccess,PreConstant.ONE);
             stockWrapper.isNull(JdOrderPt::getPaySuccessTime).gt(JdOrderPt::getWxPayExpireTime, new Date());
             List<JdOrderPt> jdOrderPtStocks = jdOrderPtMapper.selectList(stockWrapper);
             if (jdOrderPtStocks.size() >= jdAppStoreConfig.getProductStockNum()) {
