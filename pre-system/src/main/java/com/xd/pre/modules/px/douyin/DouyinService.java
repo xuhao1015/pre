@@ -1344,6 +1344,34 @@ public class DouyinService {
 
     @Scheduled(cron = "0/20 * * * * ?")
     @Async("asyncPool")
+    public void freeOrderStock() {
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("freeOrderStock", "freeOrderStock", 15, TimeUnit.SECONDS);
+        if (!ifAbsent) {
+            return;
+        }
+        PreTenantContextHolder.setCurrentTenantId(1L);
+        DateTime dateTimes = DateUtil.offsetMinute(new Date(), -5);
+        DateTime dateTimee = DateUtil.offsetMinute(new Date(), -30);
+        LambdaQueryWrapper<JdMchOrder> notClickPay = Wrappers.<JdMchOrder>lambdaQuery().gt(JdMchOrder::getCreateTime, dateTimee).lt(JdMchOrder::getCreateTime, dateTimes)
+                .isNotNull(JdMchOrder::getOriginalTradeId)
+                .isNull(JdMchOrder::getClickPay);
+        List<JdMchOrder> jdMchOrders = jdMchOrderMapper.selectList(notClickPay);
+        if (CollUtil.isEmpty(jdMchOrders)) {
+            return;
+        }
+        List<Integer> orderPtIds = jdMchOrders.stream().map(it -> it.getOriginalTradeId()).collect(Collectors.toList());
+        List<JdOrderPt> jdOrderPts = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery().in(JdOrderPt::getId, orderPtIds));
+        if (CollUtil.isEmpty(jdOrderPts)) {
+            return;
+        }
+        //   Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
+        for (JdOrderPt jdOrderPt : jdOrderPts) {
+            redisTemplate.delete("锁定抖音库存订单:" + jdOrderPt.getId());
+        }
+    }
+
+    @Scheduled(cron = "0/20 * * * * ?")
+    @Async("asyncPool")
     public void deleteChoufengShu() {
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("deleteChoufengShu", "deleteChoufengShu", 15, TimeUnit.SECONDS);
         if (!ifAbsent) {
