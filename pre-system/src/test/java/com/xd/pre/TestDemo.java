@@ -12,6 +12,8 @@ public class TestDemo {
 
 
     public static void main(String[] args) {
+        long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
+        System.out.println(l);
         List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\kele300.txt", "UTF-8");
         StringBuilder stringBuilder = new StringBuilder();
         for (String line : STRINGS) {

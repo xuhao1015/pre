@@ -46,6 +46,7 @@ import javax.jms.Destination;
 import javax.jms.Queue;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -767,6 +768,14 @@ public class DouyinService {
 
 //        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
+            String orgDataOldAccount = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
+            if (StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= 12) {
+                log.info("当前账号使用aacount:{}，已经下满12单了", douyinAppCk.getUid());
+                redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
+                long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
+                redisTemplate.opsForValue().set("抖音ck锁定3分钟:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), l, TimeUnit.SECONDS);
+                return null;
+            }
             if (isProductElef(storeConfig) && douyinAppCk.getIsOld() != 1) {
                 log.info("订单号:{},已经够了库存。", jdMchOrder.getTradeNo());
                 redisTemplate.delete("当前账号循环额度:" + douyinAppCk.getUid());
@@ -803,6 +812,15 @@ public class DouyinService {
                     continue;
                 }
                 if (bodyRes1.contains("order_id")) {
+                    if (douyinAppCk.getIsOld() == PreConstant.ONE) {
+                        long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
+                        String orgData = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
+                        if (StrUtil.isNotBlank(orgData)) {
+                            redisTemplate.opsForValue().set("老号下次成功次数:" + douyinAppCk.getUid(), "1", BigInteger.valueOf(l).intValue(), TimeUnit.SECONDS);
+                        } else {
+                            redisTemplate.opsForValue().set("老号下次成功次数:" + douyinAppCk.getUid(), (Integer.valueOf(orgData) + 1) + "", BigInteger.valueOf(l).intValue(), TimeUnit.SECONDS);
+                        }
+                    }
                     redisTemplate.delete("老号失败次数:" + douyinAppCk.getUid());///重置下单失败次数
                     redisTemplate.delete("抖音下单次数过多:" + douyinAppCk.getUid());//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
@@ -818,8 +836,6 @@ public class DouyinService {
                     log.info("订单号{}，下单成功", jdMchOrder);
                     String orderId = JSON.parseObject(JSON.parseObject(bodyRes1).getString("data")).getString("order_id");
                     log.info("订单号{}，当前订单号msg:{}", jdMchOrder.getTradeNo(), orderId);
-                    redisTemplate.opsForValue().increment("抖音设备号成功次数:" + douyinDeviceIid.getDeviceId());
-                    redisTemplate.opsForValue().increment("抖音账号成功次数:" + douyinAppCk.getUid());
                     douyinDeviceIid.setSuccess(douyinDeviceIid.getSuccess() == null ? 1 : douyinDeviceIid.getSuccess() + 1);
                     log.info("订单号:{}设置上次成功时间msg:{}", jdMchOrder.getTradeNo(), new Date().toLocaleString());
                     douyinDeviceIid.setLastSuccessTime(new Date());
