@@ -18,11 +18,11 @@ import java.util.Map;
 public class DouYNew {
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < 100; i++) {
-            Integer payType = 10;
+            Integer payType = 2;
             String payIp = "189.222.12.272";
-            String device_id = "device_id_str=154378046813470";
-            String iid = "install_id_str=383076465115624";
-            String ck = "sid_tt=5824ed4a13b56bac33cf597c0392f693;";
+            String device_id = "device_id_str=3637631348384654";
+            String iid = "install_id_str=3303379813794888";
+            String ck = "sid_tt=cf34e6115d2598c16baccfec4087c583;";
             if (device_id.contains("device_id_str=")) {
                 device_id = device_id.replace("device_id_str=", "");
             }
@@ -207,7 +207,7 @@ public class DouYNew {
             String bodyRes1 = response1.body().string();
             response1.close();
             log.info("msg:{}", bodyRes1);
-            Thread.sleep(1*1000);
+            Thread.sleep(1 * 1000);
         }
 
 
