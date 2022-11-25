@@ -1388,7 +1388,7 @@ public class DouyinService {
         }
     }
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     @Async("asyncPool")
     public void deleteChoufengShu() {
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("deleteChoufengShu", "deleteChoufengShu", 15, TimeUnit.SECONDS);
