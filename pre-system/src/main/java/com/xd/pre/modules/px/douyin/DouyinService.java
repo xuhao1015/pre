@@ -1375,14 +1375,13 @@ public class DouyinService {
         if (CollUtil.isEmpty(jdMchOrders)) {
             return;
         }
-        List<Integer> orderPtIds = jdMchOrders.stream().map(it -> it.getOriginalTradeId()).collect(Collectors.toList());
-        List<JdOrderPt> jdOrderPts = jdOrderPtMapper.selectList(Wrappers.<JdOrderPt>lambdaQuery().in(JdOrderPt::getId, orderPtIds));
-        if (CollUtil.isEmpty(jdOrderPts)) {
-            return;
-        }
-        //   Set<String> stockNums = redisTemplate.keys("锁定抖音库存订单:*");
-        for (JdOrderPt jdOrderPt : jdOrderPts) {
-            redisTemplate.delete("锁定抖音库存订单:" + jdOrderPt.getId());
+        for (JdMchOrder jdMchOrder : jdMchOrders) {
+            Boolean ifAbsent1 = redisTemplate.opsForValue().setIfAbsent("删除订单库存:" + jdMchOrder.getId(), JSON.toJSONString(jdMchOrder), 40, TimeUnit.MINUTES);
+            if (!ifAbsent1) {
+                continue;
+            }
+            redisTemplate.delete("锁定抖音库存订单:" + jdMchOrder.getOriginalTradeId());
+            JdOrderPt jdOrderPt = jdOrderPtMapper.selectById(jdMchOrder.getOriginalTradeId());
             jdOrderPt.setHrefUrl("");
             this.jdOrderPtMapper.updateById(jdOrderPt);
         }
