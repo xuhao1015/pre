@@ -364,7 +364,7 @@ public class JdCkSysController {
                             build.setFailReason("替换");
                             douyinAppCkMapper.insert(build);
                         }
-                        if (!douyinAppCkDb.getFileName().equals("douyinck_11_05.txt") && DateUtil.parseDateTime("2022-10-22 00:00:00").getTime() < douyinAppCkDb.getCreateTime().getTime()) {
+                        if (DateUtil.parseDateTime("2022-10-22 00:00:00").getTime() < douyinAppCkDb.getCreateTime().getTime()) {
                             feihao.add("重复号:" + douYinAppCk);
                         }
                     } else {

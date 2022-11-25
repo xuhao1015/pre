@@ -43,7 +43,8 @@ public class TestResoData {
         String iid = "";
         String ck = ";";
         String notUse = "";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221123%' and id >7272 ");
+//        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221123%' and id >7272 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221125%' ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
         List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 14499  ");
         for (Entity entity : appCks) {
