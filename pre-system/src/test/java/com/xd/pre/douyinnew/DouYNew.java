@@ -20,9 +20,9 @@ public class DouYNew {
         for (int i = 0; i < 100; i++) {
             Integer payType = 2;
             String payIp = "189.222.12.272";
-            String device_id = "device_id_str=400668791154424";
-            String iid = "install_id_str=400668791676222";
-            String ck = "sid_tt=aee0b0886dbf3b5a91456efff61f5840;";
+            String device_id = "device_id_str=3320971675312904";
+            String iid = "install_id_str=3109865444349527";
+            String ck = "sid_tt=7c4cee8c4556d8813a58f70e2af7e7f8;";
 
             if (device_id.contains("device_id_str=")) {
                 device_id = device_id.replace("device_id_str=", "");
@@ -168,7 +168,6 @@ public class DouYNew {
                     buyRenderParamDto.getSku_id(),
                     buyRenderParamDto.getEcom_scene_id()
             );
-            System.out.println(bodyData1);
             String X_SS_STUB1 = SecureUtil.md5("json_form=" + URLEncoder.encode(bodyData1)).toUpperCase();
             String signData1 = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB1, url1
