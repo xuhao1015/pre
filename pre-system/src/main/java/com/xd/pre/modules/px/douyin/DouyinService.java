@@ -769,7 +769,7 @@ public class DouyinService {
 //        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
             String orgDataOldAccount = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
-            if (StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= 12) {
+            if (douyinAppCk.getIsOld() == PreConstant.ONE && StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= 12) {
                 log.info("当前账号使用aacount:{}，已经下满12单了", douyinAppCk.getUid());
                 redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                 long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
