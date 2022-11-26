@@ -389,7 +389,6 @@ public class DouyinService {
                 }
             }
         } else {
-            log.info("绕开1点到2点的时间");
             DateTime beginOfDay = DateUtil.beginOfDay(new Date());
             DateTime dateTime0 = DateUtil.offsetMinute(beginOfDay, 0);
             String 首单开始跑时间 = redisTemplate.opsForValue().get("首单开始跑时间");
@@ -766,7 +765,8 @@ public class DouyinService {
 //        redisTemplate.opsForValue().setIfAbsent("老号锁定线程账号IP:" + douyinAppCk.getUid(), JSON.toJSONString(jdProxyIpPort), suf / 1000, TimeUnit.SECONDS);
         for (DouyinDeviceIid douyinDeviceIid : douyinDeviceIids) {
             String orgDataOldAccount = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
-            if (douyinAppCk.getIsOld() == PreConstant.ONE && StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= 12) {
+            String oldAccountMax = redisTemplate.opsForValue().get("老号最大下单次数");
+            if (douyinAppCk.getIsOld() == PreConstant.ONE && StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= Integer.valueOf(oldAccountMax)) {
                 log.info("当前账号使用aacount:{}，已经下满12单了", douyinAppCk.getUid());
                 redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                 long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
