@@ -592,8 +592,8 @@ public class DouyinService {
             }
             //PreUtils.getTel()
             buyRenderRoot.setPost_tel(phone);
-            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(5) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel="+PreUtils.getRandomString(10)+"&device_platform=android&iid=" + douyinDeviceIid.getIid() + "&version_code="+PreUtils.getRandomNum(5)+"&cdid="+PreUtils.getRandomString(36)+"d&os=android&is_android_pad=0&openudid="+PreUtils.getRandomNum(16)+"&device_id="
-                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=" + PreUtils.getRandomString(5) + "&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc="+PreUtils.getRandomNum(5);
+            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(5) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + douyinDeviceIid.getIid() + "&version_code=" + PreUtils.getRandomNum(5) + "&cdid=" + PreUtils.getRandomString(36) + "d&os=android&is_android_pad=0&openudid=" + PreUtils.getRandomNum(16) + "&device_id="
+                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=" + PreUtils.getRandomString(5) + "&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
             String bodyData1 = String.format("{\"area_type\":\"170\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                             "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                             "\"origin_type\":\"%s\"," +
@@ -767,7 +767,7 @@ public class DouyinService {
             String orgDataOldAccount = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
             String oldAccountMax = redisTemplate.opsForValue().get("老号最大下单次数");
             if (douyinAppCk.getIsOld() == PreConstant.ONE && StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= Integer.valueOf(oldAccountMax)) {
-                log.info("当前账号使用订单号;{}，aacount:{}，已经下满12单了",jdMchOrder.getTradeNo() ,douyinAppCk.getUid());
+                log.info("当前账号使用订单号;{}，aacount:{}，已经下满12单了", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
                 redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                 long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
                 redisTemplate.opsForValue().set("抖音ck锁定3分钟:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), l, TimeUnit.SECONDS);
@@ -788,7 +788,7 @@ public class DouyinService {
             try {
                 sufMeny = getSufMeny(douyinAppCk.getUid(), jdMchOrder);
                 if (sufMeny - new BigDecimal(jdMchOrder.getMoney()).intValue() < 0) {
-                    log.info("当前ck出现了余额不足的情况");
+                    log.info("订单号:当前ck出现了余额不足的情况", jdMchOrder.getTradeNo());
                     redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                     synProductMaxPrirce();
                     return null;
@@ -810,7 +810,7 @@ public class DouyinService {
                 }
                 if (bodyRes1.contains("order_id")) {
                     if (douyinAppCk.getIsOld() == PreConstant.ONE) {
-                        log.info("订单号:{},老号下次成功次数:{}",jdMchOrder.getTradeNo(),douyinAppCk.getUid());
+                        log.info("订单号:{},老号下次成功次数:{}", jdMchOrder.getTradeNo(), douyinAppCk.getUid());
                         long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
                         String orgData = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
                         if (StrUtil.isBlank(orgData)) {
@@ -819,7 +819,7 @@ public class DouyinService {
                             redisTemplate.opsForValue().set("老号下次成功次数:" + douyinAppCk.getUid(), (Integer.valueOf(orgData) + 1) + "", BigInteger.valueOf(l).intValue(), TimeUnit.SECONDS);
                         }
                     }
-                    log.info("当前成功:{}",jdMchOrder.getTradeNo());
+                    log.info("当前成功:{}", jdMchOrder.getTradeNo());
                     redisTemplate.delete("老号失败次数:" + douyinAppCk.getUid());///重置下单失败次数
                     redisTemplate.delete("抖音下单次数过多:" + douyinAppCk.getUid());//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
@@ -914,8 +914,8 @@ public class DouyinService {
             if (Integer.valueOf(jdMchOrder.getPassCode()) == PreConstant.TEN) {
                 body = SubmitUtils.buildBuyRenderYongHui(buyRenderParamDto);
             }
-            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(3) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel="+PreUtils.getRandomString(10)+"&_rticket=1664384064117&device_platform=android&iid="
-                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid="+PreUtils.getRandomString(36)+"&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + douyinDeviceIid.getDeviceId() + "&resolution=720%2A1280&os_version="+PreUtils.getRandomNum(5)+"&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc="+PreUtils.getRandomNum(5);
+            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(3) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&_rticket=1664384064117&device_platform=android&iid="
+                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid=" + PreUtils.getRandomString(36) + "&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + douyinDeviceIid.getDeviceId() + "&resolution=720%2A1280&os_version=" + PreUtils.getRandomNum(5) + "&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
             String X_SS_STUB = SecureUtil.md5("json_form=" + URLEncoder.encode(body)).toUpperCase();
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB, url
