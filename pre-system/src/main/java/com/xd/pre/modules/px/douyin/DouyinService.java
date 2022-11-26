@@ -800,7 +800,7 @@ public class DouyinService {
                 }
                 if (bodyRes1 == null) {
                     Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
-                    if (failOldTimes >= 30) {
+                    if (failOldTimes >= 10) {
                         redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                         douyinAppCk.setIsEnable(88);
                         this.douyinAppCkMapper.updateById(douyinAppCk);
