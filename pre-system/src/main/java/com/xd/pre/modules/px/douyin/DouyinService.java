@@ -767,7 +767,7 @@ public class DouyinService {
             String orgDataOldAccount = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
             String oldAccountMax = redisTemplate.opsForValue().get("老号最大下单次数");
             if (douyinAppCk.getIsOld() == PreConstant.ONE && StrUtil.isNotBlank(orgDataOldAccount) && Integer.valueOf(orgDataOldAccount) >= Integer.valueOf(oldAccountMax)) {
-                log.info("当前账号使用aacount:{}，已经下满12单了", douyinAppCk.getUid());
+                log.info("当前账号使用订单号;{}，aacount:{}，已经下满12单了",jdMchOrder.getTradeNo() ,douyinAppCk.getUid());
                 redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                 long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
                 redisTemplate.opsForValue().set("抖音ck锁定3分钟:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), l, TimeUnit.SECONDS);
@@ -810,14 +810,16 @@ public class DouyinService {
                 }
                 if (bodyRes1.contains("order_id")) {
                     if (douyinAppCk.getIsOld() == PreConstant.ONE) {
+                        log.info("订单号:{},老号下次成功次数:{}",jdMchOrder.getTradeNo(),douyinAppCk.getUid());
                         long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
                         String orgData = redisTemplate.opsForValue().get("老号下次成功次数:" + douyinAppCk.getUid());
-                        if (StrUtil.isNotBlank(orgData)) {
+                        if (StrUtil.isBlank(orgData)) {
                             redisTemplate.opsForValue().set("老号下次成功次数:" + douyinAppCk.getUid(), "1", BigInteger.valueOf(l).intValue(), TimeUnit.SECONDS);
                         } else {
                             redisTemplate.opsForValue().set("老号下次成功次数:" + douyinAppCk.getUid(), (Integer.valueOf(orgData) + 1) + "", BigInteger.valueOf(l).intValue(), TimeUnit.SECONDS);
                         }
                     }
+                    log.info("当前成功:{}",jdMchOrder.getTradeNo());
                     redisTemplate.delete("老号失败次数:" + douyinAppCk.getUid());///重置下单失败次数
                     redisTemplate.delete("抖音下单次数过多:" + douyinAppCk.getUid());//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
@@ -825,18 +827,12 @@ public class DouyinService {
                     douyinAppCkMapper.updateById(douyinAppCk);
                     log.info("订单号:{},设备号重复使用查询和删除", jdMchOrder.getTradeNo());
 //                    deleteLockCk(douyinAppCk, douyinDeviceIid);
-                    redisTemplate.opsForValue().set("抖音锁定设备:" + douyinDeviceIid.getId(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);
-                    redisTemplate.opsForValue().set("抖音锁定设备:" + douyinDeviceIid.getId(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);
                     log.info("订单号:{},当前设备号和uid绑定其他人不能使用msg:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getId());
-                    redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);
-                    redisTemplate.opsForValue().set("抖音和设备号关联:" + douyinAppCk.getUid(), JSON.toJSONString(douyinDeviceIid), 2000, TimeUnit.HOURS);
                     log.info("订单号{}，下单成功", jdMchOrder);
                     String orderId = JSON.parseObject(JSON.parseObject(bodyRes1).getString("data")).getString("order_id");
                     log.info("订单号{}，当前订单号msg:{}", jdMchOrder.getTradeNo(), orderId);
                     douyinDeviceIid.setSuccess(douyinDeviceIid.getSuccess() == null ? 1 : douyinDeviceIid.getSuccess() + 1);
                     log.info("订单号:{}设置上次成功时间msg:{}", jdMchOrder.getTradeNo(), new Date().toLocaleString());
-                    douyinDeviceIid.setLastSuccessTime(new Date());
-                    douyinDeviceIidMapper.updateById(douyinDeviceIid);
                     PayDto payDto = PayDto.builder().ck(PreAesUtils.encrypt加密(douyinAppCk.getCk())).device_id(douyinDeviceIid.getDeviceId()).iid(douyinDeviceIid.getIid()).pay_type(payType + "")
                             .orderId(orderId).userIp(jdLog.getIp()).build();
                     JdOrderPt jdOrderPtDb = JdOrderPt.builder().orderId(payDto.getOrderId()).ptPin(douyinAppCk.getUid()).success(PreConstant.ZERO)
