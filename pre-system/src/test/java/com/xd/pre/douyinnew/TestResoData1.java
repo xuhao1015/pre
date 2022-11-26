@@ -43,9 +43,7 @@ public class TestResoData1 {
         String iid = "";
         String ck = ";";
         String notUse = "";
-//        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221125%' and id > 8225 ");
         List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0  and id > 9087 and id <9186 ");
-//        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
         List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 16014  ");
         for (Entity entity : appCks) {
             Entity oneData = db.use().queryOne("select * from douyin_app_ck where  id =?  ", entity.get("id"));

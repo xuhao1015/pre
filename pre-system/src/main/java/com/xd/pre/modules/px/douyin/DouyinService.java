@@ -1129,7 +1129,7 @@ public class DouyinService {
 //        redisTemplate.opsForValue().setIfAbsent("回调触发器:{}");
     }
 
-    @Scheduled(cron = "0/30 * * * * ?")
+//    @Scheduled(cron = "0/30 * * * * ?")
     @Async("asyncPool")
     public void blackBai() {
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 2, TimeUnit.MINUTES);
