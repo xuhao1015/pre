@@ -30,16 +30,17 @@ public class DouYNewCheckBangdingRedis1 {
         Set<String> keys = SetRelaship.jedis.keys("抖音和设备号关联:*");
         for (String key : keys) {
             String replace = key.replace("抖音和设备号关联:", "");
+            String lock = SetRelaship.jedis.get("aaa:" + replace);
+            if (StrUtil.isNotBlank(lock)) {
+                log.info("继续：{}",replace);
+                continue;
+            }
             Entity entity = db.queryOne("select * from douyin_app_ck where uid  = ? and is_enable != -1 and is_enable !=1 and is_enable !=-99 and is_enable !=-2 " +
                     " and is_enable !=3 and is_enable !=4  and is_enable != 5 and is_enable !=6  and is_enable !=200  ", replace);
             if (ObjectUtil.isNull(entity)) {
                 continue;
             }
             String uid = entity.getStr("uid");
-            String lock = SetRelaship.jedis.get("aaa:" + uid);
-            if (StrUtil.isNotBlank(lock)) {
-                continue;
-            }
             SetRelaship.jedis.set("aaa:" + uid, "1");
             Integer payType = 2;
             String payIp = PreUtils.getRandomIp();
@@ -95,7 +96,7 @@ public class DouYNewCheckBangdingRedis1 {
                 continue;
             }
             if (resBody.contains("获取商品规格信息失败")) {
-                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", 6, uid);
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
                 continue;
             }
             if (StrUtil.isNotBlank(resBody) && resBody.contains("部分商品无法购买，请在无效商品中查看")) {

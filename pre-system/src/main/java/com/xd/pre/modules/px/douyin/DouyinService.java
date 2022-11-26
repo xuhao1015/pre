@@ -185,7 +185,7 @@ public class DouyinService {
     private R douyinUseStock(JdMchOrder jdMchOrder, JdAppStoreConfig storeConfig, JdLog jdLog, TimeInterval timer, OkHttpClient client, List<JdOrderPt> jdOrderPtStocks, String payReUrl) {
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         JdOrderPt jdOrderPtDb = jdOrderPtStocks.get(PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 1)[0]);
-        if (jdOrderPtStocks.size() >= 20) {
+        if (jdOrderPtStocks.size() >= 15) {
             int[] ints = PreUtils.randomCommon(0, jdOrderPtStocks.size() - 1, 10);
             for (int i = 0; i < ints.length; i++) {
                 int anInt = ints[i];
@@ -1129,7 +1129,7 @@ public class DouyinService {
 //        redisTemplate.opsForValue().setIfAbsent("回调触发器:{}");
     }
 
-//    @Scheduled(cron = "0/30 * * * * ?")
+    //    @Scheduled(cron = "0/30 * * * * ?")
     @Async("asyncPool")
     public void blackBai() {
         Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("删除黑名单任务", "1", 2, TimeUnit.MINUTES);
