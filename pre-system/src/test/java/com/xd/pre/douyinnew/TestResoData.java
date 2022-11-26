@@ -44,9 +44,9 @@ public class TestResoData {
         String ck = ";";
         String notUse = "";
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name  like  '%20221125%' and id > 8225 ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0  and id > 8521 and id <9087 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 4 ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 15914  ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 16142  ");
         for (Entity entity : appCks) {
             Entity oneData = db.use().queryOne("select * from douyin_app_ck where  id =?  ", entity.get("id"));
             if (oneData.getInt("is_enable") == -1) {
@@ -234,8 +234,7 @@ public class TestResoData {
                         "\"pay\":1000}," +
                         "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"39.144.42.162\\\",\\\"os\\\":\\\"android\\\"," +
                         "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"6.3.5\\\",\\\"aid\\\":\\\"13\\\"," +
-                        "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;" +
-                        "+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+QuicVersion:12a1d5c5+2022-06-27)\\\"," +
+                        "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+xxxx:12a1d5c5+2022-06-27)\\\"," +
                         "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
                         "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
                         "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
