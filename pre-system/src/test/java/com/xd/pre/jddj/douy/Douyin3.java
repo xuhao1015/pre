@@ -1,8 +1,6 @@
 package com.xd.pre.jddj.douy;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
@@ -36,10 +34,10 @@ public class Douyin3 {
         return stringObjectHashMap;
     }
 
-    public static OkHttpClient getIpAndPort20() throws Exception{
+    public static OkHttpClient getIpAndPort20() throws Exception {
         Jedis jedis = TestResoData.jedis;
         Set<String> keys = jedis.keys("ip缓存临时:*");
-        if (CollUtil.isNotEmpty(keys) && keys.size() >=20) {
+        if (CollUtil.isNotEmpty(keys) && keys.size() >= 10) {
             List<String> collect = keys.stream().collect(Collectors.toList());
             int i = PreUtils.randomCommon(0, keys.size() - 1, 1)[0];
             String s1 = collect.get(i);
@@ -48,18 +46,22 @@ public class Douyin3 {
             OkHttpClient okHttpClient = Demo.getOkHttpClient(linshiIpAndData.getIp(), linshiIpAndData.getPort());
             return okHttpClient;
         }
-        String s = HttpUtil.get("http://route.xiongmaodaili.com/xiongmao-web/api/glip?secret=56100da16d7b18220d236a3f918c1003&orderNo=GL20221125184306k0RjFOCY&count=10&isTxt=0&proxyType=1");
-        log.info("ip:{}",s);
+        String s = HttpUtil.get("http://route.xiongmaodaili.com/xiongmao-web/api/glip?secret=56100da16d7b18220d236a3f918c1003&orderNo=GL20221125184306k0RjFOCY&count=15&isTxt=0&proxyType=1");
+        log.info("ip:{}", s);
         String data = JSON.parseObject(s).getString("obj");
+        if (!data.contains("ip")) {
+            Thread.sleep(5 * 1000);
+            return getIpAndPort20();
+        }
         List<JSONObject> jsonObjects = JSON.parseArray(data, JSONObject.class);
         for (JSONObject jsonObject : jsonObjects) {
             String ip = jsonObject.getString("ip");
             String port = jsonObject.getString("port");
             LinshiIpAndData build = LinshiIpAndData.builder().ip(ip).port(Integer.valueOf(port)).build();
             jedis.set("ip缓存临时:" + ip, JSON.toJSONString(build));
-            jedis.expire("ip缓存临时:" + ip,130 );
+            jedis.expire("ip缓存临时:" + ip, 130);
         }
-        Thread.sleep(20*1000);
+        Thread.sleep(5 * 1000);
         return getIpAndPort20();
     }
 

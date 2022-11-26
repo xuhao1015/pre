@@ -514,8 +514,6 @@ public class DouyinService {
             PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
             String bodyData = PayRiskInfoAndPayInfoUtils.buildPayForm(payDto);
             MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
-            // String bodyData = "app_name=aweme&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid=3743163984904813&order_id=4983651837194409539&os=android&device_id=2538093503847412&aid=1128&pay_type=1";
-//            String url = "https://ec.snssdk.com/order/createpay?device_id=2538093503847412&aid=1128&device_platform=android&device_type=SM-G955N&request_tag_from=h5&app_name=aweme&version_name=17.3.0&app_type=normal&channel=dy_tiny_juyouliang_dy_and24&iid=3743163984904813&version_code=170300&os=android&os_version=5.1.1";
             String url = PayRiskInfoAndPayInfoUtils.buidPayUrl(payDto);
             String X_SS_STUB = SecureUtil.md5(bodyData).toUpperCase();
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
@@ -595,8 +593,8 @@ public class DouyinService {
             }
             //PreUtils.getTel()
             buyRenderRoot.setPost_tel(phone);
-            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=5&device_type=ELE-AL00&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528931234&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy&device_platform=android&iid=" + douyinDeviceIid.getIid() + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=27b54460b6dbb870&device_id="
-                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007";
+            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(5) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel="+PreUtils.getRandomString(10)+"&device_platform=android&iid=" + douyinDeviceIid.getIid() + "&version_code="+PreUtils.getRandomNum(5)+"&cdid="+PreUtils.getRandomString(36)+"d&os=android&is_android_pad=0&openudid="+PreUtils.getRandomNum(16)+"&device_id="
+                    + douyinDeviceIid.getDeviceId() + "&resolution=720*1280&os_version=" + PreUtils.getRandomString(5) + "&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc="+PreUtils.getRandomNum(5);
             String bodyData1 = String.format("{\"area_type\":\"170\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                             "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                             "\"origin_type\":\"%s\"," +
@@ -634,8 +632,7 @@ public class DouyinService {
                             "\"pay\":1000}," +
                             "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"39.144.42.162\\\",\\\"os\\\":\\\"android\\\"," +
                             "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"6.3.5\\\",\\\"aid\\\":\\\"13\\\"," +
-                            "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;" +
-                            "+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+QuicVersion:12a1d5c5+2022-06-27)\\\"," +
+                            "\\\"ua\\\":\\\"com.ss.android.article.news/9070+(Linux;+U;+Android+12;+zh_CN;+PGBM10;+Build/SP1A.210812.016;+Cronet/TTNetVersion:f6f1f7ad+2022-10-31+QuicVersion:22f74f01+2022-10-11)\\\"," +
                             "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
                             "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
                             "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
@@ -756,7 +753,7 @@ public class DouyinService {
             int times = sufMeny / new BigDecimal(jdMchOrder.getMoney()).intValue();//96
             DouyinDeviceIid douyinDeviceIid = JSON.parseObject(deviceBangDing, DouyinDeviceIid.class);
             if (times > 10) {
-                times = times - 5;
+                times = times - 2;
             }
             for (int i = 0; i < times; i++) {
                 douyinDeviceIids.add(douyinDeviceIid);
@@ -921,8 +918,8 @@ public class DouyinService {
             if (Integer.valueOf(jdMchOrder.getPassCode()) == PreConstant.TEN) {
                 body = SubmitUtils.buildBuyRenderYongHui(buyRenderParamDto);
             }
-            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=SM-G973N&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid="
-                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + douyinDeviceIid.getDeviceId() + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
+            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(3) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel="+PreUtils.getRandomString(10)+"&_rticket=1664384064117&device_platform=android&iid="
+                    + douyinDeviceIid.getIid() + "&version_code=170300&cdid="+PreUtils.getRandomString(36)+"&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + douyinDeviceIid.getDeviceId() + "&resolution=720%2A1280&os_version="+PreUtils.getRandomNum(5)+"&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc="+PreUtils.getRandomNum(5);
             String X_SS_STUB = SecureUtil.md5("json_form=" + URLEncoder.encode(body)).toUpperCase();
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB, url
