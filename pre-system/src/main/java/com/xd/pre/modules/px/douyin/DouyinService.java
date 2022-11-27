@@ -883,8 +883,6 @@ public class DouyinService {
             log.info("订单号{}，当前下单失败,请查看原因", jdMchOrder.getTradeNo());
             return null;
         }
-        redisTemplate.delete("当前账号循环额度:" + douyinAppCk.getUid());
-        redisTemplate.delete("抖音ck锁定3分钟:" + douyinAppCk.getUid());
         return payDtos;
     }
 
