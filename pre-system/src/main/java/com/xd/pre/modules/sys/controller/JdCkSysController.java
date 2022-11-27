@@ -126,9 +126,14 @@ public class JdCkSysController {
         List<Map<String, Object>> stock = jdOrderPtMapper.selectBalanceAndStock();
         List<DouyinAppCk> douyinAppCks = douyinAppCkMapper.selectList(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getIsEnable, PreConstant.ONE));
         Integer suf = 0;
+        Set<String> keys = redisTemplate.keys("抖音ck锁定3分钟:*");
         for (DouyinAppCk douyinAppCk : douyinAppCks) {
             String eduStr = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + douyinAppCk.getUid());
             if (StrUtil.isBlank(eduStr)) {
+                continue;
+            }
+            List<String> lockStock = keys.stream().map(it -> it.replace("抖音ck锁定3分钟:", "")).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(lockStock) && lockStock.contains(douyinAppCk.getUid())) {
                 continue;
             }
             Integer balance = JSON.parseObject(eduStr).getInteger("balance");
@@ -634,7 +639,7 @@ public class JdCkSysController {
             List<JdLog> jdLogs = jdLogMapper.selectList(Wrappers.<JdLog>lambdaQuery().eq(JdLog::getOrderId, jdMchOrder.getTradeNo()));
             if (CollUtil.isNotEmpty(jdLogs)) {
                 String ip = jdLogs.get(0).getIp();
-                redisTemplate.delete("IP白名单:"+ip);
+                redisTemplate.delete("IP白名单:" + ip);
                 redisTemplate.opsForValue().set("IP黑名单:" + ip, "1000");
             }
         }
