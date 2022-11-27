@@ -195,11 +195,6 @@ public class DouyinService {
                 }
             }
         }
-        String ptPin = jdOrderPtDb.getPtPin();
-        String balanceStr = redisTemplate.opsForValue().get("抖音各个账号剩余额度:" + ptPin);
-        if (StrUtil.isNotBlank(balanceStr) && JSON.parseObject(balanceStr).getInteger("balance") < 0) {
-            return null;
-        }
         PayDto payDto = JSON.parseObject(jdOrderPtDb.getMark(), PayDto.class);
         for (int i = 0; i < 2; i++) {
             log.info("订单号：{}第{}，次循环", jdMchOrder.getTradeNo(), i);
