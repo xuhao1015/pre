@@ -1,57 +1,69 @@
-package com.xd.pre.douyinnew;
+package com.xd.pre.reset;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
+import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.jddj.douy.Douyin3;
 import com.xd.pre.modules.px.douyin.buyRender.BuyRenderParamDto;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.submit.SubmitUtils;
+import com.xd.pre.register.SetRelaship;
+import com.xd.pre.tiren.FindOrder;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 //DouYNewJinritout
-public class DouYNew {
+public class DouYNewCheckBangdingRedis3 {
     public static void main(String[] args) throws Exception {
-        for (int i = 0; i < 100; i++) {
+        Db db = FindOrder.db;
+        Set<String> keys = SetRelaship.jedis.keys("抖音和设备号关联:*");
+        for (String key : keys) {
+            String replace = key.replace("抖音和设备号关联:", "");
+            String lock = SetRelaship.jedis.get("aaa:" + replace);
+            if (StrUtil.isNotBlank(lock)) {
+                log.info("继续:{}"+replace);
+                continue;
+            }
+            Entity entity = db.queryOne("select * from douyin_app_ck where uid  = ? and is_enable != -1 and is_enable !=1 and is_enable !=-99 and is_enable !=-2 " +
+                    " and is_enable !=5  and is_enable !=4  and  is_enable !=3  ", replace);
+            if (ObjectUtil.isNull(entity)) {
+                continue;
+            }
+            String uid = entity.getStr("uid");
+            SetRelaship.jedis.set("aaa:" + uid, "1");
             Integer payType = 2;
-            String payIp = "189.222.12.272";
-            String device_id = "device_id_str=1086764291723133";
-            String iid = "install_id_str=259931549482429";
-            String ck = "sid_tt=f114a7eaa80f3e63078b9eab689dd458;";
+            String payIp = PreUtils.getRandomIp();
+            String bangdingData = SetRelaship.jedis.get("抖音和设备号关联:" + uid);
+            if (StrUtil.isBlank(bangdingData)) {
+                continue;
+            }
+            String device_id = "device_id_str=" + JSON.parseObject(bangdingData).getString("deviceId");
+            String iid = "install_id_str=" + JSON.parseObject(bangdingData).getString("iid");
+            String ck = PreAesUtils.decrypt解密(entity.getStr("ck"));
             if (device_id.contains("device_id_str=")) {
                 device_id = device_id.replace("device_id_str=", "");
             }
             if (iid.contains("install_id_str=")) {
                 iid = iid.replace("install_id_str=", "");
             }
-/*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357046087622442").sku_id("1736502463777799").author_id("4051040200033531")
-                .ecom_scene_id("1041").shop_id("GceCTPIk").origin_id("4051040200033531_3556357046087622442").origin_type("3002070010")
-                .new_source_type("product_detail").build();*/
-/*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
-                .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
+
             BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357230829939771").sku_id("1736502553929735").author_id("4051040200033531")
                     .ecom_scene_id("1003").origin_id("4051040200033531_3556357230829939771").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
             System.err.println(JSON.toJSONString(buyRenderParamDto));
-/*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-                .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
-        System.err.println(JSON.toJSONString(buyRenderParamDto));*/
-//        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-//                .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
-//        System.err.println(JSON.toJSONString(buyRenderParamDto));
             String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
-            Map<String, String> ipAndPort = Douyin3.getIpAndPort();
-            OkHttpClient client = null;
-//       client =  Demo.getOkHttpClient(ipAndPort.get("ip"), Integer.valueOf(ipAndPort.get("port")));
-            client = new OkHttpClient().newBuilder().build();
-
-//        String body = "{\"address\":null,\"platform_coupon_id\":null,\"kol_coupon_id\":null,\"auto_select_best_coupons\":true,\"customize_pay_type\":\"{\\\"checkout_id\\\":1,\\\"bio_type\\\":\\\"1\\\"}\",\"first_enter\":true,\"source_type\":\"1\",\"shape\":0,\"marketing_channel\":\"\",\"forbid_redpack\":false,\"support_redpack\":true,\"use_marketing_combo\":false,\"entrance_params\":\"{\\\"order_status\\\":3,\\\"previous_page\\\":\\\"order_list_page\\\",\\\"carrier_source\\\":\\\"order_detail\\\",\\\"ecom_scene_id\\\":\\\"1041\\\",\\\"room_id\\\":\\\"\\\",\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"4051040200033531\\\",\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"is_replay\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\"}\",\"shop_requests\":[{\"shop_id\":\"GceCTPIk\",\"product_requests\":[{\"product_id\":\"3556357046087622442\",\"sku_id\":\"1736502463777799\",\"sku_num\":1,\"author_id\":\"4051040200033531\",\"ecom_scene_id\":\"1041\",\"origin_id\":\"4051040200033531_3556357046087622442\",\"origin_type\":\"3002070010\",\"new_source_type\":\"product_detail\",\"select_privilege_properties\":[]}]}]}";
-            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=XiMe&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + device_id + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
+            OkHttpClient client = Douyin3.getIpAndPort20();
+            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=XiMe&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=" + PreUtils.getRandomString(16) + "&device_id=" + device_id + "&resolution=720%2A1280&os_version=" + PreUtils.getRandomString(5) + "&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
             String X_SS_STUB = SecureUtil.md5("json_form=" + URLEncoder.encode(body)).toUpperCase();
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB, url
@@ -71,19 +83,42 @@ public class DouYNew {
                     .addHeader("X-Khronos", x_khronos)
                     .addHeader("Content-Type", "application/x-www-form-urlencoded")
                     .build();
-            Response response = client.newCall(request).execute();
+            Response response = null;
+            try {
+                response = client.newCall(request).execute();
+            } catch (Exception e) {
+                continue;
+            }
             String resBody = response.body().string();
             log.info("预下单数据msg:{}", resBody);
+            if (resBody.contains("用户信息获取失败")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -1, uid);
+                continue;
+            }
+            if (resBody.contains("获取商品规格信息失败")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
+                continue;
+            }
+            if (StrUtil.isNotBlank(resBody) && resBody.contains("部分商品无法购买，请在无效商品中查看")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
+                log.info("无法购买");
+                continue;
+            }
+            //获取登录信息失败
+            if (StrUtil.isNotBlank(resBody) && resBody.contains("获取登录信息失败")) {
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
+                continue;
+            }
             response.close();
             if (false) {
                 return;
             }
             BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
-            //              https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid= version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=                                                                                                                                &resolution=720*1280&os_version=5.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007
-            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=PGBM10&ssmix=a&manifest_version_code="+PreUtils.getRandomNum(4)+"&dpi=240&is_guest_mode=0&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel="+PreUtils.getRandomString(10)+"&device_platform=android&iid=" + iid + "&version_code=170300&cdid=587713e0-2c73-45dd-aa5e-85e9cd10b401&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=OPPO&aid=1128&minor_status=0&mcc_mnc=46007";
-//            url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&" +
-//                    "&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=PGBM10&ssmix=a&manifest_version_code=1234&dpi=240&is_guest_mode=0&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=oppo_13_64&device_platform=android&iid=" + iid + "&version_code=170300&cdid=587713e0-2c73-45dd-aa5e-85e9cd10b401&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=OPPO&aid=1128&minor_status=0&mcc_mnc=46007";
-            System.out.println(url1);
+            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=XiMe&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(5) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + iid + "&version_code=" + PreUtils.getRandomNum(5) + "&cdid=" + PreUtils.getRandomString(36) + "d&os=android&is_android_pad=0&openudid=" + PreUtils.getRandomNum(16) + "&device_id="
+                    + device_id + "&resolution=720*1280&os_version=" + PreUtils.getRandomString(5) + "&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
             String bodyData1 = String.format("{\"area_type\":\"170\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                             "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                             "\"origin_type\":\"%s\"," +
@@ -206,13 +241,26 @@ public class DouYNew {
                     .addHeader("X-Gorgon", x_gorgon1)
                     .addHeader("X-Khronos", x_khronos1)
                     .build();
-            Response response1 = client.newCall(request1).execute();
+            Response response1 = null;
+            try {
+                response1 = client.newCall(request1).execute();
+            } catch (Exception e) {
+                continue;
+            }
             String bodyRes1 = response1.body().string();
             response1.close();
-            log.info("msg:{}", bodyRes1);
+            log.info("uid:{}:{}", uid, bodyRes1);
+            if (bodyRes1.contains("当前下单人数过多")) {
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", 3, uid);
+            }
+            if (bodyRes1.contains("设备存在异常")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", 4, uid);
+            }
+            if (bodyRes1.contains("order_id")) {
+                db.use().execute("update douyin_app_ck set is_enable = ?,fail_reason ='' where uid = ? ", 5, uid);
+            }
             Thread.sleep(1 * 1000);
         }
-
-
     }
 }

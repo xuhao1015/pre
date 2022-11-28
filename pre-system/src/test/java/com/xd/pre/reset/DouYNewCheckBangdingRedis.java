@@ -1,4 +1,4 @@
-package com.xd.pre.douyinnew;
+package com.xd.pre.reset;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -36,7 +36,7 @@ public class DouYNewCheckBangdingRedis {
                 continue;
             }
             Entity entity = db.queryOne("select * from douyin_app_ck where uid  = ? and is_enable != -1 and is_enable !=1 and is_enable !=-99 and is_enable !=-2 " +
-                    " and is_enable !=3 and is_enable !=4  and is_enable != 5 and is_enable !=6 and is_enable !=200   ", replace);
+                    " and is_enable !=5  and is_enable !=4  and  is_enable !=3  ", replace);
             if (ObjectUtil.isNull(entity)) {
                 continue;
             }
@@ -92,16 +92,24 @@ public class DouYNewCheckBangdingRedis {
             String resBody = response.body().string();
             log.info("预下单数据msg:{}", resBody);
             if (resBody.contains("用户信息获取失败")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
                 db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -1, uid);
                 continue;
             }
             if (resBody.contains("获取商品规格信息失败")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
                 db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
                 continue;
             }
             if (StrUtil.isNotBlank(resBody) && resBody.contains("部分商品无法购买，请在无效商品中查看")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
                 db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
                 log.info("无法购买");
+                continue;
+            }
+            //获取登录信息失败
+            if (StrUtil.isNotBlank(resBody) && resBody.contains("获取登录信息失败")) {
+                db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -2, uid);
                 continue;
             }
             response.close();
@@ -246,6 +254,7 @@ public class DouYNewCheckBangdingRedis {
                 db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", 3, uid);
             }
             if (bodyRes1.contains("设备存在异常")) {
+                SetRelaship.jedis.del("抖音和设备号关联:"+uid);
                 db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", 4, uid);
             }
             if (bodyRes1.contains("order_id")) {

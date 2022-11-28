@@ -1,30 +1,36 @@
 package com.xd.pre;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class TestDemo {
 
 
     public static void main(String[] args) {
-        long l = (DateUtil.endOfDay(new Date()).getTime() - System.currentTimeMillis()) / 1000;
-        System.out.println(l);
-        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\10.txt", "UTF-8");
-        StringBuilder stringBuilder = new StringBuilder();
+        Set<String> sets = new TreeSet<>();
+
+        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\888.txt", "UTF-8");
         for (String line : STRINGS) {
-            boolean contains = line.contains("Set-Cookie:") && line.contains("sid_tt=");
+            boolean contains = line.contains("sessionid=");
             if (contains) {
-                String[] split = line.split(";")[0].split(":");
-                stringBuilder.append(split[1] + ";");
-            }
-            if (line.equals("====================================")) {
-                System.out.println(stringBuilder.toString().trim());
-                stringBuilder = new StringBuilder();
+                String[] split = line.split(";");
+                for (String s : split) {
+                    if(s.contains("sessionid=")){
+                        if(s.contains("Set-Cookie:")){
+                            sets.add(s.replace("Set-Cookie:", "").trim() + ";");
+
+                        }else {
+                            sets.add(s.trim()+";");
+                        }
+                    }
+                }
             }
         }
-        StringBuilder stringBuilder1 = new StringBuilder();
+        for (String set : sets) {
+            System.out.println(set);
+        }
     }
 }

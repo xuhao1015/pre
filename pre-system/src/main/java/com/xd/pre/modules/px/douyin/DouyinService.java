@@ -317,7 +317,7 @@ public class DouyinService {
                     }
                     if (let >= Integer.valueOf(ed) && Integer.valueOf(ed) <= maxEd) {
                         // 8000
-                        maxEd = Integer.valueOf(ed);//8000
+                         maxEd = Integer.valueOf(ed);//8000
                         douyinAppCk = douyinAppCkT;
                     }
                 }

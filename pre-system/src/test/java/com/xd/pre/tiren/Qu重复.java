@@ -1,6 +1,7 @@
 package com.xd.pre.tiren;
 
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.poi.excel.ExcelReader;
@@ -42,6 +43,9 @@ public class Qu重复 {
         for (String s : collect.keySet()) {
             if (collect.get(s).size() >= 3) {
                 List<Entity> query = db.query("select * from jd_order_pt where car_my = ?", PreAesUtils.encrypt加密(s));
+                if(ObjectUtil.isNotNull(query)){
+                    continue;
+                }
                 String sku_price = query.get(0).getStr("sku_price");
                 System.out.println(sku_price+"---重复---"+s);
             }
