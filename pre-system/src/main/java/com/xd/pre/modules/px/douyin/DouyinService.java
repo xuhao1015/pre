@@ -734,6 +734,7 @@ public class DouyinService {
             douyinAppCk.setIsEnable(PreConstant.ZERO);
             douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
             redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
+            douyinAppCk.setUpdateTime(new Date());
             douyinAppCkMapper.updateById(douyinAppCk);
             return null;
         }
@@ -798,6 +799,7 @@ public class DouyinService {
                     if (failOldTimes >= 10) {
                         redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
                         douyinAppCk.setIsEnable(88);
+                        douyinAppCk.setUpdateTime(new Date());
                         this.douyinAppCkMapper.updateById(douyinAppCk);
                         return null;
                     }
@@ -819,6 +821,7 @@ public class DouyinService {
                     redisTemplate.delete("抖音下单次数过多:" + douyinAppCk.getUid());//重置下单次数
                     douyinAppCk.setSuccessTime(new Date());
                     douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
+                    douyinAppCk.setUpdateTime(new Date());
                     douyinAppCkMapper.updateById(douyinAppCk);
                     log.info("订单号:{},设备号重复使用查询和删除", jdMchOrder.getTradeNo());
 //                    deleteLockCk(douyinAppCk, douyinDeviceIid);
@@ -848,8 +851,9 @@ public class DouyinService {
                     jdOrderPtMapper.insert(jdOrderPtDb);
                 } else {
                     Long failOldTimes = redisTemplate.opsForValue().increment("老号失败次数:" + douyinAppCk.getUid(), 1);
-                    if (failOldTimes >= 30) {
+                    if (failOldTimes >= 20) {
                         douyinAppCk.setIsEnable(88);
+                        douyinAppCk.setUpdateTime(new Date());
                         douyinAppCkMapper.updateById(douyinAppCk);
                         return null;
                     }
@@ -857,16 +861,17 @@ public class DouyinService {
                     PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                     if (bodyRes1.contains("设备存在异常")) {
                         redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
-                        douyinAppCk.setIsEnable(-44);
+                        douyinAppCk.setIsEnable(4);
                     }
                     if (bodyRes1.contains("当前下单人数过")) {
                         Long increment = redisTemplate.opsForValue().increment("抖音下单次数过多:" + douyinAppCk.getUid(), 1);
                         if (increment >= 10) {
                             redisTemplate.delete("老号正在下单:" + douyinAppCk.getUid());
-                            douyinAppCk.setIsEnable(-10);
+                            douyinAppCk.setIsEnable(3);
                         }
                     }
                     douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
+                    douyinAppCk.setUpdateTime(new Date());
                     douyinAppCkMapper.updateById(douyinAppCk);
                 }
             } catch (Exception e) {
@@ -938,6 +943,7 @@ public class DouyinService {
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                 douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
+                douyinAppCk.setUpdateTime(new Date());
                 douyinAppCkMapper.updateById(douyinAppCk);
                 return null;
             }
@@ -946,6 +952,7 @@ public class DouyinService {
                 douyinAppCk.setFailReason(douyinAppCk.getFailReason() + resBody);
                 PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
                 douyinAppCk.setCk(PreAesUtils.encrypt加密(douyinAppCk.getCk()));
+                douyinAppCk.setUpdateTime(new Date());
                 douyinAppCkMapper.updateById(douyinAppCk);
                 return null;
             }
