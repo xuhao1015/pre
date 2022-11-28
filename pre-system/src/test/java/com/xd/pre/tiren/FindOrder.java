@@ -2,6 +2,7 @@ package com.xd.pre.tiren;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
@@ -116,7 +117,9 @@ public class FindOrder {
             return;
         }
         log.info("当前订单支付成功：{}", outOrder);
-        db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
+        if(entity1.getStr("href_url").contains(entity.getStr("trade_no"))){
+            db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
+        }
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
         DouyinService douyinService = new DouyinService();

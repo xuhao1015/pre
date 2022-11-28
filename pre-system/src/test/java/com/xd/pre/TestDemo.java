@@ -12,13 +12,13 @@ public class TestDemo {
     public static void main(String[] args) {
         Set<String> sets = new TreeSet<>();
 
-        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\888.txt", "UTF-8");
+        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\500+.txt", "UTF-8");
         for (String line : STRINGS) {
-            boolean contains = line.contains("sessionid=");
+            boolean contains = line.contains("sid_tt=");
             if (contains) {
                 String[] split = line.split(";");
                 for (String s : split) {
-                    if(s.contains("sessionid=")){
+                    if(s.contains("sid_tt=")){
                         if(s.contains("Set-Cookie:")){
                             sets.add(s.replace("Set-Cookie:", "").trim() + ";");
 

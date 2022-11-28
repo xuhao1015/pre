@@ -113,7 +113,9 @@ public class FindOrderDai {
             return;
         }
         log.info("支付成功:{}", original_trade_no);
-        db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
+        if(entity1.getStr("href_url").contains(entity.getStr("trade_no"))){
+            db.use().execute("update jd_mch_order set status = ? where out_trade_no = ?", 2, outOrder);
+        }
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
         DouyinService douyinService = new DouyinService();
