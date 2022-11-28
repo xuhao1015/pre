@@ -498,6 +498,13 @@ public class ProductProxyTask {
                 log.info("订单号已经退款，不需要回调:{}", jdMchOrderDb.getTradeNo());
                 return false;
             }
+            JdOrderPt jdOrderPt = jdOrderPtMapper.selectById(jdMchOrder.getOriginalTradeId());
+
+            if (StrUtil.isNotBlank(jdMchOrder.getPassCode()) && Integer.valueOf(jdMchOrder.getPassCode()) == PreConstant.EIGHT
+                    && ObjectUtil.isNotNull(jdOrderPt.getHrefUrl()) && !jdOrderPt.getHrefUrl().contains(jdMchOrder.getTradeNo())) {
+                log.info("订单号不是当前当前匹配的订单。不能回调", jdMchOrder.getTradeNo());
+                return false;
+            }
             NotifyVo notifyVo = NotifyVo.builder()
                     .mch_id(jdMchOrderDb.getMchId())
                     .trade_no(jdMchOrderDb.getTradeNo())

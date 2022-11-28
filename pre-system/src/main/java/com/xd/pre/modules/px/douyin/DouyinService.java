@@ -317,7 +317,7 @@ public class DouyinService {
                     }
                     if (let >= Integer.valueOf(ed) && Integer.valueOf(ed) <= maxEd) {
                         // 8000
-                         maxEd = Integer.valueOf(ed);//8000
+                        maxEd = Integer.valueOf(ed);//8000
                         douyinAppCk = douyinAppCkT;
                     }
                 }
@@ -1251,6 +1251,9 @@ public class DouyinService {
     }
 
     private void updateSuccess(JdMchOrder jdMchOrder, JdOrderPt jdOrderPt, String code, OkHttpClient client) {
+        if (jdMchOrder.getPassCode().equals("8") && !jdOrderPt.getHrefUrl().contains(jdMchOrder.getTradeNo())) {
+            return;
+        }
         PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
         log.info("订单号{}，当前获取的卡密成功", jdMchOrder.getTradeNo());
         jdOrderPt.setCardNumber(PreAesUtils.encrypt加密(code));
