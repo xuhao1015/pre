@@ -41,4 +41,6 @@ public class DouyinAppCk {
     private Integer isOld;
     private Integer tenantId;
     private Date successTime;
+    private String deviceId;
+    private String iid;
 }
