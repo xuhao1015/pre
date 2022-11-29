@@ -23,7 +23,7 @@ public class InsertData {
                 if (result.contains("install_id_str") && result.contains("device_id_str")) {
                     JSONObject parseObject = JSON.parseObject(result);
                     String format = String.format("INSERT INTO douyin_device_iid (  device_id, iid,fail_reason ,is_enable )VALUES('%s', '%s','%s',%d);",
-                            parseObject.getString("device_id_str"), parseObject.getString("install_id_str"), DateUtil.formatDateTime(new Date()),1);
+                            parseObject.getString("device_id_str"), parseObject.getString("install_id_str"), DateUtil.formatDateTime(new Date()),0);
                     System.out.println(format);
                         try {
                             int execute = FindOrder.db.execute(format);

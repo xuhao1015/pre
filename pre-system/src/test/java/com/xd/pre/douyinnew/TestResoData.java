@@ -45,7 +45,7 @@ public class TestResoData {
         String notUse = "";
         List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name = '20221129_473.txt' and id > 10913 ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where  id > 18376 ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0  and id > 18807 ");
         for (Entity entity : appCks) {
             Entity oneData = db.use().queryOne("select * from douyin_app_ck where  id =?  ", entity.get("id"));
             if (oneData.getInt("is_enable") == -1) {
@@ -98,7 +98,7 @@ public class TestResoData {
                     }
                     boolean b = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
                     if (b) {
-                        db.use().execute("update douyin_app_ck set is_enable = ?  ,success_time =?  where id = ?", 1, DateUtil.formatDateTime(new Date()), entity.getInt("id"));
+                        db.use().execute("update douyin_app_ck set is_enable = ? ,success_time =?,device_id = ? ,iid = ?  where id = ?", 1, DateUtil.formatDateTime(new Date()), device_id, iid, entity.getInt("id"));
                         db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, devicesBd.getInt("id"));
                         log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
                     }
@@ -107,7 +107,7 @@ public class TestResoData {
                         boolean b = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
                         if (b) {
                             log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
-                            db.use().execute("update douyin_app_ck set is_enable = ?,success_time=? where id = ?", 1, DateUtil.formatDateTime(new Date()), entity.getInt("id"));
+                            db.use().execute("update douyin_app_ck set is_enable = ?,success_time=?,device_id = ? ,iid = ?  where id = ?", 1, DateUtil.formatDateTime(new Date()), device_id, iid, entity.getInt("id"));
                             db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, devicesBd.getInt("id"));
                             log.info("22222222>>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
                         }
@@ -123,7 +123,6 @@ public class TestResoData {
     private static boolean mian1(String device_id, String iid, String ck, Integer deiviesId, String uid) throws Exception {
         Integer payType = 1;
         String payIp = PreUtils.getRandomIp();
-
 
         if (device_id.contains("device_id_str=")) {
             device_id = device_id.replace("device_id_str=", "");
