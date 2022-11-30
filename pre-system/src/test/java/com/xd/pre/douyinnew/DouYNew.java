@@ -35,8 +35,8 @@ public class DouYNew {
                 .new_source_type("product_detail").build();*/
 /*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
                 .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
-            BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357230829939771").sku_id("1736502553929735").author_id("4051040200033531")
-                    .ecom_scene_id("1003").origin_id("4051040200033531_3556357230829939771").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
+            BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
+                    .ecom_scene_id("1003").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
             System.err.println(JSON.toJSONString(buyRenderParamDto));
 /*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
                 .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();

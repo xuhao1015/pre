@@ -387,7 +387,7 @@ public class DouyinService {
             DateTime beginOfDay = DateUtil.beginOfDay(new Date());
             DateTime dateTime0 = DateUtil.offsetMinute(beginOfDay, 0);
             String 首单开始跑时间 = redisTemplate.opsForValue().get("首单开始跑时间");
-            DateTime dateTime4 = DateUtil.offsetMinute(beginOfDay, Integer.valueOf(首单开始跑时间) * 60);
+            DateTime dateTime4 = DateUtil.offsetMinute(beginOfDay, Integer.valueOf(首单开始跑时间));
             if (System.currentTimeMillis() > dateTime0.getTime() && System.currentTimeMillis() < dateTime4.getTime()) {
                 long l = (dateTime4.getTime() - System.currentTimeMillis()) / 1000;
                 redisTemplate.opsForValue().set("抖音ck锁定3分钟:" + douyinAppCk.getUid(), JSON.toJSONString(douyinAppCk), l, TimeUnit.SECONDS);
@@ -1518,8 +1518,7 @@ public class DouyinService {
                 if (CollUtil.isNotEmpty(skuyesterdays) && skuyesterdays.contains(pt_pin)) {
                     BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((maxPrice - sku_price_total)).build();
                     redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
-                }
-                else {
+                } else {
                     if (sku_price_total == 100) {
                         BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((100 - sku_price_total)).build();
                         redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
