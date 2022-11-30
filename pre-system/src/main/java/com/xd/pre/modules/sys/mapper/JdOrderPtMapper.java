@@ -56,7 +56,7 @@ public interface JdOrderPtMapper extends BaseMapper<JdOrderPt> {
             "and create_time BETWEEN #{beginOfDay} AND #{endOfDay}")
     Integer selectDouYinByStartTimeAndEndAndUid(@Param("ptPin") String ptPin, @Param("beginOfDay") DateTime beginOfDay, @Param("endOfDay") DateTime endOfDay);
 
-    @Select("select pt_pin  from jd_order_pt where pay_success_time < #{beginOfDay} " +
+    @Select("select pt_pin  from jd_order_pt where create_time < #{beginOfDay} and car_my  is not null  " +
             "and sku_id  in   ('1736502463777799', '1739136614382624', '1739136822194211','1745277214000191','1739136537934909')" +
             "GROUP BY pt_pin ")
     List<String> selectOrderSuccessYesterday(@Param("beginOfDay") DateTime beginOfDay);

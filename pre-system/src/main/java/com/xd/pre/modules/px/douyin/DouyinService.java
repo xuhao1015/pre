@@ -1510,14 +1510,16 @@ public class DouyinService {
                 }
 //                String pt_pin = data.get("pt_pin").toString();
 //                Integer sku_price_total = new BigDecimal(data.get("sku_price_total").toString()).intValue();
+                if (douyinAppCk.getIsOld() == PreConstant.ONE) {
+                    BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((maxPrice - sku_price_total)).build();
+                    redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
+                    continue;
+                }
                 if (CollUtil.isNotEmpty(skuyesterdays) && skuyesterdays.contains(pt_pin)) {
                     BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((maxPrice - sku_price_total)).build();
                     redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
                 }
-                if (douyinAppCk.getIsOld() == PreConstant.ONE) {
-                    BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((maxPrice - sku_price_total)).build();
-                    redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));
-                } else {
+                else {
                     if (sku_price_total == 100) {
                         BalanceRedisDto build = BalanceRedisDto.builder().uid(pt_pin).balance((100 - sku_price_total)).build();
                         redisTemplate.opsForValue().set("抖音各个账号剩余额度:" + pt_pin, JSON.toJSONString(build));

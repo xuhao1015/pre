@@ -12,7 +12,7 @@ public class TestDemo {
     public static void main(String[] args) {
         Set<String> sets = new TreeSet<>();
 
-        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\297.txt", "UTF-8");
+        List<String> STRINGS = FileUtil.readLines("C:\\Users\\Administrator\\Downloads\\Telegram Desktop\\苹果151.txt", "UTF-8");
         for (String line : STRINGS) {
             boolean contains = line.contains("sid_tt=");
             if (contains) {
