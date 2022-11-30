@@ -1482,10 +1482,10 @@ public class DouyinService {
         isDelete(client, jdMchOrder, jdOrderPt);
     }
 
-    @Scheduled(cron = "0/20 * * * * ?")
+    @Scheduled(cron = "0/15 * * * * ?")
     @Async("asyncPool")
     public void synProductMaxPrirce() {
-        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("同步订单金额", "2", 30, TimeUnit.SECONDS);
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent("同步订单金额", "2", 10, TimeUnit.SECONDS);
         if (!ifAbsent) {
             return;
         }
