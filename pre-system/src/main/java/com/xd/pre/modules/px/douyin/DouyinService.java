@@ -542,6 +542,14 @@ public class DouyinService {
                 return null;
             }
             log.info("订单号{}，原始订单号:{}支付消息返回数据msg:{}", jdMchOrder.getTradeNo(), payDto.getOrderId(), payData);
+            if (StrUtil.isNotBlank(payData) && payData.contains("订单不能被支付")) {
+                JdOrderPt jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getOrderId, payDto.getOrderId()));
+                jdOrderPt.setWxPayExpireTime(DateUtil.offsetMinute(new Date(), -100));
+                PreTenantContextHolder.setCurrentTenantId(jdMchOrder.getTenantId());
+                jdOrderPt.setIsWxSuccess(PreConstant.ZERO);
+                jdOrderPtMapper.updateById(jdOrderPt);
+                return null;
+            }
             String payUrl = JSON.parseObject(JSON.parseObject(JSON.parseObject(JSON.parseObject(payData).getString("data")).getString("data"))
                     .getString("sdk_info")).getString("url");
             redisTemplate.opsForValue().set("阿里支付数据:" + jdMchOrder.getTradeNo(), payUrl, 3, TimeUnit.MINUTES);
