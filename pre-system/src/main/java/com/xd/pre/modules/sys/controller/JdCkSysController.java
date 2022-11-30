@@ -123,6 +123,7 @@ public class JdCkSysController {
 
     @GetMapping("/balanceAndStock")
     public R getbalanceAndStock() {
+        String 额度动态系数 = redisTemplate.opsForValue().get("额度动态系数");
         List<Map<String, Object>> stock = jdOrderPtMapper.selectBalanceAndStock();
         List<DouyinAppCk> douyinAppCks = douyinAppCkMapper.selectList(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getIsEnable, PreConstant.ONE));
         Integer suf = 0;
@@ -137,11 +138,12 @@ public class JdCkSysController {
                 continue;
             }
             Integer balance = JSON.parseObject(eduStr).getInteger("balance");
-            suf = suf + balance;
+            if(balance==200){
+                suf = suf + balance;
+            }else {
+                suf=suf+new BigDecimal(balance).multiply(new BigDecimal(额度动态系数)).intValue();
+            }
         }
-        String 额度动态系数 = redisTemplate.opsForValue().get("额度动态系数");
-
-        suf = new BigDecimal(suf).multiply(new BigDecimal(额度动态系数)).intValue();
         BalanceAndstockVo build = BalanceAndstockVo.builder().suf(suf).stock(stock).build();
         return R.ok(build);
     }
