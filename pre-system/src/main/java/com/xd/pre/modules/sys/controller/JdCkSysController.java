@@ -139,7 +139,9 @@ public class JdCkSysController {
             Integer balance = JSON.parseObject(eduStr).getInteger("balance");
             suf = suf + balance;
         }
-        suf = new BigDecimal(suf).multiply(new BigDecimal(0.75)).intValue();
+        String 额度动态系数 = redisTemplate.opsForValue().get("额度动态系数");
+
+        suf = new BigDecimal(suf).multiply(new BigDecimal(额度动态系数)).intValue();
         BalanceAndstockVo build = BalanceAndstockVo.builder().suf(suf).stock(stock).build();
         return R.ok(build);
     }
