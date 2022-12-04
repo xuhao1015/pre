@@ -16,7 +16,6 @@ import com.xd.pre.modules.px.douyin.buyRender.BuyRenderParamDto;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.submit.SubmitUtils;
 import com.xd.pre.modules.sys.domain.DouyinDeviceIid;
-import com.xd.pre.modules.sys.util.PreUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import redis.clients.jedis.Jedis;
@@ -44,10 +43,10 @@ public class TestResoData {
         String iid = "";
         String ck = ";";
         String notUse = "";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 7  AND fail_reason  LIKE '%当前下单人数过多%' ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name = '20221204_300.txt'and id = 12167 ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
 //        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 15971  ");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 19399  ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 19511 ");
         for (Entity entity : appCks) {
             Entity oneData = db.use().queryOne("select * from douyin_app_ck where  id =?  ", entity.get("id"));
             if (oneData.getInt("is_enable") == -1 || oneData.getInt("is_enable") == 1) {
@@ -103,6 +102,10 @@ public class TestResoData {
                         db.use().execute("update douyin_app_ck set is_enable = ? ,success_time =?,device_id = ? ,iid = ?  where id = ?", 1, DateUtil.formatDateTime(new Date()), device_id, iid, entity.getInt("id"));
                         db.use().execute("update douyin_device_iid set is_enable = ? where id = ?", 1, devicesBd.getInt("id"));
                         log.info(">>>>>>>>>>>>>>>>>>>>>执行成功当前顺序:{},{}", entity.getStr("id"), devicesBd.getInt("id"));
+                        boolean b1 = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
+                        boolean b2 = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
+                        boolean b3 = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
+                        boolean b4 = mian1(device_id, iid, ck, devicesBd.getInt("id"), entity.getStr("uid"));
                     }
                 } catch (Exception e) {
                     try {
@@ -124,30 +127,20 @@ public class TestResoData {
 
     private static boolean mian1(String device_id, String iid, String ck, Integer deiviesId, String uid) throws Exception {
         Integer payType = 1;
-        String payIp = PreUtils.getRandomIp();
-
+        String payIp = "61.232.238.91";
+        System.err.println(payIp);
         if (device_id.contains("device_id_str=")) {
             device_id = device_id.replace("device_id_str=", "");
         }
         if (iid.contains("install_id_str=")) {
             iid = iid.replace("install_id_str=", "");
         }
-/*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357046087622442").sku_id("1736502463777799").author_id("4051040200033531")
-                .ecom_scene_id("1041").shop_id("GceCTPIk").origin_id("4051040200033531_3556357046087622442").origin_type("3002070010")
-                .new_source_type("product_detail").build();*/
-/*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
-                .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
         BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357230829939771").sku_id("1736502553929735").author_id("4051040200033531")
                 .ecom_scene_id("1003").origin_id("4051040200033531_3556357230829939771").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
         System.err.println(JSON.toJSONString(buyRenderParamDto));
-/*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-                .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
-        System.err.println(JSON.toJSONString(buyRenderParamDto));*/
-//        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-//                .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
-//        System.err.println(JSON.toJSONString(buyRenderParamDto));
         String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
-        OkHttpClient client = Douyin3.getIpAndPort20();
+//        OkHttpClient client = Douyin3.getIpAndPort20();
+        OkHttpClient client = new OkHttpClient();
         if (false) {
             Set<String> keys = jedis.keys("ip缓存临时:*");
             for (String key : keys) {
@@ -196,15 +189,20 @@ public class TestResoData {
             db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -1, uid);
         }
         BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
-        String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type="+PreUtils.getRandomString(6)+"&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(4) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + iid + "&version_code=" + PreUtils.getRandomNum(7) + "&cdid=" + PreUtils.getRandomString(36) + "&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=" + PreUtils.getRandomNum(5) + "&language=zh&device_brand="+ PreUtils.getRandomString(4) +"&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
-
-        String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
+        String url1 = "";
+        if (StrUtil.isBlank(jedis.get("关联url" + uid))) {
+            url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=" + PreUtils.getRandomString(6) + "&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(4) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + iid + "&version_code=" + PreUtils.getRandomNum(7) + "&cdid=" + PreUtils.getRandomString(36) + "&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=" + PreUtils.getRandomNum(5) + "&language=zh&device_brand=" + PreUtils.getRandomString(4) + "&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
+        } else {
+            url1 = jedis.get("关联url" + uid);
+        }
+        log.info("当前执行的url为msg:{}", url1);
+        String bodyData1 = String.format("{\"area_type\":\"" + PreUtils.getRandomNum(3) + "\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                         "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                         "\"origin_type\":\"%s\"," +
                         "\"origin_id\":\"%s\"," +
                         "\"new_source_type\":\"product_detail\",\"new_source_id\":\"0\",\"source_type\":\"0\"," +
                         "\"source_id\":\"0\",\"schema\":\"snssdk143://\",\"extra\":\"{\\\"page_type\\\":\\\"lynx\\\"," +
-                        "\\\"alkey\\\":\\\"1128_99514375927_0_3556357046087622442_010\\\"," +
+                        "\\\"alkey\\\":\\\"" + PreUtils.getRandomNum(50) + "\\\"," +
                         "\\\"c_biz_combo\\\":\\\"8\\\"," +
                         "\\\"render_track_id\\\":\\\"%s\\\"," +
                         "\\\"risk_info\\\":\\\"{\\\\\\\"biometric_params\\\\\\\":\\\\\\\"1\\\\\\\"" +
@@ -231,18 +229,18 @@ public class TestResoData {
                         "\"sub_b_type\":\"3\",\"gray_feature\":\"PlatformFullDiscount\",\"sub_way\":0," +
                         "\"pay_type\":%d," +
                         "\"post_addr\":{\"province\":{},\"city\":{},\"town\":{},\"street\":{\"id\":\"\",\"name\":\"\"}}," +
-                        "\"post_tel\":\"%s\",\"address_id\":\"0\",\"price_info\":{\"origin\":1000,\"freight\":0,\"coupon\":0," +
-                        "\"pay\":1000}," +
-                        "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"39.144.42.162\\\",\\\"os\\\":\\\"android\\\"," +
-                        "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"6.3.5\\\",\\\"aid\\\":\\\"13\\\"," +
-                        "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+xxxx:12a1d5c5+2022-06-27)\\\"," +
+                        "\"post_tel\":\"%s\",\"address_id\":\"0\",\"price_info\":{\"origin\":10000,\"freight\":0,\"coupon\":0," +
+                        "\"pay\":10000}," +
+                        "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"" + payIp + "\\\",\\\"os\\\":\\\"android\\\"," +
+                        "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"" + PreUtils.getRandomNum(3) + "\\\",\\\"aid\\\":\\\"" + PreUtils.getRandomNum(2) + "\\\"," +
+                        "\\\"ua\\\":\\\"" + PreUtils.getRandomString(130) + "\\\"," +
                         "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
-                        "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
+                        "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"" + PreUtils.getRandomNum(2) + "\\\"," +
                         "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
-                        "\\\"appVersion\\\":\\\"8.9.6\\\",\\\"appName\\\":\\\"aweme\\\"," +
+                        "\\\"appVersion\\\":\\\"" + PreUtils.getRandomNum(3) + "\\\",\\\"appName\\\":\\\"aweme\\\"," +
                         "\\\"devicePlatform\\\":\\\"android\\\",\\\"deviceType\\\":\\\"PACT00\\\"," +
-                        "\\\"channel\\\":\\\"oppo_13_64\\\",\\\"openudid\\\":\\\"\\\"," +
-                        "\\\"versionCode\\\":\\\"896\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"OPPO\\\",\\\"iid\\\":\\\"%s\\\",\\\"bioType\\\":\\\"1\\\"}," +
+                        "\\\"channel\\\":\\\"" + PreUtils.getRandomString(10) + "\\\",\\\"openudid\\\":\\\"\\\"," +
+                        "\\\"versionCode\\\":\\\"" + PreUtils.getRandomNum(3) + "\\\",\\\"ac\\\":\\\"wifi\\\",\\\"brand\\\":\\\"" + PreUtils.getRandomString(5) + "\\\",\\\"iid\\\":\\\"%s\\\",\\\"bioType\\\":\\\"1\\\"}," +
                         "\\\"credit_pay_info\\\":{\\\"installment\\\":\\\"1\\\"},\\\"bank_card_info\\\":{},\\\"voucher_no_list\\\":[]," +
                         "\\\"zg_ext_param\\\":" +
                         "\\\"{\\\\\\\"decision_id\\\\\\\":\\\\\\\"%s\\\\\\\",\\\\\\\"qt_c_pay_url\\\\\\\":\\\\\\\"\\\\\\\"," +
@@ -333,7 +331,9 @@ public class TestResoData {
         }
         String bodyRes1 = response1.body().string();
         response1.close();
+        log.info("下单结果:{}", bodyRes1);
         if (bodyRes1.contains("order_id")) {
+            jedis.set("关联url" + uid, url1);
             log.info("放入数据库");
             log.info("放入设备号锁定数据库id:{}", deiviesId);
             DouyinDeviceIid build = DouyinDeviceIid.builder().id(deiviesId.intValue()).failReason(DateUtil.formatDateTime(new Date())).deviceId(device_id).iid(iid).build();

@@ -20,38 +20,23 @@ public class DouYNew {
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < 100; i++) {
             Integer payType = 2;
-            String payIp = "189.222.12.272";
-            String device_id = "device_id_str=1086764291723133";
-            String iid = "install_id_str=259931549482429";
-            String ck = "sid_tt=6347132ddaf4a8be324f45be6342fcd7;";
+            String payIp = "106.84.177.158";
+            String device_id = "device_id_str=101604772574542";
+            String iid = "install_id_str=2758024866825336";
+            String ck = "sid_tt=083c453302a54c2557ce55883793628e;";
             if (device_id.contains("device_id_str=")) {
                 device_id = device_id.replace("device_id_str=", "");
             }
             if (iid.contains("install_id_str=")) {
                 iid = iid.replace("install_id_str=", "");
             }
-/*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357046087622442").sku_id("1736502463777799").author_id("4051040200033531")
-                .ecom_scene_id("1041").shop_id("GceCTPIk").origin_id("4051040200033531_3556357046087622442").origin_type("3002070010")
-                .new_source_type("product_detail").build();*/
-/*        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3561751789252519688").sku_id("1739136614382624").author_id("4051040200033531")
-                .ecom_scene_id("1003").origin_id("4051040200033531_3561751789252519688").origin_type("3002002002").new_source_type("product_detail").build();*/
-            BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-                    .ecom_scene_id("1003").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
+            BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3556357230829939771").sku_id("1736502553929735").author_id("4051040200033531")
+                    .ecom_scene_id("1003").origin_id("4051040200033531_3556357230829939771").origin_type("3002002002").shop_id("GceCTPIk").new_source_type("product_detail").build();
             System.err.println(JSON.toJSONString(buyRenderParamDto));
-/*     BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-                .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
-        System.err.println(JSON.toJSONString(buyRenderParamDto));*/
-//        BuyRenderParamDto buyRenderParamDto = BuyRenderParamDto.builder().product_id("3574327743640429367").sku_id("1745277214000191").author_id("4051040200033531")
-//                .ecom_scene_id("").origin_id("4051040200033531_3574327743640429367").origin_type("3002002002").new_source_type("product_detail").build();
-//        System.err.println(JSON.toJSONString(buyRenderParamDto));
             String body = SubmitUtils.buildBuyRenderParamData(buyRenderParamDto);
-            Map<String, String> ipAndPort = Douyin3.getIpAndPort();
-            OkHttpClient client = null;
-//       client =  Demo.getOkHttpClient(ipAndPort.get("ip"), Integer.valueOf(ipAndPort.get("port")));
-            client = new OkHttpClient().newBuilder().build();
+            OkHttpClient client = Douyin3.getIpAndPort20();
 
-//        String body = "{\"address\":null,\"platform_coupon_id\":null,\"kol_coupon_id\":null,\"auto_select_best_coupons\":true,\"customize_pay_type\":\"{\\\"checkout_id\\\":1,\\\"bio_type\\\":\\\"1\\\"}\",\"first_enter\":true,\"source_type\":\"1\",\"shape\":0,\"marketing_channel\":\"\",\"forbid_redpack\":false,\"support_redpack\":true,\"use_marketing_combo\":false,\"entrance_params\":\"{\\\"order_status\\\":3,\\\"previous_page\\\":\\\"order_list_page\\\",\\\"carrier_source\\\":\\\"order_detail\\\",\\\"ecom_scene_id\\\":\\\"1041\\\",\\\"room_id\\\":\\\"\\\",\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"4051040200033531\\\",\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"is_replay\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\"}\",\"shop_requests\":[{\"shop_id\":\"GceCTPIk\",\"product_requests\":[{\"product_id\":\"3556357046087622442\",\"sku_id\":\"1736502463777799\",\"sku_num\":1,\"author_id\":\"4051040200033531\",\"ecom_scene_id\":\"1041\",\"origin_id\":\"4051040200033531_3556357046087622442\",\"origin_type\":\"3002070010\",\"new_source_type\":\"product_detail\",\"select_privilege_properties\":[]}]}]}";
-            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=XiMe&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=4G&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + device_id + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
+            String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=SM-G973N&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + device_id + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
             String X_SS_STUB = SecureUtil.md5("json_form=" + URLEncoder.encode(body)).toUpperCase();
             String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     X_SS_STUB, url
@@ -79,12 +64,8 @@ public class DouYNew {
                 return;
             }
             BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
-            //              https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=SM-G973N&ssmix=a&manifest_version_code=170301&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384138&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&device_platform=android&iid= version_code=170300&cdid=481a445f-aeb7-4365-b0cd-4d82727bb775&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=                                                                                                                                &resolution=720*1280&os_version=5.1.1&language=zh&device_brand=samsung&aid=1128&minor_status=0&mcc_mnc=46007
-            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=PGBM10&ssmix=a&manifest_version_code="+PreUtils.getRandomNum(4)+"&dpi=240&is_guest_mode=0&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel="+PreUtils.getRandomString(10)+"&device_platform=android&iid=" + iid + "&version_code=170300&cdid=587713e0-2c73-45dd-aa5e-85e9cd10b401&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=OPPO&aid=1128&minor_status=0&mcc_mnc=46007";
-//            url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&" +
-//                    "&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=PGBM10&ssmix=a&manifest_version_code=1234&dpi=240&is_guest_mode=0&app_name=aweme&version_name=17.3.0&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=17309900&channel=oppo_13_64&device_platform=android&iid=" + iid + "&version_code=170300&cdid=587713e0-2c73-45dd-aa5e-85e9cd10b401&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=7.1.1&language=zh&device_brand=OPPO&aid=1128&minor_status=0&mcc_mnc=46007";
-            System.out.println(url1);
-            String bodyData1 = String.format("{\"area_type\":\"170\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
+            String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type=" + PreUtils.getRandomString(6) + "&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(4) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + iid + "&version_code=" + PreUtils.getRandomNum(7) + "&cdid=" + PreUtils.getRandomString(36) + "&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=" + PreUtils.getRandomNum(5) + "&language=zh&device_brand=" + PreUtils.getRandomString(4) + "&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
+            String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                             "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                             "\"origin_type\":\"%s\"," +
                             "\"origin_id\":\"%s\"," +
@@ -121,7 +102,7 @@ public class DouYNew {
                             "\"pay\":1000}," +
                             "\"pay_info\":\"{\\\"sdk_version\\\":\\\"v2\\\",\\\"dev_info\\\":{\\\"reqIp\\\":\\\"39.144.42.162\\\",\\\"os\\\":\\\"android\\\"," +
                             "\\\"isH5\\\":false,\\\"cjSdkVersion\\\":\\\"6.3.5\\\",\\\"aid\\\":\\\"13\\\"," +
-                            "\\\"ua\\\":\\\"com.ss.android.article.news/9070+(Linux;+U;+Android+12;+zh_CN;+PGBM10;+Build/SP1A.210812.016;+Cronet/TTNetVersion:f6f1f7ad+2022-10-31+QuicVersion:22f74f01+2022-10-11)\\\"," +
+                            "\\\"ua\\\":\\\"com.ss.android.article.news/8960+(Linux;+U;+Android+10;+zh_CN;+PACT00;+Build/QP1A.190711.020;+Cronet/TTNetVersion:68deaea9+2022-07-19+xxxx:12a1d5c5+2022-06-27)\\\"," +
                             "\\\"riskUa\\\":\\\"\\\",\\\"lang\\\":\\\"zh-Hans\\\"," +
                             "\\\"deviceId\\\":\\\"%s\\\",\\\"osVersion\\\":\\\"10\\\"," +
                             "\\\"vendor\\\":\\\"\\\",\\\"model\\\":\\\"\\\",\\\"netType\\\":\\\"\\\"," +
