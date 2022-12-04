@@ -475,7 +475,7 @@ public class DouyinService {
                 }
             }
             if (CollUtil.isNotEmpty(noUseData)) {
-                log.info("订单号{},不能使用的账号:{}", no, JSON.toJSONString(noUseData));
+                log.debug("订单号{},不能使用的账号:{}", no, JSON.toJSONString(noUseData));
                 wrapper.notIn(DouyinAppCk::getUid, noUseData);
             }
         }

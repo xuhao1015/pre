@@ -80,7 +80,7 @@ public class JdSgin {
     }
 
     public static void main(String[] args) {
-        String genAppPayId = getJdSgin("genToken", "{\"action\":\"to\",\"to\":\"https%3A%2F%2Fmpay.m.jd.com%2Fmpay.1ec8f70280318a51e2bb.html%3FappId%3Dd_m_mdbang%26payId%3Dd88cb94aa86b47e683a2948e78d4a023\"}");
+        String genAppPayId = getJdSgin("genToken", "{\"action\":\"to\",\"to\":\"https%3A%2F%2Fmjrpay.jd.com%2Findex.html%3FpayParam%3Dfd1d996bffaf78f3f1fe28db99b2b142cd635025e3432eecb1d2a11f6b8b57ad33f44e1f1fa139903dae472834aa4f1ff3e083391d80ceec80a81fa986aef4d86154bb868b31ca968a6746c27f479e8b336b70eb240246c7c2a2d805b82ab42609db1e4eaebd4608611d4202213e4e373b6516536e3fead0e2e75376918c8e5ca83a44411bfa4da4764aad64ff94561e7f362d6b5992b25a224a4fb05aa93ef94678a2a3f04484f711ee481ac6d49408%26appId%3Drecharge_card%26flag%3D1\"}");
         System.out.println(genAppPayId);
     }
 
