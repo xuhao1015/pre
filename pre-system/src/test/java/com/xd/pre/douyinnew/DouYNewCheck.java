@@ -25,7 +25,7 @@ public class DouYNewCheck {
     public static void main(String[] args) throws Exception {
 
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where  file_name ='221116.txt'   ");
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name = '20221130_新版本.txt' ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 7 and file_name = '20221130_297.txt' ");
         for (Entity appCk : appCks) {
             String ck = PreAesUtils.decrypt解密(appCk.getStr("ck"));
             Integer id = appCk.getInt("id");

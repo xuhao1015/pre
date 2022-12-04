@@ -16,6 +16,7 @@ import com.xd.pre.modules.px.douyin.buyRender.BuyRenderParamDto;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.submit.SubmitUtils;
 import com.xd.pre.modules.sys.domain.DouyinDeviceIid;
+import com.xd.pre.modules.sys.util.PreUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import redis.clients.jedis.Jedis;
@@ -43,9 +44,10 @@ public class TestResoData {
         String iid = "";
         String ck = ";";
         String notUse = "";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name = '20221130_新版本.txt' ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 7  AND fail_reason  LIKE '%当前下单人数过多%' ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 15971  ");
+//        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 15971  ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 19399  ");
         for (Entity entity : appCks) {
             Entity oneData = db.use().queryOne("select * from douyin_app_ck where  id =?  ", entity.get("id"));
             if (oneData.getInt("is_enable") == -1 || oneData.getInt("is_enable") == 1) {
@@ -194,7 +196,8 @@ public class TestResoData {
             db.use().execute("update douyin_app_ck set is_enable = ? where uid = ?", -1, uid);
         }
         BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(resBody).getString("data"), BuyRenderRoot.class);
-        String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=31&device_type=PGBM10&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(4) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + iid + "&version_code=" + PreUtils.getRandomNum(7) + "&cdid=" + PreUtils.getRandomString(36) + "&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=" + PreUtils.getRandomNum(5) + "&language=zh&device_brand=OPPO&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
+        String url1 = "https://ec.snssdk.com/order/newcreate/vtl?can_queue=1&b_type_new=2&request_tag_from=lynx&os_api=22&device_type="+PreUtils.getRandomString(6)+"&ssmix=a&manifest_version_code=" + PreUtils.getRandomNum(4) + "&dpi=240&is_guest_mode=0&app_name=aweme&version_name=" + PreUtils.getRandomNum(5) + "&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=armeabi-v7a&update_version_code=" + PreUtils.getRandomNum(8) + "&channel=" + PreUtils.getRandomString(10) + "&device_platform=android&iid=" + iid + "&version_code=" + PreUtils.getRandomNum(7) + "&cdid=" + PreUtils.getRandomString(36) + "&os=android&is_android_pad=0&device_id=" + device_id + "&resolution=720*1280&os_version=" + PreUtils.getRandomNum(5) + "&language=zh&device_brand="+ PreUtils.getRandomString(4) +"&aid=1128&minor_status=0&mcc_mnc=" + PreUtils.getRandomNum(5);
+
         String bodyData1 = String.format("{\"area_type\":\"169\",\"receive_type\":1,\"travel_info\":{\"departure_time\":0,\"trave_type\":1,\"trave_no\":\"\"}," +
                         "\"pickup_station\":\"\",\"traveller_degrade\":\"\",\"b_type\":3,\"env_type\":\"2\",\"activity_id\":\"\"," +
                         "\"origin_type\":\"%s\"," +

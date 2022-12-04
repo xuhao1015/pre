@@ -23,7 +23,7 @@ public class DouYNew {
             String payIp = "189.222.12.272";
             String device_id = "device_id_str=1086764291723133";
             String iid = "install_id_str=259931549482429";
-            String ck = "sid_tt=f114a7eaa80f3e63078b9eab689dd458;";
+            String ck = "sid_tt=6347132ddaf4a8be324f45be6342fcd7;";
             if (device_id.contains("device_id_str=")) {
                 device_id = device_id.replace("device_id_str=", "");
             }
