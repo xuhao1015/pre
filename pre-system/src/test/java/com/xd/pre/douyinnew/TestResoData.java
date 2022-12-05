@@ -43,10 +43,10 @@ public class TestResoData {
         String iid = "";
         String ck = ";";
         String notUse = "";
-        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name = '20221204_300.txt'and id = 12167 ");
+        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable = 0 and file_name = '20221204_300.txt'and id = 12169 ");
 //        List<Entity> appCks = db.use().query("select * from douyin_app_ck where is_enable =-44");
 //        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 15971  ");
-        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 19511 ");
+        List<Entity> devicesBds = db.use().query("select * from douyin_device_iid where   is_enable = 0 and id > 19512 ");
         for (Entity entity : appCks) {
             Entity oneData = db.use().queryOne("select * from douyin_app_ck where  id =?  ", entity.get("id"));
             if (oneData.getInt("is_enable") == -1 || oneData.getInt("is_enable") == 1) {
@@ -153,12 +153,14 @@ public class TestResoData {
 //        String body = "{\"address\":null,\"platform_coupon_id\":null,\"kol_coupon_id\":null,\"auto_select_best_coupons\":true,\"customize_pay_type\":\"{\\\"checkout_id\\\":1,\\\"bio_type\\\":\\\"1\\\"}\",\"first_enter\":true,\"source_type\":\"1\",\"shape\":0,\"marketing_channel\":\"\",\"forbid_redpack\":false,\"support_redpack\":true,\"use_marketing_combo\":false,\"entrance_params\":\"{\\\"order_status\\\":3,\\\"previous_page\\\":\\\"order_list_page\\\",\\\"carrier_source\\\":\\\"order_detail\\\",\\\"ecom_scene_id\\\":\\\"1041\\\",\\\"room_id\\\":\\\"\\\",\\\"promotion_id\\\":\\\"\\\",\\\"author_id\\\":\\\"\\\",\\\"group_id\\\":\\\"\\\",\\\"anchor_id\\\":\\\"4051040200033531\\\",\\\"source_method\\\":\\\"open_url\\\",\\\"ecom_group_type\\\":\\\"video\\\",\\\"discount_type\\\":\\\"\\\",\\\"full_return\\\":\\\"0\\\",\\\"is_exist_size_tab\\\":\\\"0\\\",\\\"rank_id_source\\\":\\\"\\\",\\\"show_rank\\\":\\\"not_in_rank\\\",\\\"warm_up_status\\\":\\\"0\\\",\\\"coupon_id\\\":\\\"\\\",\\\"brand_verified\\\":\\\"0\\\",\\\"label_name\\\":\\\"\\\",\\\"with_sku\\\":\\\"0\\\",\\\"is_replay\\\":\\\"0\\\",\\\"is_package_sale\\\":\\\"0\\\",\\\"is_groupbuying\\\":\\\"0\\\"}\",\"shop_requests\":[{\"shop_id\":\"GceCTPIk\",\"product_requests\":[{\"product_id\":\"3556357046087622442\",\"sku_id\":\"1736502463777799\",\"sku_num\":1,\"author_id\":\"4051040200033531\",\"ecom_scene_id\":\"1041\",\"origin_id\":\"4051040200033531_3556357046087622442\",\"origin_type\":\"3002070010\",\"new_source_type\":\"product_detail\",\"select_privilege_properties\":[]}]}]}";
         String url = "https://ken.snssdk.com/order/buyRender?b_type_new=2&request_tag_from=lynx&os_api=25&device_type=SM-G973N&ssmix=a&manifest_version_code=169&dpi=240&is_guest_mode=0&uuid=354730528934825&app_name=aweme&version_name=17.3.0&ts=1664384063&cpu_support64=false&app_type=normal&appTheme=dark&ac=wifi&host_abi=arm64-v8a&update_version_code=17309900&channel=dy_tiny_juyouliang_dy_and24&_rticket=1664384064117&device_platform=android&iid=" + iid + "&version_code=170300&cdid=78d30492-1201-49ea-b86a-1246a704711d&os=android&is_android_pad=0&openudid=199d79fbbeff0e58&device_id=" + device_id + "&resolution=720%2A1280&os_version=5.1.1&language=zh&device_brand=Xiaomi&aid=1128&minor_status=0&mcc_mnc=46011";
         String X_SS_STUB = SecureUtil.md5("json_form=" + URLEncoder.encode(body)).toUpperCase();
-        String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
-                X_SS_STUB, url
+        String signData = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
+                X_SS_STUB,device_id, url
         );
         String signHt = HttpRequest.post("http://1.15.184.191:8292/dy22").body(signData).execute().body();
         String x_gorgon = JSON.parseObject(signHt).getString("x-gorgon");
         String x_khronos = JSON.parseObject(signHt).getString("x-khronos");
+        String x_argus = JSON.parseObject(signHt).getString("x-argus");
+        String x_ladon = JSON.parseObject(signHt).getString("x-ladon");
         RequestBody requestBody = new FormBody.Builder()
                 .add("json_form", body)
                 .build();
@@ -169,7 +171,10 @@ public class TestResoData {
                 .addHeader("Cookie", ck)
                 .addHeader("X-Gorgon", x_gorgon)
                 .addHeader("X-Khronos", x_khronos)
+                .addHeader("X-Argus", x_argus)
+                .addHeader("X-Ladon", x_ladon)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .addHeader("User-Agent", "com.ss.android.article.news/9070 (Linux; U; Android 12; zh_CN; PGBM10; Build/SP1A.210812.016; Cronet/TTNetVersion:f6f1f7ad 2022-10-31 QuicVersion:22f74f01 2022-10-11)")
                 .build();
         Response response = null;
         try {
@@ -292,6 +297,9 @@ public class TestResoData {
         String x_gorgon1 = JSON.parseObject(signHt1).getString("x-gorgon");
         String x_khronos1 = JSON.parseObject(signHt1).getString("x-khronos");
         String tarceid1 = JSON.parseObject(signHt1).getString("tarceid");
+        String x_argus1 = JSON.parseObject(signHt1).getString("x-argus");
+        String x_ladon1 = JSON.parseObject(signHt1).getString("x-ladon");
+
         RequestBody requestBody1 = new FormBody.Builder()
                 .add("json_form", bodyData1)
                 .build();
@@ -318,6 +326,8 @@ public class TestResoData {
                 .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
                 .addHeader("X-Gorgon", x_gorgon1)
                 .addHeader("X-Khronos", x_khronos1)
+                .addHeader("X-Argus", x_argus1)
+                .addHeader("X-Ladon", x_ladon1)
                 .build();
         Response response1 = null;
         try {
