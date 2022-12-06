@@ -33,7 +33,7 @@ public class TestDemo {
     public static Jedis jedis = RedisDS.create().getJedis();
 
     public static void main(String[] args) throws Exception {
-        Integer buyPrice = 10000;
+        Integer buyPrice = 1000*100;
         String payIp = PreUtils.getRandomIp();
         String post_tel = PreUtils.getTel();
         Entity appCk = db.use().queryOne("select * from douyin_app_ck where is_enable = 0 and file_name = '20221204_300.txt'and id = 12173 ");
@@ -43,13 +43,13 @@ public class TestDemo {
         log.info("当前ck:{}", ck);
         String device_id = devicesBd.getStr("device_id");
         String iid = devicesBd.getStr("iid");
-/*        ck="sid_tt=3c69a4c5b4d1ced7b1a0b828efe7aa30;";
+        ck="sid_tt=3c69a4c5b4d1ced7b1a0b828efe7aa30;";
         device_id="70662667346";
-        iid="1086767867631422";*/
+        iid="1086767867631422";
         log.info("当前device_id:{},iid:{}", device_id, iid);
         String seach_url = "https://ecom3-normal-hl.ecombdapi.com/aweme/v2/shop/search/aggregate/shopping/?iid=" + iid + "&device_id=" + device_id + "&ac=wifi&channel=aweGW&aid=1128&app_name=aweme&version_code=230400&version_name=23.4.0&device_platform=android&os=android&ssmix=a&device_type=Redmi+8A&device_brand=Xiaomi&language=zh&os_api=28&os_version=9&openudid=07dc71770c124fcc&manifest_version_code=230401&resolution=720*1369&dpi=320&update_version_code=23409900&_rticket=1670240113925&package=com.ss.android.ugc.aweme&mcc_mnc=46001&cpu_support64=false&host_abi=armeabi-v7a&is_guest_mode=0&app_type=normal&minor_status=0&appTheme=light&need_personal_recommend=1&is_android_pad=0&ts=1670240113&cdid=361c3ca7-4e33-49e1-b8fd-2cb86f6a452e&oaid=93a7d5f0816be2ca&md=0";
         OkHttpClient client = new OkHttpClient();
-        String seach_body = "cursor=0&from_group_id=&no_trace_search_switch=off&enter_from=search_order_center&request_type=1&search_scene=douyin_search&search_channel=search_order_center&count=10&is_after_locate=false&ecom_theme=light&enter_from_second=order_homepage__personal_homepage&query_correct_type=1&search_source=search_history&ecom_scene_id=1031&token=search&large_font_mode=0&address_book_access=2&location_access=2&extra=%7B%22recommend_word_id%22%3A%22%22%2C%22recommend_word_session_id%22%3A%22%22%7D&search_filter=1&shown_count=0&keyword=%E6%8A%96%E9%9F%B3%E8%8B%B9%E6%9E%9C%E5%8D%A1&device_score=5.523&current_page=order_center";
+        String seach_body = "cursor=0&from_group_id=&no_trace_search_switch=off&enter_from=search_order_center&request_type=1&search_scene=douyin_search&search_channel=search_order_center&count=10&is_after_locate=false&ecom_theme=light&enter_from_second=order_homepage__personal_homepage&query_correct_type=1&search_source=search_history&ecom_scene_id=1031&token=search&large_font_mode=0&address_book_access=2&location_access=2&extra=%7B%22recommend_word_id%22%3A%22%22%2C%22recommend_word_session_id%22%3A%22%22%7D&search_filter=1&shown_count=0&keyword=%E6%8A%96%E9%9F%B3%E8%8B%B9%E6%9E%9C%E5%8D%A1"+buyPrice/100+"&device_score=5.523&current_page=order_center";
         String searchMd5 = SecureUtil.md5(seach_body).toUpperCase();
         String search_body = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                 searchMd5, device_id, seach_url
