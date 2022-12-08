@@ -65,6 +65,7 @@ pre:
       - douyin_device_iid
       - douyin_sign_data
       - douyin_woerma
+      - douyin_method_name_param
     tenantIdColumn: tenant_id
   url:
     address: http://localhost:9528

@@ -17,8 +17,10 @@ public class GidAndShowdPrice {
     private String gid;
     private Integer show_price;
     private String schema;
+    private String query_id;
     private String ecom_scene_id;
     private String search_id;
+    private String title;
     /**
      * 搜索封装
      */

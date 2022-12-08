@@ -43,4 +43,5 @@ public class DouyinAppCk {
     private Date successTime;
     private String deviceId;
     private String iid;
+    private String exParam;
 }
