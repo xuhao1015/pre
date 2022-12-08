@@ -93,6 +93,7 @@ public class XiaoMiTouTiao1 {
                 .addHeader("X-Khronos", pack_x_khronos)
                 .addHeader("X-Argus", pack_x_argus)
                 .addHeader("X-Ladon", pack_x_ladon)
+                //TODO 缺少请求头的设置
                 .addHeader("user-agent", "com.ss.android.ugc.aweme/200001 (Linux; U; Android 9; zh_CN; Redmi 8A; Build/PKQ1.190319.001; Cronet/TTNetVersion:3a37693c 2022-02-10 QuicVersion:775bd845 2021-12-24)")
                 .addHeader("Content-Type", "application/x-www-form-urlencoded")
                 .addHeader("cache-control", "no-cache")
