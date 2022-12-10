@@ -1,5 +1,6 @@
 package com.xd.pre.dy23;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -10,9 +11,12 @@ import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xd.pre.common.aes.PreAesUtils;
+import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.px.PreUtils;
+import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.deal.GidAndShowdPrice;
 import com.xd.pre.modules.px.douyin.toutiao.BuildDouYinUrlUtils;
+import com.xd.pre.modules.px.douyin.toutiao.BuyRenderParam;
 import com.xd.pre.modules.px.douyin.toutiao.SearchParam;
 import com.xd.pre.modules.sys.domain.DouyinAppCk;
 import com.xd.pre.modules.sys.domain.DouyinMethodNameParam;
@@ -26,8 +30,10 @@ import org.jsoup.select.Elements;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -38,75 +44,223 @@ public class XiaoMiTouTiao1 {
 
 
     public static void main(String[] args) throws Exception {
-        String uid = "3250607754582456";
+        for (int i = 0; i < 100; i++) {
+
+            String uid = "3250607754582456";
+            Entity appCk = db.use().queryOne("select * from douyin_app_ck_all_param where uid=?", uid);
+            Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
+            Entity method_pack = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "pack");
+            Entity method_buyRender = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "buyRender");
+            Entity method_newcreate = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "newcreate");
+
+            String payIp = PreUtils.getRandomIp();
+            String post_tel = PreUtils.getTel();
+            Integer buyPrice = 200;
+
+            OkHttpClient client = new OkHttpClient();
+            DouyinAppCk douyinAppCk = DouyinAppCk.builder().uid(uid).exParam(appCk.getStr("ex_param")).ck(appCk.getStr("ck"))
+                    .deviceId(appCk.getStr("device_id")).iid(appCk.getStr("iid")).build();
+
+            DouyinMethodNameParam methodNameSearch = DouyinMethodNameParam.builder().method_name(method_db.getStr("method_name")).method_url(method_db.getStr("method_url")).build();
+
+            DouyinMethodNameParam methodNamePack = DouyinMethodNameParam.builder().method_name(method_pack.getStr("method_name"))
+                    .method_param(method_pack.getStr("method_param")).method_url(method_pack.getStr("method_url")).build();
 
 
-        Entity appCk = db.use().queryOne("select * from douyin_app_ck_all_param where uid=?", uid);
-        Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
-        Entity method_pack = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "pack");
+            DouyinMethodNameParam methodNameBuyRender = DouyinMethodNameParam.builder().method_name(method_buyRender.getStr("method_name"))
+                    .method_param(method_buyRender.getStr("method_param")).method_url(method_buyRender.getStr("method_url")).build();
 
-        String payIp = PreUtils.getRandomIp();
-        String post_tel = PreUtils.getTel();
-        Integer buyPrice = 200;
+            DouyinMethodNameParam methodNameCreatenew = DouyinMethodNameParam.builder().method_name(method_newcreate.getStr("method_name"))
+                    .method_param(method_newcreate.getStr("method_param")).method_url(method_newcreate.getStr("method_url")).build();
 
-        OkHttpClient client = new OkHttpClient();
-        DouyinAppCk douyinAppCk = DouyinAppCk.builder().uid(uid).exParam(appCk.getStr("ex_param")).ck(appCk.getStr("ck"))
-                .deviceId(appCk.getStr("device_id")).iid(appCk.getStr("iid")).build();
 
-        DouyinMethodNameParam methodNameSearch = DouyinMethodNameParam.builder().method_name(method_db.getStr("method_name")).method_url(method_db.getStr("method_url")).build();
-
-        DouyinMethodNameParam methodNamePack = DouyinMethodNameParam.builder().method_name(method_pack.getStr("method_name"))
-                .method_param(method_pack.getStr("method_param")).method_url(method_pack.getStr("method_url")).build();
-
-        JdMchOrder jdMchOrder = JdMchOrder.builder().tradeNo("202211111112222").outTradeNo("P123456456").build();
-        log.info("执行,当前订单号:{}ck的uid:{},device:{},iid:{} ", jdMchOrder.getTradeNo(), douyinAppCk.getUid(), douyinAppCk.getDeviceId(), douyinAppCk.getIid());
-        log.info("开始执行搜索:{}", jdMchOrder.getTradeNo());
-        List<GidAndShowdPrice> gidAndShowdPriceList = getGidAndShowdPrices(buyPrice, client, douyinAppCk, methodNameSearch);
+            JdMchOrder jdMchOrder = JdMchOrder.builder().tradeNo("202211111112222").outTradeNo("P123456456").build();
+            log.info("执行,当前订单号:{}ck的uid:{},device:{},iid:{} ", jdMchOrder.getTradeNo(), douyinAppCk.getUid(), douyinAppCk.getDeviceId(), douyinAppCk.getIid());
+            log.info("开始执行搜索:{}", jdMchOrder.getTradeNo());
+       /* List<GidAndShowdPrice> gidAndShowdPriceList = getGidAndShowdPrices(buyPrice, client, douyinAppCk, methodNameSearch);
         log.info(JSON.toJSONString(gidAndShowdPriceList));
-        //TODO
         GidAndShowdPrice gidAndShowdPrice = gidAndShowdPriceList.get(0);
+        gidAndShowdPrice = buildPackSkuData(client, douyinAppCk, methodNamePack, gidAndShowdPrice);
+        if (ObjectUtil.isNull(gidAndShowdPrice)) {
+            log.error("订单号:{},封装sku和productId有问题请查看:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(gidAndShowdPrice));
+        }
+        */
+            //TODO
+            GidAndShowdPrice gidAndShowdPrice = new GidAndShowdPrice();
+            gidAndShowdPrice.setPost_tel(post_tel);
+            gidAndShowdPrice.setPayIp("182.147.57.114");
+
+            gidAndShowdPrice.setEcom_scene_id("1031,1041");
+            gidAndShowdPrice.setProduct_id("3556357230829939771");
+            gidAndShowdPrice.setSku_id("1736502553929735");
+//        gidAndShowdPrice.setEcom_scene_id("1031,1041");
+//        gidAndShowdPrice.setProduct_id("3586218895557658254");
+//        gidAndShowdPrice.setSku_id("1751083441416206");
+            gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
+            gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
+        }
+
+    }
+
+    private static GidAndShowdPrice buildCreateOrder(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameCreatenew) {
+        try {
+            BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
+            String newcreate_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameCreatenew, douyinAppCk);
+            //TODO
+            String newcreate_body = BuildDouYinUrlUtils.buildCreatenew(gidAndShowdPrice, douyinAppCk);
+            log.info("请求参数:{}", newcreate_body);
+            String create_md5 = SecureUtil.md5("json_form=" + URLEncoder.encode(newcreate_body)).toUpperCase();
+            String create_body_sign = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
+                    create_md5, douyinAppCk.getDeviceId(), newcreate_url
+            );
+            String create_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(create_body_sign).execute().body();
+            String create_x_gorgon = JSON.parseObject(create_sign_body).getString("x-gorgon");
+            String create_x_khronos = JSON.parseObject(create_sign_body).getString("x-khronos");
+            RequestBody requestBody1 = new FormBody.Builder()
+                    .add("json_form", newcreate_body)
+                    .build();
+            Request.Builder builder = new Request.Builder();
+            Request request_create = builder.url(newcreate_url)
+                    .post(requestBody1)
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                    .addHeader("X-SS-STUB", create_md5)
+                    //TODO
+                    .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
+                    .addHeader("X-Gorgon", create_x_gorgon)
+                    .addHeader("X-Khronos", create_x_khronos)
+                    .build();
+            Response execute = client.newCall(request_create).execute();
+            String createbody = execute.body().string();
+            log.info("下单数据:{}", createbody);
+            return null;
+        } catch (Exception e) {
+            log.error("创建订单报错:{}", e.getMessage());
+        }
+        return null;
+    }
+
+    private static GidAndShowdPrice buildBuRender(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameBuyRender) {
+        try {
+            BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
+            String buyRenderUrl = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameBuyRender, douyinAppCk);
+            String buyRenderBody = BuildDouYinUrlUtils.buildBuyRender(gidAndShowdPrice);
+            String buyRenderMd5 = SecureUtil.md5("json_form=" + URLEncoder.encode(buyRenderBody)).toUpperCase();
+
+            String pack_body_sign = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
+                    buyRenderMd5, douyinAppCk.getDeviceId(), buyRenderUrl
+            );
+            String pack_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(pack_body_sign).execute().body();
+            String buyRender_x_gorgon = JSON.parseObject(pack_sign_body).getString("x-gorgon");
+            String buyRender_x_khronos = JSON.parseObject(pack_sign_body).getString("x-khronos");
+            RequestBody requestBody1 = new FormBody.Builder()
+                    .add("json_form", buyRenderBody)
+                    .build();
+            Request.Builder builder = new Request.Builder();
+            Request requestBuyRender = builder.url(buyRenderUrl)
+                    .post(requestBody1)
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                    .addHeader("X-SS-STUB", buyRenderMd5)
+                    .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
+                    .addHeader("X-Gorgon", buyRender_x_gorgon)
+                    .addHeader("X-Khronos", buyRender_x_khronos)
+                    .build();
+            Response execute = client.newCall(requestBuyRender).execute();
+            String buyRenderbody = execute.body().string();
+            log.info("预下单数据:{}", buyRenderbody);
+            execute.close();
+
+            String zg_ext_info_str = JSON.parseObject(buyRenderbody).getJSONObject("data").getJSONObject("pay_method").getString("zg_ext_info");
+            BeanUtil.copyProperties(JSON.parseObject(zg_ext_info_str), gidAndShowdPrice);
+            BuyRenderRoot buyRenderRoot = JSON.parseObject(JSON.parseObject(buyRenderbody).getString("data"), BuyRenderRoot.class);
+            String decision_id = buyRenderRoot.getPay_method().getDecision_id();
+            String payapi_cache_id = buyRenderRoot.getPay_method().getPayapi_cache_id();
+            String render_token = buyRenderRoot.getRender_token();
+            String render_track_id = buyRenderRoot.getRender_track_id();
+            String marketing_plan_id = buyRenderRoot.getTotal_price_result().getMarketing_plan_id();
+            gidAndShowdPrice.setDecision_id(decision_id);
+            gidAndShowdPrice.setPayapi_cache_id(payapi_cache_id);
+            gidAndShowdPrice.setRender_token(render_token);
+            gidAndShowdPrice.setRender_track_id(render_track_id);
+            gidAndShowdPrice.setMarketing_plan_id(marketing_plan_id);
+
+            log.info("处理价格");
+            JSONObject total_price_result_json = JSON.parseObject(buyRenderbody).getJSONObject("data").getJSONObject("total_price_result");
+            Integer total_amount = total_price_result_json.getInteger("total_amount");
+            gidAndShowdPrice.setTotal_amount(total_amount);
+            Integer total_origin_amount = total_price_result_json.getInteger("total_origin_amount");
+            gidAndShowdPrice.setTotal_origin_amount(total_origin_amount);
+            Integer total_coupon_amount = total_price_result_json.getInteger("total_coupon_amount");
+            gidAndShowdPrice.setTotal_coupon_amount(total_coupon_amount);
+
+            if (total_origin_amount.intValue() != total_amount.intValue()) {
+                log.info("当前数据有优惠卷");
+                JSONObject coupon_info = total_price_result_json.getJSONObject("shop_sku_map").getJSONObject("GceCTPIk").getJSONObject("sku_list")
+                        .getJSONObject(gidAndShowdPrice.getSku_id()).getJSONObject("shop_discount").getJSONObject("coupon_info");
+                String coupon_info_id = coupon_info.getString("id");
+                String coupon_meta_id = coupon_info.getString("coupon_meta_id");
+                gidAndShowdPrice.setCoupon_info_id(coupon_info_id);
+                gidAndShowdPrice.setCoupon_meta_id(coupon_meta_id);
+            }
+            System.err.println(JSON.toJSONString(gidAndShowdPrice));
+            return gidAndShowdPrice;
+        } catch (Exception e) {
+            log.error("预下单报错msg:{}", e.getMessage());
+        }
+        return null;
+    }
+
+    private static GidAndShowdPrice buildPackSkuData(OkHttpClient client, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNamePack, GidAndShowdPrice gidAndShowdPrice) {
+        for (int i = 0; i < 100; i++) {
+            try {
+                String pack_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(null, methodNamePack, douyinAppCk);
+                String pack_body = BuildDouYinUrlUtils.buildPackPostData(methodNamePack, gidAndShowdPrice);
+                FormBody formBody = BuildDouYinUrlUtils.formPack(methodNamePack, gidAndShowdPrice);
+                // pack_body="user_id=_00017yEywhDwoBBVLzWnw_W7HF2_U73NLhJ&sec_user_id=&author_id=&author_open_id=&sec_author_id=&promotion_ids=3586218895557658254&item_id=&enter_from=search_order_center&meta_param={\"entrance_info\":\"{\\\"carrier_source\\\":\\\"search_order_center\\\",\\\"search_params\\\":{\\\"search_id\\\":\\\"20221209130101010142041019267C0D92\\\",\\\"search_result_id\\\":\\\"3586218895557658254\\\"},\\\"source_method\\\":\\\"product_card\\\",\\\"source_page\\\":\\\"search_order_center\\\",\\\"ecom_group_type\\\":\\\"\\\",\\\"card_status\\\":\\\"\\\",\\\"module_label\\\":\\\"\\\",\\\"ecom_icon\\\":\\\"\\\"}\"}&width=1080&height=1080&rank_id=&use_new_price=1&gps_on=0&bff_type=1&ui_params={\"action_type\":\"\",\"carrier_source\":\"search_order_center\",\"client_abs\":\"{\\\"iesec_new_goods_detail_edition\\\":6,\\\"iesec_detail_head_search_plan\\\":-1}\",\"ecom_entrance_form\":\"open_url\",\"enter_method\":\"\",\"entrance_info\":\"{\\\"carrier_source\\\":\\\"search_order_center\\\",\\\"search_params\\\":{\\\"search_id\\\":\\\"20221209130101010142041019267C0D92\\\",\\\"search_result_id\\\":\\\"3586218895557658254\\\"},\\\"source_method\\\":\\\"product_card\\\",\\\"source_page\\\":\\\"search_order_center\\\",\\\"ecom_group_type\\\":\\\"\\\",\\\"card_status\\\":\\\"\\\",\\\"module_label\\\":\\\"\\\",\\\"ecom_icon\\\":\\\"\\\"}\",\"follow_status\":0,\"font_scale\":1.0,\"from_live\":false,\"from_video\":false,\"full_mode\":true,\"iesec_new_goods_detail_edition\":6,\"icon_type\":\"\",\"is_luban\":false,\"is_recommend_enable\":true,\"is_short_screen\":false,\"window_reposition\":false,\"large_font_scale\":false,\"live_room_id\":\"\",\"module_name\":\"\",\"page_id\":\"\",\"product_id\":\"\",\"promotion_id\":\"3586218895557658254\",\"show_sku_panel\":0,\"source_method\":\"product_card\",\"source_page\":\"search_order_center\",\"three_d_log_data\":\"\",\"useful_screen_width\":392,\"v3_events_additions\":\"{\\\"search_params\\\":{\\\"search_id\\\":\\\"20221209130101010142041019267C0D92\\\",\\\"search_result_id\\\":\\\"3586218895557658254\\\"}}\"}&user_avatar_shrink=132_132&goods_header_shrink=1080_1080&goods_comment_shrink=464_464&shop_avatar_shrink=101_101&common_large_shrink=3240_3240&ecom_scene_id=&is_preload_req=false";
+                log.info("pack_url：{},buildPackPostData:{}", pack_url, pack_body);
+                String packMd5 = SecureUtil.md5(pack_body).toUpperCase();
+                String pack_body_sign = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
+                        packMd5, douyinAppCk.getDeviceId(), pack_url
+                );
+                String pack_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(pack_body_sign).execute().body();
+                String pack_x_gorgon = JSON.parseObject(pack_sign_body).getString("x-gorgon");
+                String pack_x_khronos = JSON.parseObject(pack_sign_body).getString("x-khronos");
+                String pack_x_argus = JSON.parseObject(pack_sign_body).getString("x-argus");
+                String pack_x_ladon = JSON.parseObject(pack_sign_body).getString("x-ladon");
+//                MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+//                RequestBody packRqform = RequestBody.create(mediaType, pack_body);
 
 
-        String pack_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(null, methodNamePack, douyinAppCk);
-        String pack_body = BuildDouYinUrlUtils.buildPackPostData(methodNamePack, gidAndShowdPrice);
-
-        log.info("pack_url：{},buildPackPostData:{}", pack_url, pack_body);
-        String packMd5 = SecureUtil.md5(pack_body).toUpperCase();
-        String pack_body_sign = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
-                packMd5, douyinAppCk.getDeviceId(), pack_url
-        );
-
-        String pack_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(pack_body_sign).execute().body();
-        String pack_x_gorgon = JSON.parseObject(pack_sign_body).getString("x-gorgon");
-        String pack_x_khronos = JSON.parseObject(pack_sign_body).getString("x-khronos");
-        String pack_x_argus = JSON.parseObject(pack_sign_body).getString("x-argus");
-        String pack_x_ladon = JSON.parseObject(pack_sign_body).getString("x-ladon");
-
-        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
-        RequestBody packRqform = RequestBody.create(mediaType, pack_body);
-        Request request = new Request.Builder()
-                .url(pack_url)
-                .post(packRqform)
-                .addHeader("X-SS-STUB", packMd5)
-                .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
-                .addHeader("X-Gorgon", pack_x_gorgon)
-                .addHeader("X-Khronos", pack_x_khronos)
-                .addHeader("X-Argus", pack_x_argus)
-                .addHeader("X-Ladon", pack_x_ladon)
-                //TODO 缺少请求头的设置
-                .addHeader("user-agent", "com.ss.android.ugc.aweme/200001 (Linux; U; Android 9; zh_CN; Redmi 8A; Build/PKQ1.190319.001; Cronet/TTNetVersion:3a37693c 2022-02-10 QuicVersion:775bd845 2021-12-24)")
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .addHeader("cache-control", "no-cache")
-                .build();
-        Response searchResponse = client.newCall(request).execute();
-        String packResBody = searchResponse.body().string();
-        log.info("packResBody：{}", packResBody);
+                Request request = new Request.Builder()
+                        .url(pack_url)
+                        .post(formBody)
+                        .addHeader("X-SS-STUB", packMd5)
+                        .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                        .addHeader("X-Gorgon", pack_x_gorgon)
+                        .addHeader("X-Khronos", pack_x_khronos)
+                        //TODO 缺少请求头的设置
+                        .addHeader("user-agent", "com.ss.android.ugc.aweme/200001 (Linux; U; Android 9; zh_CN; Redmi 8A; Build/PKQ1.190319.001; Cronet/TTNetVersion:3a37693c 2022-02-10 QuicVersion:775bd845 2021-12-24)")
+                        .build();
+                Response searchResponse = client.newCall(request).execute();
+                String packResBody = searchResponse.body().string();
+                log.info("packResBody：{}", packResBody);
+                String h5_url = JSON.parseObject(JSON.toJSONString(JSON.parseObject(packResBody).getJSONArray("promotions").get(PreConstant.ZERO))).getJSONObject("base_info").getJSONObject("links").getString("h5_url");
+                Map<String, String> params = PreUtils.parseUrl(h5_url).getParams();
+                BeanUtil.copyProperties(params, gidAndShowdPrice);
+                if (StrUtil.isNotBlank(gidAndShowdPrice.getCombo_id())) {
+                    System.err.println(JSON.toJSONString(gidAndShowdPrice));
+                    return gidAndShowdPrice;
+                }
+            } catch (Exception e) {
+                log.error("buildPackSkuData错误:{}", e.getMessage());
+            }
+        }
+        return null;
 
     }
 
     private static List<GidAndShowdPrice> getGidAndShowdPrices(Integer buyPrice, OkHttpClient client, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNameSearch) throws IOException {
         SearchParam searchParam = SearchParam.buildSearchParam("苹果充值卡" + buyPrice);
-        String search_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(searchParam, methodNameSearch, douyinAppCk);
+        String search_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(searchParam)), methodNameSearch, douyinAppCk);
         log.info("查询链接:{}", search_url);
         Request request = new Request.Builder()
                 .url(search_url)

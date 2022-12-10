@@ -14,13 +14,21 @@ public class GidAndShowdPrice {
     private String post_tel;
     private Integer buyPrice;
 
+    /**
+     * sku相关信息
+     */
+    private String ecom_scene_id;
+    private String product_id;
+    private String sku_id;
+
+
     private String gid;
     private Integer show_price;
     private String schema;
     private String query_id;
-    private String ecom_scene_id;
     private String search_id;
     private String title;
+
     /**
      * 搜索封装
      */
@@ -61,4 +69,16 @@ public class GidAndShowdPrice {
     private String promotion_process;
     private String activity_id;
     private String merchant_info;
+
+    private Integer total_amount;
+    private Integer total_origin_amount;
+    private Integer total_coupon_amount;
+
+    /**
+     * 优惠卷
+     */
+    private String coupon_info_id;
+    private String coupon_meta_id;
+
+
 }
