@@ -133,7 +133,7 @@ public class JdCkSysController {
             if (StrUtil.isBlank(eduStr)) {
                 continue;
             }
-            List<String> lockStock = keys.stream().map(it -> it.replace("抖音ck锁定3分钟:", "")).collect(Collectors.toList());
+            List<String> lockStock = keys.stream().map(it -> it.replace(":", "")).collect(Collectors.toList());
             if (CollUtil.isNotEmpty(lockStock) && lockStock.contains(douyinAppCk.getUid())) {
                 continue;
             }

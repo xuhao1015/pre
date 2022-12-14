@@ -52,7 +52,7 @@ public class XiaoMiTouTiao1 {
 
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < 100; i++) {
-            String uid = "2889965552023799";
+            String uid = "69493460857";
             Entity appCk = db.use().queryOne("select * from douyin_app_ck_all_param where uid=?", uid);
             Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
             Entity method_pack = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "pack");
@@ -98,13 +98,13 @@ public class XiaoMiTouTiao1 {
             gidAndShowdPrice.setEcom_scene_id("1031,1041");
             gidAndShowdPrice.setProduct_id("3578244605646345985");
             gidAndShowdPrice.setSku_id("1747189749393459");
-//            gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
-//            gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
-            gidAndShowdPrice.setOrderId("5011913753496616515");
+            gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
+            gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
+//            gidAndShowdPrice.setOrderId("5011913753496616515");
 //            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
 //            gidAndShowdPrice = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
-            gidAndShowdPrice.setAction_id("100030");
-            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
+//            gidAndShowdPrice.setAction_id("100030");
+//            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
 
 
         }

@@ -663,7 +663,6 @@ public class DouyinService {
                     douyinAppCk.setUpdateTime(new Date());
                     douyinAppCkMapper.updateById(douyinAppCk);
                     log.info("订单号:{},设备号重复使用查询和删除", jdMchOrder.getTradeNo());
-//                    deleteLockCk(douyinAppCk, douyinDeviceIid);
                     log.info("订单号:{},当前设备号和uid绑定其他人不能使用msg:{}", jdMchOrder.getTradeNo(), douyinDeviceIid.getId());
                     log.info("订单号{}，下单成功", jdMchOrder);
                     String orderId = JSON.parseObject(JSON.parseObject(bodyRes1).getString("data")).getString("order_id");
