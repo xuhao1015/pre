@@ -114,7 +114,6 @@ public class Toutiao3 {
             String bodyRes1 = response1.body().string();
             response1.close();
             log.info("下单结果:{}", bodyRes1);
-
         }
 
 

@@ -20,7 +20,6 @@ import com.xd.pre.modules.px.douyin.toutiao.BuyRenderParam;
 import com.xd.pre.modules.px.douyin.toutiao.SearchParam;
 import com.xd.pre.modules.sys.domain.DouyinAppCk;
 import com.xd.pre.modules.sys.domain.DouyinMethodNameParam;
-import com.xd.pre.modules.sys.domain.JdMchOrder;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jsoup.Jsoup;
@@ -43,66 +42,155 @@ public class XiaoMiTouTiao1 {
     public static Jedis jedis = RedisDS.create().getJedis();
 
 
+    public static DouyinMethodNameParam getDouyinParam(String method_name) throws Exception {
+        Entity method_detailInfo = db.use().queryOne("select * from douyin_method_name_param where method_name=?", method_name);
+
+        DouyinMethodNameParam methodNamemethod_postExec = DouyinMethodNameParam.builder().methodName(method_detailInfo.getStr("method_name"))
+                .methodParam(method_detailInfo.getStr("method_param")).methodUrl(method_detailInfo.getStr("method_url")).build();
+        return methodNamemethod_postExec;
+    }
+
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < 100; i++) {
-
-            String uid = "3250607754582456";
+            String uid = "2889965552023799";
             Entity appCk = db.use().queryOne("select * from douyin_app_ck_all_param where uid=?", uid);
             Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
             Entity method_pack = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "pack");
             Entity method_buyRender = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "buyRender");
             Entity method_newcreate = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "newcreate");
+            Entity method_createpay = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "createpay");
+            Entity method_detailInfo = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "detailInfo");
+            Entity method_postExec = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "postExec");
 
-            String payIp = PreUtils.getRandomIp();
+
             String post_tel = PreUtils.getTel();
-            Integer buyPrice = 200;
-
             OkHttpClient client = new OkHttpClient();
             DouyinAppCk douyinAppCk = DouyinAppCk.builder().uid(uid).exParam(appCk.getStr("ex_param")).ck(appCk.getStr("ck"))
                     .deviceId(appCk.getStr("device_id")).iid(appCk.getStr("iid")).build();
 
-            DouyinMethodNameParam methodNameSearch = DouyinMethodNameParam.builder().method_name(method_db.getStr("method_name")).method_url(method_db.getStr("method_url")).build();
+            DouyinMethodNameParam methodNameSearch = DouyinMethodNameParam.builder().methodName(method_db.getStr("method_name")).methodUrl(method_db.getStr("method_url")).build();
 
-            DouyinMethodNameParam methodNamePack = DouyinMethodNameParam.builder().method_name(method_pack.getStr("method_name"))
-                    .method_param(method_pack.getStr("method_param")).method_url(method_pack.getStr("method_url")).build();
-
-
-            DouyinMethodNameParam methodNameBuyRender = DouyinMethodNameParam.builder().method_name(method_buyRender.getStr("method_name"))
-                    .method_param(method_buyRender.getStr("method_param")).method_url(method_buyRender.getStr("method_url")).build();
-
-            DouyinMethodNameParam methodNameCreatenew = DouyinMethodNameParam.builder().method_name(method_newcreate.getStr("method_name"))
-                    .method_param(method_newcreate.getStr("method_param")).method_url(method_newcreate.getStr("method_url")).build();
+            DouyinMethodNameParam methodNamePack = DouyinMethodNameParam.builder().methodName(method_pack.getStr("method_name"))
+                    .methodParam(method_pack.getStr("method_param")).methodUrl(method_pack.getStr("method_url")).build();
 
 
-            JdMchOrder jdMchOrder = JdMchOrder.builder().tradeNo("202211111112222").outTradeNo("P123456456").build();
-            log.info("执行,当前订单号:{}ck的uid:{},device:{},iid:{} ", jdMchOrder.getTradeNo(), douyinAppCk.getUid(), douyinAppCk.getDeviceId(), douyinAppCk.getIid());
-            log.info("开始执行搜索:{}", jdMchOrder.getTradeNo());
-       /* List<GidAndShowdPrice> gidAndShowdPriceList = getGidAndShowdPrices(buyPrice, client, douyinAppCk, methodNameSearch);
-        log.info(JSON.toJSONString(gidAndShowdPriceList));
-        GidAndShowdPrice gidAndShowdPrice = gidAndShowdPriceList.get(0);
-        gidAndShowdPrice = buildPackSkuData(client, douyinAppCk, methodNamePack, gidAndShowdPrice);
-        if (ObjectUtil.isNull(gidAndShowdPrice)) {
-            log.error("订单号:{},封装sku和productId有问题请查看:{}", jdMchOrder.getTradeNo(), JSON.toJSONString(gidAndShowdPrice));
-        }
-        */
+            DouyinMethodNameParam methodNameBuyRender = DouyinMethodNameParam.builder().methodName(method_buyRender.getStr("method_name"))
+                    .methodParam(method_buyRender.getStr("method_param")).methodUrl(method_buyRender.getStr("method_url")).build();
+
+            DouyinMethodNameParam methodNameCreatenew = DouyinMethodNameParam.builder().methodName(method_newcreate.getStr("method_name"))
+                    .methodParam(method_newcreate.getStr("method_param")).methodUrl(method_newcreate.getStr("method_url")).build();
+
+            DouyinMethodNameParam methodNameCreatePay = DouyinMethodNameParam.builder().methodName(method_createpay.getStr("method_name"))
+                    .methodParam(method_createpay.getStr("method_param")).methodUrl(method_createpay.getStr("method_url")).build();
+
+
+            DouyinMethodNameParam methodNameDetailInfo = DouyinMethodNameParam.builder().methodName(method_detailInfo.getStr("method_name"))
+                    .methodParam(method_detailInfo.getStr("method_param")).methodUrl(method_detailInfo.getStr("method_url")).build();
+
+            DouyinMethodNameParam methodNamemethod_postExec = DouyinMethodNameParam.builder().methodName(method_postExec.getStr("method_name"))
+                    .methodParam(method_postExec.getStr("method_param")).methodUrl(method_postExec.getStr("method_url")).build();
+
+
             //TODO
             GidAndShowdPrice gidAndShowdPrice = new GidAndShowdPrice();
             gidAndShowdPrice.setPost_tel(post_tel);
             gidAndShowdPrice.setPayIp("182.147.57.114");
-
             gidAndShowdPrice.setEcom_scene_id("1031,1041");
-            gidAndShowdPrice.setProduct_id("3556357230829939771");
-            gidAndShowdPrice.setSku_id("1736502553929735");
-//        gidAndShowdPrice.setEcom_scene_id("1031,1041");
-//        gidAndShowdPrice.setProduct_id("3586218895557658254");
-//        gidAndShowdPrice.setSku_id("1751083441416206");
-            gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
-            gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
+            gidAndShowdPrice.setProduct_id("3578244605646345985");
+            gidAndShowdPrice.setSku_id("1747189749393459");
+//            gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
+//            gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
+            gidAndShowdPrice.setOrderId("5011913753496616515");
+//            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
+//            gidAndShowdPrice = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
+            gidAndShowdPrice.setAction_id("100030");
+            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
+
+
         }
 
     }
 
-    private static GidAndShowdPrice buildCreateOrder(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameCreatenew) {
+    public static GidAndShowdPrice buildPostExec(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNamemethod_postExec) {
+        BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
+        MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
+        String postExec_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNamemethod_postExec, douyinAppCk);
+        String datafromOri = "common_params=%7B%22enter_from%22%3A%22order_list_page%22%2C%22previous_page%22%3A%22mine_tab_order_list__order_homepage%22%7D&action_id=" + gidAndShowdPrice.getAction_id()
+                + "&business_line=2&trade_type=0&source=1&ecom_appid=7386&lynx_support_version=1&order_id=" + gidAndShowdPrice.getOrderId() + "&page_size=15";
+        RequestBody body = RequestBody.create(mediaType, datafromOri);
+        try {
+            Request.Builder builder = new Request.Builder();
+            Request request_create = builder.url(postExec_url)
+                    .post(body)
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                    .build();
+            Response execute = client.newCall(request_create).execute();
+            String createbody = execute.body().string();
+            log.info("支付数据数据:{}", createbody);
+            return null;
+        } catch (Exception e) {
+            log.error("创建订单报错:{}", e.getMessage());
+        }
+        return null;
+
+    }
+
+    public static String buildDetailInfo(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameDetailInfo) {
+        try {
+            BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
+            String newcreate_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameDetailInfo, douyinAppCk) + "&order_id=" + gidAndShowdPrice.getOrderId();
+            Request.Builder builder = new Request.Builder();
+            Request request_create = builder.url(newcreate_url)
+                    .get()
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                    .build();
+            Response execute = client.newCall(request_create).execute();
+            String buildDetailInfodata = execute.body().string();
+            log.info("支付数据数据:{}", buildDetailInfodata);
+            return buildDetailInfodata;
+        } catch (Exception e) {
+            log.error("创建订单报错:{}", e.getMessage());
+        }
+        return null;
+    }
+
+    public static GidAndShowdPrice buildCreatepay(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameCreatenew) {
+        try {
+            BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
+            String newcreate_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameCreatenew, douyinAppCk);
+            String newcreate_body = BuildDouYinUrlUtils.buildCreatepay(gidAndShowdPrice, douyinAppCk);
+            log.info("请求参数:{}", newcreate_body);
+            String create_md5 = SecureUtil.md5("json_form=" + URLEncoder.encode(newcreate_body)).toUpperCase();
+            String create_body_sign = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
+                    create_md5, douyinAppCk.getDeviceId(), newcreate_url
+            );
+            String create_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(create_body_sign).execute().body();
+            String create_x_gorgon = JSON.parseObject(create_sign_body).getString("x-gorgon");
+            String create_x_khronos = JSON.parseObject(create_sign_body).getString("x-khronos");
+            RequestBody requestBody1 = new FormBody.Builder()
+                    .add("json_form", newcreate_body)
+                    .build();
+            Request.Builder builder = new Request.Builder();
+            Request request_create = builder.url(newcreate_url)
+                    .post(requestBody1)
+                    .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
+                    .addHeader("X-SS-STUB", create_md5)
+                    //TODO
+                    .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
+                    .addHeader("X-Gorgon", create_x_gorgon)
+                    .addHeader("X-Khronos", create_x_khronos)
+                    .build();
+            Response execute = client.newCall(request_create).execute();
+            String createbody = execute.body().string();
+            log.info("支付数据数据:{}", createbody);
+            return null;
+        } catch (Exception e) {
+            log.error("创建订单报错:{}", e.getMessage());
+        }
+        return null;
+    }
+
+    public static GidAndShowdPrice buildCreateOrder(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameCreatenew) {
         try {
             BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
             String newcreate_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameCreatenew, douyinAppCk);
@@ -139,7 +227,7 @@ public class XiaoMiTouTiao1 {
         return null;
     }
 
-    private static GidAndShowdPrice buildBuRender(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameBuyRender) {
+    public static GidAndShowdPrice buildBuRender(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameBuyRender) {
         try {
             BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
             String buyRenderUrl = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameBuyRender, douyinAppCk);
@@ -209,7 +297,7 @@ public class XiaoMiTouTiao1 {
         return null;
     }
 
-    private static GidAndShowdPrice buildPackSkuData(OkHttpClient client, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNamePack, GidAndShowdPrice gidAndShowdPrice) {
+    public static GidAndShowdPrice buildPackSkuData(OkHttpClient client, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNamePack, GidAndShowdPrice gidAndShowdPrice) {
         for (int i = 0; i < 100; i++) {
             try {
                 String pack_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(null, methodNamePack, douyinAppCk);
@@ -258,7 +346,7 @@ public class XiaoMiTouTiao1 {
 
     }
 
-    private static List<GidAndShowdPrice> getGidAndShowdPrices(Integer buyPrice, OkHttpClient client, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNameSearch) throws IOException {
+    public static List<GidAndShowdPrice> getGidAndShowdPrices(Integer buyPrice, OkHttpClient client, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNameSearch) throws IOException {
         SearchParam searchParam = SearchParam.buildSearchParam("苹果充值卡" + buyPrice);
         String search_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(searchParam)), methodNameSearch, douyinAppCk);
         log.info("查询链接:{}", search_url);

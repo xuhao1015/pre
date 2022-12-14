@@ -24,7 +24,7 @@ public class DouyinMethodNameParam {
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-    private String method_name;
-    private String method_param;
-    private String method_url;
+    private String methodName;
+    private String methodParam;
+    private String methodUrl;
 }

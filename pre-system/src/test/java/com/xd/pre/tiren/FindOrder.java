@@ -7,9 +7,15 @@ import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.xd.pre.common.aes.PreAesUtils;
 import com.xd.pre.common.constant.PreConstant;
+import com.xd.pre.dy23.XiaoMiTouTiao1;
 import com.xd.pre.modules.px.douyin.DouyinService;
+import com.xd.pre.modules.px.douyin.toutiao.BuildDouYinUrlUtils;
+import com.xd.pre.modules.px.douyin.toutiao.BuyRenderParam;
+import com.xd.pre.modules.sys.domain.DouyinAppCk;
+import com.xd.pre.modules.sys.domain.DouyinMethodNameParam;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -28,7 +34,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("P1597994235317112832");
+        outOrders.add("1000");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -71,18 +77,31 @@ public class FindOrder {
         }
     }
 
-    private static void noticy(String outOrder) throws SQLException, IOException {
+    private static void noticy(String outOrder) throws Exception {
         Entity entity = db.use().queryOne(String.format("select * from jd_mch_order where out_trade_no = '%s'", outOrder));
         if (entity.getInt("status") == 2) {
             log.info("当前订单已经成功");
             return;
         }
+
+
+
         String original_trade_no = entity.getStr("original_trade_no");
         Entity entity1 = db.use().queryOne(String.format("select * from jd_order_pt where order_id = %s", original_trade_no));
+
+
+        Entity entityAppCk = db.use().queryOne(String.format("select * from douyin_app_ck where uid = '%s'", entity1.getStr("pt_pin")));
+        DouyinAppCk douyinAppCk = DouyinAppCk.builder().exParam(entityAppCk.getStr("ex_param")).ck(entityAppCk.getStr("ck")).uid(entityAppCk.getStr("ck"))
+                .deviceId(entityAppCk.getStr("device_id")).iid(entityAppCk.getStr("iid")).build();
+        BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
+        DouyinMethodNameParam methodNameDetailInfo = XiaoMiTouTiao1.getDouyinParam("detailInfo");
+        DouyinMethodNameParam methodNamepostExec = XiaoMiTouTiao1.getDouyinParam("postExec");
+        String infoUrl = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameDetailInfo, douyinAppCk) + "&order_id=" + entity1.getStr("order_id");
+
         String current_ck = entity1.getStr("current_ck");
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("https://aweme.snssdk.com/aweme/v1/commerce/order/detailInfo/?aid=45465&order_id=" + original_trade_no)
+                .url(infoUrl)
                 .get()
                 .addHeader("Cookie", PreAesUtils.decrypt解密(current_ck))
                 .addHeader("X-Khronos", "1665697911")
@@ -122,10 +141,10 @@ public class FindOrder {
         db.use().execute("update jd_order_pt set card_number = ? ,car_my = ?,pay_success_time = ?,org_app_ck = ?,html=? where order_id = ?",
                 PreAesUtils.encrypt加密(code), PreAesUtils.encrypt加密(code), DateUtil.formatDateTime(new Date()), DateUtil.formatDateTime(new Date()), shop_order_status_info, original_trade_no);
         DouyinService douyinService = new DouyinService();
-        Boolean ac100030 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100030");
+        Boolean ac100030 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100030", douyinAppCk,methodNamepostExec);
         if (ac100030) {
             db.use().execute("update jd_order_pt set action_id = ? where order_id = ?", 100030, original_trade_no);
-            Boolean ac100040 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100040");
+            Boolean ac100040 = douyinService.isac100030Zr100040(client, entity.getStr("trade_no"), original_trade_no, current_ck, "100040", douyinAppCk,methodNamepostExec);
             if (ac100040) {
                 db.use().execute("update jd_order_pt set action_id = ? where order_id = ?", 100040, original_trade_no);
                 log.info("删除订单成功:{}", outOrder);

@@ -114,40 +114,5 @@ public class Toutiao2 {
         response1.close();
         log.info("下单结果:{}", bodyRes1);
 
-
-
-
-
-
-        /* Long _rticket = System.currentTimeMillis();
-        String search_url = "https://search5-search-hl.toutiaoapi.com/search/?keyword=苹果卡" + buyPrice / 100 + "元&iid=" + iid + "&device_id=" + device_id + "&search_start_time=" + _rticket + "&_rticket=" + _rticket + "&inner_resolution=1080*2400&search_sug=1&gs_height=44&action_type=history_keyword_search&search_json={\"__logExtra__\":{\"if_sar_recall\":\"0\"}}&source=search_history&is_older=0&client_extra_params={\"playparam\":\"codec_type:0,cdn_type:1,resolution:1080*2400,ttm_version:-1,enable_dash:0,unwatermark:1,v1_fitter_info:1,tt_net_energy:3,is_order_flow:-1,tt_device_score:11.0,tt_enable_adaptive:2\"}&is_darkmode=0&from=search_bar_ecom_bottom&na_pre_search_type=LOAD_URL&plugin_enable=3&tt_font_size=m&multi_container=1&is_incognito=0&hide_headbar=1&tt_daymode=1&keyword_type=hist&fetch_by_ttnet=1&forum=1&search_position=search_bar_ecom_bottom&multi_container_type=1&cur_tab_title=search_tab&pd=shopping&offset_height=84&navbar_height=36&is_ttwebview=0&device_platform=android&os=android&ssmix=a&cdid=587713e0-2c73-45dd-aa5e-85e9cd10b401&channel=update&aid=13&app_name=news_article&version_code=910&version_name=9.1.0&manifest_version_code=9095&update_version_code=91006&ab_version=668775,4091914,4407627,5158114,5175927,1859937,668779,5175922,668774,5175916,662176,5175909,662099,5175875,668776,5175917,660830,5107919,5114922,5175925,5082917,5092860,5113788,3746951,5179111&ab_group=94565,102751&ab_feature=94563,102749&resolution=1080*2245&dpi=480&device_type=PGBM10&device_brand=OPPO&language=zh&os_api=31&os_version=12&ac=wifi&dq_param=0&plugin=0&isTTWebView=0&session_id=b5170649-e673-498b-91d8-b47e4e84fc99&host_abi=armeabi-v7a&tma_jssdk_version=2.53.0&rom_version=coloros__pgbm10_11_a.26&immerse_pool_type=101&oaid=A559639399424FFDAE9603485CF9AFE6fb4ea015bac69b9d611fdab2449c7f03";
-        Request request = new Request.Builder()
-                .url(search_url)
-                .addHeader("Cookie", ck)
-                .addHeader("Referer", "https://is.snssdk.com/search/?inner_resolution=1080*2400&search_sug=1")
-                .addHeader("user-agent", "Mozilla/5.0 (Linux; Android 12; PGBM10 Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/97.0.4692.98 Mobile Safari/537.36 JsSdk/2 NewsArticle/9.1.0 NetType/wifi")
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .build();
-        Response searchResponse = client.newCall(request).execute();
-        String searchResBody = searchResponse.body().string();
-        log.info("搜索苹果卡数据:{}", searchResBody);
-        searchResponse.close();
-        if (!searchResBody.contains("cr-params=")) {
-            log.error("没有搜索到");
-            return;
-        }
-        String[] split = searchResBody.split("cr-params=");
-        for (String oneHtml : split) {
-            if(oneHtml.contains("App Store 充值卡") && oneHtml.contains("search_result_id=")){
-                String[] twoHtmls = oneHtml.split("App Store 充值卡");
-                for (String twoHtml : twoHtmls) {
-                    if(twoHtml.contains("search_result_id=")){
-                        System.err.println(twoHtml);
-                        System.err.println("=============");
-                    }
-                }
-            }
-        }*/
-
     }
 }

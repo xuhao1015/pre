@@ -80,5 +80,8 @@ public class GidAndShowdPrice {
     private String coupon_info_id;
     private String coupon_meta_id;
 
+    private Boolean checkIp=false;
+    private String orderId;
+    private String action_id;
 
 }
