@@ -1,6 +1,8 @@
 package com.xd.pre.dy23;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -15,6 +17,7 @@ import com.xd.pre.common.constant.PreConstant;
 import com.xd.pre.common.utils.px.PreUtils;
 import com.xd.pre.modules.px.douyin.buyRender.res.BuyRenderRoot;
 import com.xd.pre.modules.px.douyin.deal.GidAndShowdPrice;
+import com.xd.pre.modules.px.douyin.pay.PayDto;
 import com.xd.pre.modules.px.douyin.toutiao.BuildDouYinUrlUtils;
 import com.xd.pre.modules.px.douyin.toutiao.BuyRenderParam;
 import com.xd.pre.modules.px.douyin.toutiao.SearchParam;
@@ -31,6 +34,7 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +55,10 @@ public class XiaoMiTouTiao1 {
     }
 
     public static void main(String[] args) throws Exception {
-        for (int i = 0; i < 100; i++) {
-            String uid = "787703994006904";
+        for (int i = 0; i < 2; i++) {
+            String uid = "3250607754582456";
             Entity appCk = db.use().queryOne("select * from douyin_app_ck where uid=?", uid);
+
             Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
             Entity method_pack = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "pack");
             Entity method_buyRender = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "buyRender");
@@ -62,8 +67,10 @@ public class XiaoMiTouTiao1 {
             Entity method_detailInfo = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "detailInfo");
             Entity method_postExec = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "postExec");
 
-
             String post_tel = PreUtils.getTel();
+            Integer price = 200;
+            Entity jd_app_store_config_entity = db.queryOne("select * from jd_app_store_config where group_num =8 and is_product =1 and sku_price  = ? ", price);
+
             OkHttpClient client = new OkHttpClient();
             DouyinAppCk douyinAppCk = DouyinAppCk.builder().uid(uid).exParam(appCk.getStr("ex_param")).ck(appCk.getStr("ck"))
                     .deviceId(appCk.getStr("device_id")).iid(appCk.getStr("iid")).build();
@@ -95,19 +102,34 @@ public class XiaoMiTouTiao1 {
             gidAndShowdPrice.setPost_tel(post_tel);
             gidAndShowdPrice.setPayIp("182.147.57.114");
             gidAndShowdPrice.setEcom_scene_id("1031,1041");
-            gidAndShowdPrice.setProduct_id("3561823775085438878");
-            gidAndShowdPrice.setSku_id("1739171765850115");
+            JSONObject config = JSON.parseObject(jd_app_store_config_entity.getStr("config"));
+            gidAndShowdPrice.setProduct_id(config.getString("product_id"));
+            gidAndShowdPrice.setSku_id(config.getString("sku_id"));
             gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
             gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
-//            gidAndShowdPrice.setOrderId("5012157330670842997");
-//            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
-            String a  = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
-            System.out.println(a);
-//            gidAndShowdPrice.setAction_id("100030");
-//            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
-            Thread.sleep(10*10000);
-
-
+            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
+            if (ObjectUtil.isNull(gidAndShowdPrice)) {
+                log.info("=================订单报错");
+                return;
+            }
+            log.info("开始入库:{}", gidAndShowdPrice.getOrderId());
+            DateTime dateTime = DateUtil.offsetMinute(new Date(), 25);
+            PayDto payDto = PayDto.builder().ck(PreAesUtils.encrypt加密(douyinAppCk.getCk())).device_id(douyinAppCk.getDeviceId()).iid(douyinAppCk.getIid()).pay_type(2 + "")
+                    .orderId(gidAndShowdPrice.getOrderId()).userIp(gidAndShowdPrice.getPayIp()).build();
+            db.execute("INSERT INTO jd_order_pt (order_id,pt_pin,expire_time,create_time,sku_price,sku_name,sku_id,wx_pay_expire_time,current_ck,mark, " +
+                            "tenant_id)VALUES( ?,?,?,?,?,?,?,?,?,?,?)", gidAndShowdPrice.getOrderId(), uid, dateTime, new Date(),
+                    jd_app_store_config_entity.getBigDecimal("sku_price"), jd_app_store_config_entity.getStr("sku_name"),
+                    jd_app_store_config_entity.getStr("sku_id"), dateTime, douyinAppCk.getCk(), JSON.toJSONString(payDto), 1);
+            log.info("订单入库成功");
+            if (true) {
+                return;
+            }
+            String a = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
+            gidAndShowdPrice.setAction_id("100030");
+            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
+            gidAndShowdPrice.setAction_id("100040");
+            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
+            Thread.sleep(10 * 10000);
         }
 
     }
@@ -126,8 +148,8 @@ public class XiaoMiTouTiao1 {
                     .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
                     .build();
             Response execute = client.newCall(request_create).execute();
-            String createbody = execute.body().string();
-            log.info("支付数据数据:{}", createbody);
+            String deleteDataRes = execute.body().string();
+            log.info("删除数据结果:{}", deleteDataRes);
             return null;
         } catch (Exception e) {
             log.error("创建订单报错:{}", e.getMessage());
@@ -184,7 +206,11 @@ public class XiaoMiTouTiao1 {
             Response execute = client.newCall(request_create).execute();
             String createbody = execute.body().string();
             log.info("支付数据数据:{}", createbody);
-            return null;
+            if (StrUtil.isNotBlank(createbody) && createbody.contains("order_id")) {
+                String orderId = JSON.parseObject(createbody).getJSONObject("data").getString("order_id");
+                gidAndShowdPrice.setOrderId(orderId);
+                return gidAndShowdPrice;
+            }
         } catch (Exception e) {
             log.error("创建订单报错:{}", e.getMessage());
         }
@@ -290,7 +316,6 @@ public class XiaoMiTouTiao1 {
                 gidAndShowdPrice.setCoupon_info_id(coupon_info_id);
                 gidAndShowdPrice.setCoupon_meta_id(coupon_meta_id);
             }
-            System.err.println(JSON.toJSONString(gidAndShowdPrice));
             return gidAndShowdPrice;
         } catch (Exception e) {
             log.error("预下单报错msg:{}", e.getMessage());
@@ -336,7 +361,6 @@ public class XiaoMiTouTiao1 {
                 Map<String, String> params = PreUtils.parseUrl(h5_url).getParams();
                 BeanUtil.copyProperties(params, gidAndShowdPrice);
                 if (StrUtil.isNotBlank(gidAndShowdPrice.getCombo_id())) {
-                    System.err.println(JSON.toJSONString(gidAndShowdPrice));
                     return gidAndShowdPrice;
                 }
             } catch (Exception e) {

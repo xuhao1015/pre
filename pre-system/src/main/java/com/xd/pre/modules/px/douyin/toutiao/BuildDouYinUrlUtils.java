@@ -78,7 +78,6 @@ public class BuildDouYinUrlUtils {
                 gidAndShowdPrice.getSku_id(),
                 gidAndShowdPrice.getEcom_scene_id()
         );
-        System.err.println("============" + buildData);
         return buildData;
     }
 

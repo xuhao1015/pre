@@ -789,7 +789,6 @@ public class DouyinService {
                 gidAndShowdPrice.setCoupon_info_id(coupon_info_id);
                 gidAndShowdPrice.setCoupon_meta_id(coupon_meta_id);
             }
-            System.err.println(JSON.toJSONString(gidAndShowdPrice));
             return gidAndShowdPrice;
         } catch (Exception e) {
             log.error("预下单报错msg:{}", e.getMessage());
@@ -1181,7 +1180,6 @@ public class DouyinService {
 
     public Boolean isac100030Zr100040(OkHttpClient client, String tradeNo, String originalTradeNo, String currentCk, String ac, DouyinAppCk douyinAppCk, DouyinMethodNameParam methodNamemethod_postExec) {
         try {
-
 
             BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
             String postExec_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNamemethod_postExec, douyinAppCk);

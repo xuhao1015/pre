@@ -34,7 +34,7 @@ public class FindOrder {
 
     public static void main(String[] args) throws Exception {
         List<String> outOrders = new ArrayList<>();
-        outOrders.add("1000");
+        outOrders.add("21000");
         for (String outOrder : outOrders) {
             noticy(outOrder);
         }
@@ -83,8 +83,6 @@ public class FindOrder {
             log.info("当前订单已经成功");
             return;
         }
-
-
 
         String original_trade_no = entity.getStr("original_trade_no");
         Entity entity1 = db.use().queryOne(String.format("select * from jd_order_pt where order_id = %s", original_trade_no));

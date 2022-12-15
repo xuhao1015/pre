@@ -25,7 +25,7 @@ public class Toutiao {
         Integer buyPrice = 200 * 100;
         String payIp = PreUtils.getRandomIp();
         String post_tel = PreUtils.getTel();
-        Entity appCk = db.use().queryOne("select * from douyin_app_ck where is_enable = 0 and file_name = '20221204_300.txt'and id = 12173 ");
+        Entity appCk = db.use().queryOne("select * from douyin_app_ck where is_enable = 1 and id = 12316 ");
         Entity devicesBd = db.use().queryOne("select * from douyin_device_iid where   is_enable = 0 and id > 19522 ");
         String uid = appCk.getStr("uid");
         String ck = PreAesUtils.decrypt解密(appCk.getStr("ck"));
