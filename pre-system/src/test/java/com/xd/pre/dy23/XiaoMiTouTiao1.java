@@ -107,7 +107,6 @@ public class XiaoMiTouTiao1 {
             gidAndShowdPrice.setSku_id(config.getString("sku_id"));
             gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
             gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
-            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
             if (ObjectUtil.isNull(gidAndShowdPrice)) {
                 log.info("=================订单报错");
                 return;
@@ -124,6 +123,7 @@ public class XiaoMiTouTiao1 {
             if (true) {
                 return;
             }
+            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
             String a = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
             gidAndShowdPrice.setAction_id("100030");
             gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
@@ -247,7 +247,11 @@ public class XiaoMiTouTiao1 {
             Response execute = client.newCall(request_create).execute();
             String createbody = execute.body().string();
             log.info("下单数据:{}", createbody);
-            return null;
+            if (StrUtil.isNotBlank(createbody) && createbody.contains("order_id")) {
+                String orderId = JSON.parseObject(createbody).getJSONObject("data").getString("order_id");
+                gidAndShowdPrice.setOrderId(orderId);
+                return gidAndShowdPrice;
+            }
         } catch (Exception e) {
             log.error("创建订单报错:{}", e.getMessage());
         }
