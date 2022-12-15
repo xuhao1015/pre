@@ -42,7 +42,6 @@ import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import javax.jms.Destination;
 import javax.jms.Queue;
@@ -604,7 +603,6 @@ public class DouyinService {
         try {
             BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
             String newcreate_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameCreatenew, douyinAppCk);
-            //TODO
             String newcreate_body = BuildDouYinUrlUtils.buildCreatenew(gidAndShowdPrice, douyinAppCk);
             log.info("请求参数:{}", newcreate_body);
             String create_md5 = SecureUtil.md5("json_form=" + URLEncoder.encode(newcreate_body)).toUpperCase();
