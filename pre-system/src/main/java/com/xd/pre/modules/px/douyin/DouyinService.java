@@ -478,8 +478,10 @@ public class DouyinService {
         return payReUrl;
     }
 
-    private String buildCreatepay(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameCreatenew) {
+    private String buildCreatepay(GidAndShowdPrice gidAndShowdPrice, DouyinAppCk douyinAppCk, OkHttpClient client, DouyinMethodNameParam methodNameCreatenew, String logIp) {
         try {
+
+
             BuyRenderParam buyRenderParam = BuyRenderParam.buildBuyRenderParam();
             String newcreate_url = BuildDouYinUrlUtils.buildSearchAndPackUrl(JSON.parseObject(JSON.toJSONString(buyRenderParam)), methodNameCreatenew, douyinAppCk);
             String newcreate_body = BuildDouYinUrlUtils.buildCreatepay(gidAndShowdPrice, douyinAppCk);
@@ -488,6 +490,7 @@ public class DouyinService {
             String create_body_sign = String.format("{\"header\": {\"X-SS-STUB\": \"%s\",\"deviceid\": \"%s\",\"ktoken\": \"\",\"cookie\" : \"\"},\"url\": \"%s\"}",
                     create_md5, douyinAppCk.getDeviceId(), newcreate_url
             );
+
             String create_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(create_body_sign).execute().body();
             String create_x_gorgon = JSON.parseObject(create_sign_body).getString("x-gorgon");
             String create_x_khronos = JSON.parseObject(create_sign_body).getString("x-khronos");
@@ -495,14 +498,17 @@ public class DouyinService {
                     .add("json_form", newcreate_body)
                     .build();
             Request.Builder builder = new Request.Builder();
+            Map<String, String> ipMaps = PreUtils.buildIpMap(logIp);
+            for (String keyData : ipMaps.keySet()) {
+                builder.addHeader(keyData, ipMaps.get(keyData));
+            }
             Request request_create = builder.url(newcreate_url)
                     .post(requestBody1)
                     .addHeader("Cookie", PreAesUtils.decrypt解密(douyinAppCk.getCk()))
                     .addHeader("X-SS-STUB", create_md5)
                     .addHeader("User-Agent", "com.ss.android.article.news/8960 (Linux; U; Android 10; zh_CN; PACT00; Build/QP1A.190711.020; Cronet/TTNetVersion:68deaea9 2022-07-19 QuicVersion:12a1d5c5 2022-06-22)")
                     .addHeader("X-Gorgon", create_x_gorgon)
-                    .addHeader("X-Khronos", create_x_khronos)
-                    .build();
+                    .addHeader("X-Khronos", create_x_khronos).build();
             Response execute = client.newCall(request_create).execute();
             String createbody = execute.body().string();
             log.info("支付数据数据:{}", createbody);
@@ -523,7 +529,7 @@ public class DouyinService {
             JdOrderPt jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getOrderId, payDto.getOrderId()));
             DouyinAppCk douyinAppCk = douyinAppCkMapper.selectOne(Wrappers.<DouyinAppCk>lambdaQuery().eq(DouyinAppCk::getUid, jdOrderPt.getPtPin()));
             DouyinMethodNameParam methodNameCreatepay = douyinMethodNameParamMapper.selectOne(Wrappers.<DouyinMethodNameParam>lambdaQuery().eq(DouyinMethodNameParam::getMethodName, "createpay"));
-            String payData = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatepay);
+            String payData = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatepay, jdLog.getIp());
             if (payData.contains("订单已被支付")) {
                 jdOrderPt = jdOrderPtMapper.selectOne(Wrappers.<JdOrderPt>lambdaQuery().eq(JdOrderPt::getOrderId, payDto.getOrderId()));
                 jdOrderPt.setWxPayExpireTime(DateUtil.offsetMinute(new Date(), -100));
