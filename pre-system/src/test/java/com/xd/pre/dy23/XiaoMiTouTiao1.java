@@ -52,8 +52,8 @@ public class XiaoMiTouTiao1 {
 
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < 100; i++) {
-            String uid = "69493460857";
-            Entity appCk = db.use().queryOne("select * from douyin_app_ck_all_param where uid=?", uid);
+            String uid = "787703994006904";
+            Entity appCk = db.use().queryOne("select * from douyin_app_ck where uid=?", uid);
             Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
             Entity method_pack = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "pack");
             Entity method_buyRender = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "buyRender");
@@ -90,21 +90,22 @@ public class XiaoMiTouTiao1 {
             DouyinMethodNameParam methodNamemethod_postExec = DouyinMethodNameParam.builder().methodName(method_postExec.getStr("method_name"))
                     .methodParam(method_postExec.getStr("method_param")).methodUrl(method_postExec.getStr("method_url")).build();
 
-
             //TODO
             GidAndShowdPrice gidAndShowdPrice = new GidAndShowdPrice();
             gidAndShowdPrice.setPost_tel(post_tel);
             gidAndShowdPrice.setPayIp("182.147.57.114");
             gidAndShowdPrice.setEcom_scene_id("1031,1041");
-            gidAndShowdPrice.setProduct_id("3578244605646345985");
-            gidAndShowdPrice.setSku_id("1747189749393459");
+            gidAndShowdPrice.setProduct_id("3561823775085438878");
+            gidAndShowdPrice.setSku_id("1739171765850115");
             gidAndShowdPrice = buildBuRender(gidAndShowdPrice, douyinAppCk, client, methodNameBuyRender);
             gidAndShowdPrice = buildCreateOrder(gidAndShowdPrice, douyinAppCk, client, methodNameCreatenew);
-//            gidAndShowdPrice.setOrderId("5011913753496616515");
+//            gidAndShowdPrice.setOrderId("5012157330670842997");
 //            gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
-//            gidAndShowdPrice = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
+            String a  = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
+            System.out.println(a);
 //            gidAndShowdPrice.setAction_id("100030");
 //            gidAndShowdPrice = buildPostExec(gidAndShowdPrice, douyinAppCk, client, methodNamemethod_postExec);
+            Thread.sleep(10*10000);
 
 
         }
@@ -146,7 +147,7 @@ public class XiaoMiTouTiao1 {
                     .build();
             Response execute = client.newCall(request_create).execute();
             String buildDetailInfodata = execute.body().string();
-            log.info("支付数据数据:{}", buildDetailInfodata);
+            log.info("支付详情:{}", buildDetailInfodata);
             return buildDetailInfodata;
         } catch (Exception e) {
             log.error("创建订单报错:{}", e.getMessage());
