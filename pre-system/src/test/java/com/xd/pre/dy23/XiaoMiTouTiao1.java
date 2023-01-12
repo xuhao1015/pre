@@ -55,8 +55,8 @@ public class XiaoMiTouTiao1 {
     }
 
     public static void main(String[] args) throws Exception {
-        for (int i = 0; i < 2; i++) {
-            String uid = "3250607754582456";
+        for (int i = 0; i < 10; i++) {
+            String uid = "224754065217422";
             Entity appCk = db.use().queryOne("select * from douyin_app_ck where uid=?", uid);
 
             Entity method_db = db.use().queryOne("select * from douyin_method_name_param where method_name=?", "search");
@@ -121,7 +121,7 @@ public class XiaoMiTouTiao1 {
                     jd_app_store_config_entity.getStr("sku_id"), dateTime, douyinAppCk.getCk(), JSON.toJSONString(payDto), 1);
             log.info("订单入库成功");
             if (true) {
-                return;
+                continue;
             }
             gidAndShowdPrice = buildCreatepay(gidAndShowdPrice, douyinAppCk, client, methodNameCreatePay);
             String a = buildDetailInfo(gidAndShowdPrice, douyinAppCk, client, methodNameDetailInfo);
@@ -229,6 +229,7 @@ public class XiaoMiTouTiao1 {
                     create_md5, douyinAppCk.getDeviceId(), newcreate_url
             );
             String create_sign_body = HttpRequest.post("http://1.15.184.191:8292/dy22").body(create_body_sign).execute().body();
+            log.info("签证结果数据为:{}",create_sign_body);
             String create_x_gorgon = JSON.parseObject(create_sign_body).getString("x-gorgon");
             String create_x_khronos = JSON.parseObject(create_sign_body).getString("x-khronos");
             RequestBody requestBody1 = new FormBody.Builder()
